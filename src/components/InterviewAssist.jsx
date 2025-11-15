@@ -19,7 +19,7 @@ import { jsPDF } from "jspdf";
 // WEBSOCKET URL CONFIGURATION - PRODUCTION READY
 // ============================================================================
 
-const BACKEND_URL = "interview-assist-1.onrender.com";
+const BACKEND_URL = "verve-ai-ukec.onrender.com";
 
 const getWebSocketUrl = (path) => {
   const isDevelopment = window.location.hostname === 'localhost' || 
