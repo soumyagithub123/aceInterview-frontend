@@ -22,16 +22,16 @@ import { jsPDF } from "jspdf";
 // const BACKEND_URL = "https://verve-ai-ukec.onrender.com";
 // const WS_URL = "wss://verve-ai-ukec.onrender.com";
 
-const BACKEND_URL = "http://0.0.0.0:8000";
-const WS_URL = "wss://0.0.0.0:8000";
+const BACKEND_URL = "http://0.0.0.0:10000";
+const WS_URL = "wss://0.0.0.0:10000";
 
 const getWebSocketUrl = (path) => {
   const isDevelopment =
     window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
+    window.location.hostname === "127.0.0.10000";
 
   if (isDevelopment) {
-    return `ws://127.0.0.1:8000${path}`;
+    return `ws://127.0.0.1:10000${path}`;
   } else {
     return `${WS_URL}${path}`;
   }
@@ -314,7 +314,7 @@ export default function InterviewAssist() {
     try {
       console.log("🟦 Sending request → /api/manual-generate");
 
-      const res = await fetch("http://127.0.0.1:8000/api/manual-generate", {
+      const res = await fetch("http://127.0.0.1:10000/api/manual-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
