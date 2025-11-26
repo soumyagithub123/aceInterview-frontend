@@ -14,6 +14,8 @@ import {
   MicOff,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
+import MarkdownRenderer from "./MarkdownRenderer";
+
 
 // ============================================================================
 // WEBSOCKET URL CONFIGURATION - PRODUCTION READY
@@ -22,16 +24,16 @@ import { jsPDF } from "jspdf";
 // const BACKEND_URL = "https://verve-ai-ukec.onrender.com";
 // const WS_URL = "wss://verve-ai-ukec.onrender.com";
 
-const BACKEND_URL = "http://0.0.0.0:10000";
-const WS_URL = "wss://0.0.0.0:10000";
+const BACKEND_URL = "http://0.0.0.0:8000";
+const WS_URL = "wss://0.0.0.0:8000";
 
 const getWebSocketUrl = (path) => {
   const isDevelopment =
     window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.10000";
+    window.location.hostname === "127.0.0.1";
 
   if (isDevelopment) {
-    return `ws://127.0.0.1:10000${path}`;
+    return `ws://127.0.0.1:8000${path}`;
   } else {
     return `${WS_URL}${path}`;
   }
@@ -190,7 +192,7 @@ class ReconnectingWebSocket {
 }
 
 // ============================================================================
-// STREAMING COMPONENTS
+// STREAMING COMPONENTS WITH MARKDOWN SUPPORT
 // ============================================================================
 
 function StreamingText({ text, isComplete, className = "" }) {
@@ -215,12 +217,12 @@ function StreamingText({ text, isComplete, className = "" }) {
   }, [text, currentWordIndex, isComplete]);
 
   return (
-    <p className={`whitespace-pre-wrap leading-relaxed ${className}`}>
-      {displayedWords.join(" ")}
+    <div className={`whitespace-pre-wrap leading-relaxed ${className}`}>
+      <MarkdownRenderer content={displayedWords.join(" ")} />
       {!isComplete && currentWordIndex < text.split(" ").length && (
         <span className="inline-block w-1 h-4 bg-blue-400 ml-1 animate-pulse"></span>
       )}
-    </p>
+    </div>
   );
 }
 
@@ -245,17 +247,17 @@ function StreamingAnswer({ text, isComplete }) {
   }, [text, currentIndex, isComplete]);
 
   return (
-    <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
-      {displayedText}
+    <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+      <MarkdownRenderer content={displayedText} />
       {!isComplete && currentIndex < text.length && (
         <span className="inline-block w-1 h-4 bg-green-400 ml-1 animate-pulse"></span>
       )}
-    </p>
+    </div>
   );
 }
 
 // ============================================================================
-// QA LIST
+// QA LIST WITH MARKDOWN SUPPORT
 // ============================================================================
 
 function QAList({ qaList }) {
@@ -286,9 +288,9 @@ function QAList({ qaList }) {
                   💬 ANSWER
                 </span>
               </div>
-              <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
-                {item.answer}
-              </p>
+              <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                <MarkdownRenderer content={item.answer} />
+              </div>
             </div>
           </div>
         );
@@ -308,48 +310,52 @@ export default function InterviewAssist() {
   
 
   // ⭐ MANUAL GENERATE BUTTON HANDLER ⭐
-  async function handleManualGenerate(text) {
-    console.log("🟦 [ManualGenerate] Button clicked with text:", text);
+ // ⭐ FIXED MANUAL GENERATE ⭐
+async function handleManualGenerate(text) {
+  console.log("🟦 [ManualGenerate] Button clicked with text:", text);
 
-    try {
-      console.log("🟦 Sending request → /api/manual-generate");
+  try {
+    console.log("🟦 Sending request → /api/manual-generate");
 
-      const res = await fetch("http://127.0.0.1:10000/api/manual-generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          transcript: text,
-          settings: settings || {},
-          persona_data: {},  // FIXED
-          custom_style_prompt: null,
-          force_generate: true
-        }),
-      });
+    const payload = {
+      user_id: user?.id || "anonymous",
+      message: text,
+      model: settings.defaultModel || "gpt-4o"
+    };
 
-      console.log("🟧 Server responded. Status:", res.status);
+    console.log("🟦 Payload:", payload);
 
-      const data = await res.json();
-      console.log("🟩 Parsed response:", data);
+    const res = await fetch("http://127.0.0.1:8000/api/manual-generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-      if (data.answer) {
-        console.log("🟩 Adding answer to UI:", data.answer);
+    console.log("🟧 Server responded. Status:", res.status);
 
-        setQaList((prev) => [
-          ...prev,
-          {
-            id: Date.now() + Math.random(),
-            question: text,
-            answer: data.answer,
-          },
-        ]);
-      } else {
-        console.warn("⚠️ No answer returned from backend");
-      }
-    } catch (err) {
-      console.error("🔴 Manual generate failed:", err);
-      console.error("🔴 Full error:", JSON.stringify(err));
+    const data = await res.json();
+    console.log("🟩 Parsed response:", data);
+
+    if (data.answer) {
+      console.log("🟩 Adding answer to UI:", data.answer);
+
+      setQaList((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          question: text,
+          answer: data.answer,
+        },
+      ]);
+    } else {
+      console.warn("⚠️ No answer returned from backend");
     }
+  } catch (err) {
+    console.error("🔴 Manual generate failed:", err);
+    console.error("🔴 Full error:", JSON.stringify(err));
   }
+}
+
 
   // Persona & Settings State
   const [personaId] = useState(
