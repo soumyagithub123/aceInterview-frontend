@@ -1,23 +1,29 @@
 import React from "react";
-
+import { useNavigate } from "react-router-dom";
+import homeimage4 from "../../assets/homeimages/homeimage4.png";
+import homeimage5 from "../../assets/homeimages/homeimage5.png";
+import homeimage6 from "../../assets/homeimages/homeimage6.png";
 export default function ToolsSection() {
+  const navigate = useNavigate();
+
   const tools = [
-    { 
-      title: "AI Mock Interview", 
-      desc: "Immersive interview simulation with extensive question banks", 
-      img: "https://framerusercontent.com/images/jY8B1tXPxXT2ojQi7WemDeItIEk.png?width=1862&height=1250" 
-    },
-    { 
-      title: "AI Interview Copilot", 
-      desc: "Instant, personalized, actionable support during live interviews", 
-      img: "https://framerusercontent.com/images/XZi002ckJANbAzVYZZUPAx0lZM.png?width=1062&height=682" 
-    },
-    { 
-      title: "AI Resume Editor", 
-      desc: "Generate winning resume that passes screening and stand out", 
-      img: "https://framerusercontent.com/images/7Gfj7yHHQyk5gh7BXhQffLCmVtY.png?width=1206&height=722" 
-    }
-  ];
+  { 
+    title: "AI Mock Interview", 
+    desc: "Immersive interview simulation with extensive question banks", 
+    img: homeimage4
+  },
+  { 
+    title: "AI Interview Copilot", 
+    desc: "Instant, personalized, actionable support during live interviews", 
+    img: homeimage5
+  },
+  { 
+    title: "AI Resume Editor", 
+    desc: "Generate winning resume that passes screening and stand out", 
+    img: homeimage6
+  }
+];
+
 
   return (
     <section className="py-20 bg-white">
@@ -36,7 +42,7 @@ export default function ToolsSection() {
               key={tool.title} 
               className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow flex flex-col w-80 h-[480px]"
             >
-              {/* Taller image */}
+              {/* Image */}
               <div className="w-full h-64 rounded-xl mb-6 overflow-hidden">
                 <img 
                   src={tool.img} 
@@ -44,11 +50,18 @@ export default function ToolsSection() {
                   className="w-full h-full object-cover rounded-xl"
                 />
               </div>
+
               <h3 className="text-xl font-bold text-gray-900 mb-2">{tool.title}</h3>
               <p className="text-gray-600 mb-4 flex-grow">{tool.desc}</p>
-              <button className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors">
+
+              {/* Updated Button with Navigate */}
+              <button
+                onClick={() => navigate("/interview")}
+                className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              >
                 Try now
               </button>
+
             </div>
           ))}
         </div>
