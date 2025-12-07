@@ -1,5 +1,5 @@
 // ============================================================================
-// InterviewAssist.jsx - Main Container Component (STICKY LEFT PANEL)
+// InterviewAssist.jsx - Main Container Component (FIXED SINGLE PARAGRAPH)
 // ============================================================================
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -132,13 +132,13 @@ export default function InterviewAssist() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isStreamingComplete, setIsStreamingComplete] = useState(false);
 
-  // Current paragraph building states
+  // ✅ Live paragraph display (final accumulated + interim preview)
   const [currentCandidateParagraph, setCurrentCandidateParagraph] = useState("");
   const [currentInterviewerParagraph, setCurrentInterviewerParagraph] = useState("");
-
-  // Pure interim (real-time, not is_final)
-  const [currentCandidateInterim, setCurrentCandidateInterim] = useState("");
-  const [currentInterviewerInterim, setCurrentInterviewerInterim] = useState("");
+  
+  // Temporary interim text (replaced on next update, never persisted)
+  const [candidateInterim, setCandidateInterim] = useState("");
+  const [interviewerInterim, setInterviewerInterim] = useState("");
 
   // Refs
   const deepgramWsRef = useRef(null);
@@ -168,6 +168,114 @@ export default function InterviewAssist() {
       navigate("/sign-in");
     }
   }, [user, loading, navigate]);
+
+  // ============================================================================
+  // ✅ FIXED: WORD-BY-WORD LIVE DISPLAY (NO DUPLICATION)
+  // ============================================================================
+  const handleDeepgramTranscript = (data) => {
+    const { stream, transcript, is_final, speech_final } = data;
+
+    if (!transcript || !transcript.trim()) return;
+
+    const pauseInterval = (settings.pauseInterval || 2.0) * 1000;
+
+    // Helper: Finalize paragraph and move to history
+    const finalizeParagraph = (ref, setState, setHistory, setInterim, sendToQA = false) => {
+      if (!ref.current) return;
+
+      const finalText = ref.current;
+      setHistory((prev) => [
+        ...prev,
+        {
+          text: finalText,
+          timestamp: new Date().toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }),
+          id: Date.now() + Math.random(),
+          stream,
+        },
+      ]);
+
+      // ✅ Send ONLY interviewer text to Q&A
+      if (sendToQA && reconnectingQaWsRef.current) {
+        reconnectingQaWsRef.current.send({
+          type: "transcript",
+          transcript: finalText,
+          is_final: true,
+          speech_final: true,
+        });
+        console.log("📤 Sent to Q&A:", finalText.substring(0, 50) + "...");
+      }
+
+      ref.current = "";
+      setState("");
+      setInterim("");
+    };
+
+    // ✅ CANDIDATE STREAM
+    if (stream === "candidate") {
+      if (candidatePauseTimerRef.current) {
+        clearTimeout(candidatePauseTimerRef.current);
+      }
+
+      if (!is_final) {
+        // ✅ Show interim text live (word by word)
+        setCandidateInterim(transcript.trim());
+      } else {
+        // ✅ Commit final text, clear interim
+        setCandidateInterim("");
+        candidateParagraphRef.current = candidateParagraphRef.current
+          ? `${candidateParagraphRef.current} ${transcript.trim()}`
+          : transcript.trim();
+        
+        setCurrentCandidateParagraph(candidateParagraphRef.current);
+
+        // Set timer to finalize after pause
+        candidatePauseTimerRef.current = setTimeout(() => {
+          finalizeParagraph(
+            candidateParagraphRef,
+            setCurrentCandidateParagraph,
+            setCandidateTranscript,
+            setCandidateInterim,
+            false // Don't send candidate speech to Q&A
+          );
+        }, pauseInterval);
+      }
+    }
+
+    // ✅ INTERVIEWER STREAM
+    if (stream === "interviewer") {
+      if (interviewerPauseTimerRef.current) {
+        clearTimeout(interviewerPauseTimerRef.current);
+      }
+
+      if (!is_final) {
+        // ✅ Show interim text live (word by word)
+        setInterviewerInterim(transcript.trim());
+      } else {
+        // ✅ Commit final text, clear interim
+        setInterviewerInterim("");
+        interviewerParagraphRef.current = interviewerParagraphRef.current
+          ? `${interviewerParagraphRef.current} ${transcript.trim()}`
+          : transcript.trim();
+        
+        setCurrentInterviewerParagraph(interviewerParagraphRef.current);
+
+        // Set timer to finalize after pause
+        interviewerPauseTimerRef.current = setTimeout(() => {
+          finalizeParagraph(
+            interviewerParagraphRef,
+            setCurrentInterviewerParagraph,
+            setInterviewerTranscript,
+            setInterviewerInterim,
+            true // ✅ Send interviewer speech to Q&A
+          );
+        }, pauseInterval);
+      }
+    }
+  };
 
   // ============================================================================
   // LEFT PANEL: DEEPGRAM DUAL-STREAM TRANSCRIPTION
@@ -228,100 +336,6 @@ export default function InterviewAssist() {
         })
         .catch(reject);
     });
-  };
-
-  // 🔥 FIXED: Word-by-word display handler
-  const handleDeepgramTranscript = (data) => {
-    const { stream, transcript, is_final, speech_final } = data;
-
-    if (!transcript || !transcript.trim()) return;
-
-    const pauseInterval = (settings.pauseInterval || 2.0) * 1000;
-
-    if (stream === "candidate") {
-      if (candidatePauseTimerRef.current) {
-        clearTimeout(candidatePauseTimerRef.current);
-      }
-
-      if (!is_final) {
-        setCurrentCandidateInterim(transcript);
-      } else {
-        setCurrentCandidateInterim("");
-        const newParagraph = candidateParagraphRef.current
-          ? `${candidateParagraphRef.current} ${transcript.trim()}`
-          : transcript.trim();
-        candidateParagraphRef.current = newParagraph;
-        setCurrentCandidateParagraph(newParagraph);
-
-        candidatePauseTimerRef.current = setTimeout(() => {
-          if (candidateParagraphRef.current) {
-            const finalText = candidateParagraphRef.current;
-            setCandidateTranscript((transcripts) => [
-              ...transcripts,
-              {
-                text: finalText,
-                timestamp: new Date().toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                }),
-                id: Date.now() + Math.random(),
-                stream: "candidate",
-              },
-            ]);
-            candidateParagraphRef.current = "";
-            setCurrentCandidateParagraph("");
-          }
-        }, pauseInterval);
-      }
-    } else if (stream === "interviewer") {
-      if (interviewerPauseTimerRef.current) {
-        clearTimeout(interviewerPauseTimerRef.current);
-      }
-
-      if (!is_final) {
-        setCurrentInterviewerInterim(transcript);
-      } else {
-        setCurrentInterviewerInterim("");
-        const newParagraph = interviewerParagraphRef.current
-          ? `${interviewerParagraphRef.current} ${transcript.trim()}`
-          : transcript.trim();
-        interviewerParagraphRef.current = newParagraph;
-        setCurrentInterviewerParagraph(newParagraph);
-
-        interviewerPauseTimerRef.current = setTimeout(() => {
-          if (interviewerParagraphRef.current) {
-            const finalText = interviewerParagraphRef.current;
-            setInterviewerTranscript((transcripts) => [
-              ...transcripts,
-              {
-                text: finalText,
-                timestamp: new Date().toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                }),
-                id: Date.now() + Math.random(),
-                stream: "interviewer",
-              },
-            ]);
-
-            if (reconnectingQaWsRef.current) {
-              reconnectingQaWsRef.current.send({
-                type: "transcript",
-                transcript: finalText,
-                is_final: true,
-                speech_final: true,
-              });
-              console.log("📤 Sent to Q&A:", finalText.substring(0, 50) + "...");
-            }
-
-            interviewerParagraphRef.current = "";
-            setCurrentInterviewerParagraph("");
-          }
-        }, pauseInterval);
-      }
-    }
   };
 
   const startMicrophoneCapture = async () => {
@@ -459,6 +473,7 @@ export default function InterviewAssist() {
   };
 
   const stopDeepgramCapture = () => {
+    // Clear timers
     if (candidatePauseTimerRef.current) {
       clearTimeout(candidatePauseTimerRef.current);
     }
@@ -466,6 +481,7 @@ export default function InterviewAssist() {
       clearTimeout(interviewerPauseTimerRef.current);
     }
 
+    // Finalize any remaining paragraphs
     if (candidateParagraphRef.current) {
       setCandidateTranscript((prev) => [
         ...prev,
@@ -512,6 +528,7 @@ export default function InterviewAssist() {
       setCurrentInterviewerParagraph("");
     }
 
+    // Stop audio processing
     if (candidateProcessorRef.current) {
       candidateProcessorRef.current.disconnect();
       candidateProcessorRef.current = null;
@@ -726,8 +743,8 @@ export default function InterviewAssist() {
     interviewerParagraphRef.current = "";
     setCurrentCandidateParagraph("");
     setCurrentInterviewerParagraph("");
-    setCurrentCandidateInterim("");
-    setCurrentInterviewerInterim("");
+    setCandidateInterim("");
+    setInterviewerInterim("");
   };
 
   const handleTabAudioSelection = async () => {
@@ -782,29 +799,32 @@ export default function InterviewAssist() {
         />
       )}
 
-      {/* 🔥 INDEPENDENT SCROLLING: Left stays fixed, right scrolls freely */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* LEFT PANEL - COMPLETELY INDEPENDENT */}
-        <div className="w-1/2 flex flex-col border-r border-gray-800 overflow-hidden">
-          <TranscriptPanel
-            activeView={activeView}
-            onViewChange={setActiveView}
-            interviewerTranscript={interviewerTranscript}
-            candidateTranscript={candidateTranscript}
-            currentInterviewerParagraph={currentInterviewerParagraph}
-            currentCandidateParagraph={currentCandidateParagraph}
-            currentInterviewerInterim={currentInterviewerInterim}
-            currentCandidateInterim={currentCandidateInterim}
-            isPaused={isPaused}
-            onPauseToggle={() => setIsPaused(!isPaused)}
-            isRecording={isRecording}
-            onManualGenerate={handleManualGenerate}
-            autoScroll={settings.autoScroll}
-          />
+      {/* ================== MAIN CONTENT AREA ================== */}
+      <div className="flex-1 flex bg-gray-950">
+
+        {/* ===== LEFT PANEL (30% • STICKY • OWN SCROLL) ===== */}
+        <div className="w-[30%] border-r border-gray-800">
+          <div className="sticky top-0 h-[calc(100vh-64px-48px)] overflow-y-auto">
+            <TranscriptPanel
+              activeView={activeView}
+              onViewChange={setActiveView}
+              interviewerTranscript={interviewerTranscript}
+              candidateTranscript={candidateTranscript}
+              currentInterviewerParagraph={currentInterviewerParagraph}
+              currentCandidateParagraph={currentCandidateParagraph}
+              interviewerInterim={interviewerInterim}
+              candidateInterim={candidateInterim}
+              isPaused={isPaused}
+              onPauseToggle={() => setIsPaused(!isPaused)}
+              isRecording={isRecording}
+              onManualGenerate={handleManualGenerate}
+              autoScroll={settings.autoScroll}
+            />
+          </div>
         </div>
 
-        {/* RIGHT PANEL - INDEPENDENT SCROLLING */}
-        <div className="w-1/2 flex flex-col overflow-hidden">
+        {/* ===== RIGHT PANEL (70% • FREE SCROLL) ===== */}
+        <div className="w-[70%] h-[calc(100vh-64px-48px)] overflow-y-auto">
           <QACopilot
             qaList={qaList}
             currentQuestion={currentQuestion}
@@ -814,6 +834,7 @@ export default function InterviewAssist() {
             autoScroll={settings.autoScroll}
           />
         </div>
+
       </div>
 
       <StatusBar
