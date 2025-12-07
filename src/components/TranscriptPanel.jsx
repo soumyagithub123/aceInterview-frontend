@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from "react";
-import { Volume2, Mic, Pause, Play, Activity } from "lucide-react";
+import React, { useRef, useEffect, useState } from "react";
+import { Volume2, Mic, Pause, Play } from "lucide-react";
 
 export default function TranscriptPanel({
   activeView,
@@ -8,8 +8,8 @@ export default function TranscriptPanel({
   candidateTranscript,
   currentInterviewerParagraph,
   currentCandidateParagraph,
-  currentInterviewerInterim,
-  currentCandidateInterim,
+  interviewerInterim,
+  candidateInterim,
   isPaused,
   onPauseToggle,
   isRecording,
@@ -17,6 +17,47 @@ export default function TranscriptPanel({
   autoScroll,
 }) {
   const transcriptEndRef = useRef(null);
+  
+  // ✅ Typewriter effect for word-by-word display
+  const [displayedInterim, setDisplayedInterim] = useState("");
+  const interimTimeoutRef = useRef(null);
+
+  // ✅ Animate interim text word by word
+  useEffect(() => {
+    const currentInterim = activeView === "interviewer" ? interviewerInterim : candidateInterim;
+    
+    if (!currentInterim) {
+      setDisplayedInterim("");
+      return;
+    }
+
+    // If new interim is longer, animate the new words
+    if (currentInterim.length > displayedInterim.length) {
+      const words = currentInterim.split(" ");
+      const displayedWords = displayedInterim.split(" ");
+      
+      let wordIndex = displayedWords.length;
+      
+      const animateNextWord = () => {
+        if (wordIndex < words.length) {
+          setDisplayedInterim(words.slice(0, wordIndex + 1).join(" "));
+          wordIndex++;
+          interimTimeoutRef.current = setTimeout(animateNextWord, 50); // 50ms per word
+        }
+      };
+      
+      animateNextWord();
+    } else {
+      // If interim got shorter (new sentence), show immediately
+      setDisplayedInterim(currentInterim);
+    }
+
+    return () => {
+      if (interimTimeoutRef.current) {
+        clearTimeout(interimTimeoutRef.current);
+      }
+    };
+  }, [interviewerInterim, candidateInterim, activeView]);
 
   useEffect(() => {
     if (autoScroll) {
@@ -27,25 +68,20 @@ export default function TranscriptPanel({
     interviewerTranscript,
     currentCandidateParagraph,
     currentInterviewerParagraph,
-    currentCandidateInterim,
-    currentInterviewerInterim,
+    displayedInterim,
     autoScroll,
   ]);
 
   const currentTranscript =
     activeView === "interviewer" ? interviewerTranscript : candidateTranscript;
+
   const currentParagraph =
     activeView === "interviewer"
       ? currentInterviewerParagraph
       : currentCandidateParagraph;
-  const currentInterim =
-    activeView === "interviewer"
-      ? currentInterviewerInterim
-      : currentCandidateInterim;
 
   return (
     <div className="flex flex-col h-full bg-[#111111]">
-      
       {/* TOP TABS */}
       <div className="flex items-center justify-between border-b border-[#2A2A2A] bg-[#111111]">
         <div className="flex">
@@ -65,9 +101,6 @@ export default function TranscriptPanel({
                 {interviewerTranscript.length}
               </span>
             )}
-            {currentInterviewerInterim && (
-              <Activity className="w-3 h-3 text-purple-400 animate-pulse" />
-            )}
           </button>
 
           {/* CANDIDATE TAB */}
@@ -85,9 +118,6 @@ export default function TranscriptPanel({
               <span className="px-2 py-0.5 bg-amber-400/20 text-amber-300 text-xs rounded-full">
                 {candidateTranscript.length}
               </span>
-            )}
-            {currentCandidateInterim && (
-              <Activity className="w-3 h-3 text-amber-400 animate-pulse" />
             )}
           </button>
         </div>
@@ -107,9 +137,9 @@ export default function TranscriptPanel({
         </button>
       </div>
 
-      {/* CONTENT AREA - FIXED HEIGHT, SCROLLABLE */}
+      {/* CONTENT */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {currentTranscript.length === 0 && !currentParagraph && !currentInterim ? (
+        {currentTranscript.length === 0 && !currentParagraph && !displayedInterim ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-20 h-20 bg-[#181818] rounded-full flex items-center justify-center mb-4 border border-[#2A2A2A]">
               {activeView === "interviewer" ? (
@@ -119,7 +149,9 @@ export default function TranscriptPanel({
               )}
             </div>
             <h3 className="text-xl font-semibold text-gray-400 mb-2">
-              {activeView === "interviewer" ? "Interviewer speech" : "Your speech"}
+              {activeView === "interviewer"
+                ? "Interviewer speech"
+                : "Your speech"}
             </h3>
             <p className="text-gray-500">Waiting for speech...</p>
           </div>
@@ -132,13 +164,23 @@ export default function TranscriptPanel({
                 className="bg-[#181818] rounded-lg p-4 border border-[#2A2A2A]"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-purple-400">
+                  <span
+                    className={`text-sm font-medium ${
+                      entry.stream === "interviewer"
+                        ? "text-purple-400"
+                        : "text-amber-300"
+                    }`}
+                  >
                     {entry.stream === "interviewer" ? "Interviewer" : "You"}
                   </span>
-                  <span className="text-xs text-gray-500">{entry.timestamp}</span>
+                  <span className="text-xs text-gray-500">
+                    {entry.timestamp}
+                  </span>
                 </div>
 
-                <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">{entry.text}</p>
+                <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">
+                  {entry.text}
+                </p>
 
                 {entry.stream === "interviewer" && (
                   <button
@@ -151,34 +193,25 @@ export default function TranscriptPanel({
               </div>
             ))}
 
-            {/* LIVE PARAGRAPH (FINAL TEXT ACCUMULATING) */}
-            {currentParagraph && (
+            {/* ✅ LIVE PARAGRAPH WITH ANIMATED WORD-BY-WORD INTERIM */}
+            {(currentParagraph || displayedInterim) && (
               <div className="bg-[#1A1A1A] border-2 border-purple-400/40 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
                   <span className="text-sm font-medium text-purple-300">
-                    {activeView === "interviewer" ? "Interviewer" : "You"} speaking...
+                    {activeView === "interviewer" ? "Interviewer" : "You"} speaking…
                   </span>
-                  <span className="text-xs text-gray-500">(final text)</span>
                 </div>
                 <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">
+                  {/* ✅ Accumulated final text (white) */}
                   {currentParagraph}
-                </p>
-              </div>
-            )}
-
-            {/* LIVE INTERIM (REAL-TIME STREAMING FROM DEEPGRAM) */}
-            {currentInterim && (
-              <div className="bg-[#1A1A1A] border-2 border-dashed border-yellow-500/40 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Activity className="w-3 h-3 text-yellow-400 animate-pulse" />
-                  <span className="text-sm font-medium text-yellow-400">
-                    Live interim
-                  </span>
-                  <span className="text-xs text-gray-500">(updating)</span>
-                </div>
-                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap font-mono text-sm">
-                  {currentInterim}
+                  
+                  {/* ✅ Animated interim text (gray, word by word) */}
+                  {displayedInterim && (
+                    <span className="text-gray-400 opacity-80">
+                      {currentParagraph ? " " : ""}{displayedInterim}
+                    </span>
+                  )}
                 </p>
               </div>
             )}
