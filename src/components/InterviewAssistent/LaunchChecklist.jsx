@@ -1,132 +1,184 @@
-// C:\Users\yugbo\Desktop\interview_assistent\frontend\src\components\InterviewAssistent\LaunchChecklist.jsx
+import React from "react";
+import { Check, FileText, Building2, Globe2, AlertTriangle } from "lucide-react";
 
-import React from 'react';
-import { Check, FileText, Building2, Briefcase, Globe2 } from 'lucide-react';
+function cn(...c) {
+  return c.filter(Boolean).join(" ");
+}
+
+function Row({ icon: Icon, title, value, ok }) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-between gap-4 rounded-2xl border p-4",
+        ok ? "border-emerald-400/20 bg-emerald-400/5" : "border-white/10 bg-white/[0.04]"
+      )}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div
+          className={cn(
+            "h-11 w-11 rounded-xl border grid place-items-center flex-shrink-0",
+            ok ? "border-emerald-400/20 bg-emerald-400/10" : "border-white/10 bg-black/30"
+          )}
+        >
+          {ok ? <Check className="h-5 w-5 text-emerald-300" /> : <Icon className="h-5 w-5 text-white/60" />}
+        </div>
+
+        <div className="min-w-0">
+          <div className="text-white font-semibold">{title}</div>
+          <div className={cn("text-sm truncate", ok ? "text-white/70" : "text-white/45")}>
+            {value}
+          </div>
+        </div>
+      </div>
+
+      <span
+        className={cn(
+          "text-xs font-semibold rounded-full px-3 py-1 border flex-shrink-0",
+          ok ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200" : "border-white/10 bg-white/[0.03] text-white/55"
+        )}
+      >
+        {ok ? "OK" : "Missing"}
+      </span>
+    </div>
+  );
+}
 
 export default function LaunchChecklist({ persona, personaData, domain }) {
   const checklistItems = [
     {
       icon: Building2,
-      title: 'Persona Selected',
-      description: persona || 'No persona selected',
+      title: "Persona",
+      description: persona || "No persona selected",
       status: !!persona,
     },
     {
       icon: Globe2,
-      title: 'Interview Domain',
-      description: domain || 'No domain selected',
+      title: "Domain",
+      description: domain || "No domain selected",
       status: !!domain,
     },
     {
       icon: FileText,
-      title: 'Resume',
-      description: personaData?.resume_filename || 'No resume attached',
+      title: "Resume",
+      description: personaData?.resume_filename || "No resume attached",
       status: !!personaData?.resume_filename,
     },
   ];
 
+  const allReady = checklistItems.every((x) => x.status);
+
   return (
-    <div className="bg-[#14141b] rounded-2xl p-8 border border-gray-800">
-      <div className="mb-8">
-        <h2 className="text-white text-xl font-semibold mb-2">Pre-flight Checklist</h2>
-        <p className="text-gray-400 text-sm">
-          Review your selections before launching the interview assistant
-        </p>
-      </div>
-
-      {/* Persona Details Card */}
-      {personaData && (
-        <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-700/50 rounded-xl p-6 mb-6">
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-2xl text-white font-bold flex-shrink-0">
-              {personaData.company_name?.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-white font-bold text-lg mb-1">{personaData.position}</h3>
-              <p className="text-purple-400 text-sm mb-3">@{personaData.company_name}</p>
-              <p className="text-gray-400 text-sm line-clamp-2">
-                {personaData.company_description}
-              </p>
-            </div>
+    <div className="rounded-3xl border border-white/10 bg-white/[0.04] overflow-hidden">
+      {/* Header */}
+      <div className="px-7 py-6 border-b border-white/10 bg-gradient-to-r from-white/[0.06] to-transparent">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-white text-lg font-semibold tracking-tight">Pre-flight Checklist</h2>
+            <p className="text-white/55 text-sm mt-1">
+              Confirm your setup before launching the interview assistant.
+            </p>
           </div>
-        </div>
-      )}
 
-      {/* Checklist Items */}
-      <div className="space-y-4 mb-8">
-        {checklistItems.map((item, index) => (
-          <div
-            key={index}
-            className={`bg-[#1a1a24] border ${
-              item.status ? 'border-green-700/50' : 'border-gray-700'
-            } rounded-xl p-4 transition-all`}
+          <span
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold",
+              allReady
+                ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
+                : "border-yellow-400/25 bg-yellow-400/10 text-yellow-100"
+            )}
           >
+            {allReady ? (
+              <>
+                <Check className="h-4 w-4" />
+                Ready
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="h-4 w-4" />
+                Action needed
+              </>
+            )}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-7 space-y-6">
+        {/* Persona summary */}
+        {personaData ? (
+          <div className="rounded-3xl border border-white/10 bg-black/30 p-5">
             <div className="flex items-start gap-4">
-              <div
-                className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  item.status ? 'bg-green-500/20' : 'bg-gray-700'
-                }`}
-              >
-                {item.status ? (
-                  <Check className="w-5 h-5 text-green-400" />
-                ) : (
-                  <item.icon className="w-5 h-5 text-gray-400" />
-                )}
+              <div className="h-14 w-14 rounded-2xl border border-white/10 bg-white/[0.06] grid place-items-center flex-shrink-0">
+                <span className="text-white font-semibold text-lg">
+                  {personaData.company_name?.charAt(0)?.toUpperCase() || "C"}
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-white font-medium mb-1">{item.title}</h4>
-                <p className={`text-sm ${item.status ? 'text-gray-300' : 'text-gray-500'} truncate`}>
-                  {item.description}
-                </p>
+
+              <div className="min-w-0 flex-1">
+                <div className="text-white font-semibold tracking-tight">
+                  {personaData.position || "Position"}
+                </div>
+                <div className="text-white/60 text-sm mt-0.5">
+                  @{personaData.company_name || "Company"}
+                </div>
+
+                {personaData.company_description ? (
+                  <p className="mt-3 text-sm text-white/55 line-clamp-2">
+                    {personaData.company_description}
+                  </p>
+                ) : null}
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        ) : null}
 
-      {/* System Status */}
-      <div className="bg-[#1a1a24] border border-gray-700 rounded-xl p-4 mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <h4 className="text-white font-medium">System Status</h4>
+        {/* Checklist */}
+        <div className="space-y-3">
+          {checklistItems.map((item, idx) => (
+            <Row
+              key={idx}
+              icon={item.icon}
+              title={item.title}
+              value={item.description}
+              ok={item.status}
+            />
+          ))}
         </div>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-400">AI Assistant</span>
-            <span className="text-green-400">Ready</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-400">Voice Recognition</span>
-            <span className="text-green-400">Active</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-400">Context Engine</span>
-            <span className="text-green-400">Loaded</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Ready Status */}
-      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-            <Check className="w-6 h-6 text-green-400" />
+        {/* System status (visual only like your current one) */}
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-white font-semibold">System Status</div>
+            <span className="inline-flex items-center gap-2 text-xs text-white/55">
+              <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+              Live
+            </span>
           </div>
-          <div>
-            <h4 className="text-green-400 font-semibold">All Systems Go!</h4>
-            <p className="text-gray-400 text-sm">Your interview assistant is ready to launch</p>
+
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-white/55">AI Assistant</span>
+              <span className="text-emerald-200 font-semibold">Ready</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-white/55">Voice Recognition</span>
+              <span className="text-emerald-200 font-semibold">Active</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-white/55">Context Engine</span>
+              <span className="text-emerald-200 font-semibold">Loaded</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Tips */}
-      <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-        <h4 className="text-blue-400 font-medium mb-2">💡 Pro Tips</h4>
-        <ul className="text-gray-400 text-sm space-y-1">
-          <li>• Test your microphone before starting</li>
-          <li>• Ensure you're in a quiet environment</li>
-          <li>• Keep your resume details handy</li>
-        </ul>
+        {/* Tips (no emoji) */}
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="text-white font-semibold">Tips</div>
+          <ul className="mt-3 text-sm text-white/55 space-y-2 list-disc pl-5">
+            <li>Test your microphone before starting.</li>
+            <li>Stay in a quiet environment.</li>
+            <li>Keep your resume details handy.</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

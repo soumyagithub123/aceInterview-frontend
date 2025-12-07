@@ -1,11 +1,81 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Settings, HelpCircle, Rocket, CheckCircle } from 'lucide-react';
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Settings,
+  HelpCircle,
+  Rocket,
+  CheckCircle,
+  ChevronRight,
+  Sparkles,
+  ShieldCheck,
+  Loader2,
+} from "lucide-react";
 
-import PersonaSelection from './PersonaSelection';
-import InterviewDomainSelection from './InterviewDomainSelection';
-import LaunchChecklist from './LaunchChecklist';
-import SettingsModal from './SettingsModal';
+import PersonaSelection from "./PersonaSelection";
+import InterviewDomainSelection from "./InterviewDomainSelection";
+import LaunchChecklist from "./LaunchChecklist";
+import SettingsModal from "./SettingsModal";
+
+function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function StepDot({ active, done }) {
+  return (
+    <div
+      className={cn(
+        "relative grid place-items-center h-9 w-9 rounded-full border transition-all",
+        done
+          ? "bg-emerald-500/15 border-emerald-400/30"
+          : active
+          ? "bg-white/10 border-white/25"
+          : "bg-white/5 border-white/10"
+      )}
+    >
+      {done ? (
+        <CheckCircle className="h-5 w-5 text-emerald-300" />
+      ) : (
+        <div
+          className={cn(
+            "h-2.5 w-2.5 rounded-full",
+            active ? "bg-white" : "bg-white/35"
+          )}
+        />
+      )}
+    </div>
+  );
+}
+
+function Chip({ tone = "neutral", children }) {
+  const styles =
+    tone === "ok"
+      ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
+      : tone === "warn"
+      ? "border-yellow-400/25 bg-yellow-400/10 text-yellow-100"
+      : "border-white/15 bg-white/5 text-white/75";
+  return (
+    <span className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs", styles)}>
+      {children}
+    </span>
+  );
+}
+
+function Card({ title, subtitle, right, children }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/[0.06] shadow-[0_30px_80px_-60px_rgba(0,0,0,0.9)] overflow-hidden">
+      <div className="px-6 py-5 border-b border-white/10 bg-gradient-to-r from-white/[0.08] to-transparent">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-white text-base font-semibold tracking-tight">{title}</h2>
+            {subtitle ? <p className="mt-1 text-sm text-white/60">{subtitle}</p> : null}
+          </div>
+          {right ? <div className="flex-shrink-0">{right}</div> : null}
+        </div>
+      </div>
+      <div className="p-6">{children}</div>
+    </div>
+  );
+}
 
 export default function CopilotLaunchpad() {
   const navigate = useNavigate();
@@ -82,8 +152,8 @@ export default function CopilotLaunchpad() {
       state: {
         personaId: selectedPersona,
         personaData: selectedPersonaData,
-        domain: selectedDomain
-      }
+        domain: selectedDomain,
+      },
     });
   };
 
@@ -104,200 +174,268 @@ export default function CopilotLaunchpad() {
     }
   };
 
-  // -------------------------------
-  // RENDER UI
-  // -------------------------------
+  const canLaunch = useMemo(() => {
+    return step >= 3 && !!selectedPersona && !!selectedDomain && !processingResume;
+  }, [step, selectedPersona, selectedDomain, processingResume]);
+
+  const headerTitle =
+    step === 1 ? "Pick a Persona" : step === 2 ? "Choose Interview Domain" : "Final Check";
+
+  const headerSubtitle =
+    step === 1
+      ? "Select a persona to set company + role context."
+      : step === 2
+      ? "Pick a domain to tailor the interview responses."
+      : "Review everything and launch.";
+
   return (
-    <div className="min-h-screen bg-black p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-          {/* LEFT PANEL */}
-          <div className="bg-zinc-900 rounded-xl p-8 border border-zinc-800">
-
-            {/* HEADER */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <h1 className="text-white text-2xl font-bold">Copilot Launchpad</h1>
-                <button className="text-gray-500 hover:text-white transition-colors">
-                  <HelpCircle className="w-5 h-5" />
-                </button>
-              </div>
-
-              <button
-                onClick={() => setShowSettings(true)}
-                className="text-gray-500 hover:text-white p-2 hover:bg-zinc-800 rounded-lg transition-colors"
-              >
-                <Settings className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* STEP 1: PERSONA */}
-            <div className={`mb-8 ${step > 1 ? "opacity-50" : ""}`}>
-              <div className="flex items-start gap-4">
-
-                {/* Number circle */}
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  step > 1 ? "bg-white" : "bg-zinc-800 border-2 border-white"
-                }`}>
-                  {step > 1 ? (
-                    <CheckCircle className="w-5 h-5 text-black" />
-                  ) : (
-                    <span className="text-white font-semibold">1</span>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-white font-semibold">Select Persona</h3>
-
-                    {step > 1 && (
-                      <button
-                        onClick={() => handleEditStep(1)}
-                        className="text-gray-400 hover:text-white text-sm transition-colors"
-                      >
-                        Edit
-                      </button>
-                    )}
-                  </div>
-
-                  <p className="text-gray-500 text-sm">
-                    Choose a persona that describes the company and role of your interview
-                  </p>
-
-                  {step === 1 && (
-                    <button
-                      onClick={() => navigate("/personas")}
-                      className="mt-4 bg-white hover:bg-gray-100 text-black font-medium py-2 px-4 rounded-lg text-sm transition-colors"
-                    >
-                      + Create Your Own Persona
-                    </button>
-                  )}
-
-                  {step > 1 && selectedPersonaData && (
-                    <div className="mt-3 bg-black rounded-lg p-3 border border-zinc-800">
-                      <p className="text-white text-sm font-medium">
-                        {selectedPersonaData.position} @ {selectedPersonaData.company_name}
-                      </p>
-
-                      {selectedPersonaData.company_description && (
-                        <p className="text-gray-500 text-xs mt-1 line-clamp-2">
-                          {selectedPersonaData.company_description.substring(0, 80)}...
-                        </p>
-                      )}
-
-                      {selectedPersonaData.resume_text && (
-                        <p className="text-emerald-400 text-xs mt-2">✓ Resume context loaded</p>
-                      )}
-
-                      {processingResume && (
-                        <p className="text-yellow-400 text-xs mt-2">⏳ Processing resume...</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* STEP 2: DOMAIN */}
-            <div className={`mb-8 ${step < 2 ? "opacity-30" : step > 2 ? "opacity-50" : ""}`}>
-              <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  step > 2
-                    ? "bg-white"
-                    : step === 2
-                    ? "bg-zinc-800 border-2 border-white"
-                    : "bg-zinc-800 border-2 border-zinc-700"
-                }`}>
-                  {step > 2 ? (
-                    <CheckCircle className="w-5 h-5 text-black" />
-                  ) : (
-                    <span className={`font-semibold ${step >= 2 ? "text-white" : "text-zinc-700"}`}>2</span>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-white font-semibold">Select Interview Domain</h3>
-
-                    {step > 2 && (
-                      <button
-                        onClick={() => handleEditStep(2)}
-                        className="text-gray-400 hover:text-white text-sm transition-colors"
-                      >
-                        Edit
-                      </button>
-                    )}
-                  </div>
-
-                  <p className="text-gray-500 text-sm">
-                    Choose a domain for industry-specific responses
-                  </p>
-
-                  {step > 2 && selectedDomain && (
-                    <div className="mt-3 bg-black rounded-lg p-3 border border-zinc-800">
-                      <p className="text-white text-sm font-medium">{selectedDomain}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* STEP 3: CONFIRM */}
-            <div className={`mb-8 ${step < 3 ? "opacity-30" : ""}`}>
-              <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  step === 3 ? "bg-zinc-800 border-2 border-white" : "bg-zinc-800 border-2 border-zinc-700"
-                }`}>
-                  <span className={`font-semibold ${step >= 3 ? "text-white" : "text-zinc-700"}`}>3</span>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-semibold mb-1">Confirm Launch Settings</h3>
-                  <p className="text-gray-500 text-sm">Review selections and system settings</p>
-
-                  {step === 3 && (
-                    <div className="mt-3 bg-emerald-950/50 rounded-lg p-3 border border-emerald-900/50">
-                      <p className="text-emerald-400 text-sm font-medium">✓ Ready to launch</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* LAUNCH BUTTON */}
-            <button
-              onClick={handleLaunch}
-              disabled={step < 3 || !selectedPersona || !selectedDomain || processingResume}
-              className="w-full bg-white hover:bg-gray-100 disabled:bg-zinc-800 text-black disabled:text-gray-600 font-semibold py-4 rounded-lg flex items-center justify-center gap-2 disabled:cursor-not-allowed transition-colors"
-            >
-              <Rocket className="w-5 h-5" />
-              {processingResume
-                ? "Processing resume..."
-                : step < 3
-                ? "Complete all steps to launch"
-                : "Launch Interview Copilot"}
-            </button>
-
-          </div>
-
-          {/* RIGHT PANEL */}
-          <div>
-            {step === 1 && <PersonaSelection onSelect={handlePersonaSelect} />}
-            {step === 2 && <InterviewDomainSelection onSelect={handleDomainSelect} />}
-            {step === 3 && (
-              <LaunchChecklist
-                persona={selectedPersona}
-                personaData={selectedPersonaData}
-                domain={selectedDomain}
-              />
-            )}
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#070A0F] text-white">
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(99,102,241,0.22),transparent_45%),radial-gradient(circle_at_80%_20%,rgba(16,185,129,0.18),transparent_50%),radial-gradient(circle_at_50%_95%,rgba(236,72,153,0.14),transparent_55%)]" />
+        <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:72px_72px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/50" />
       </div>
 
-      {/* SETTINGS MODAL */}
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      <div className="relative mx-auto max-w-7xl px-6 py-10">
+        {/* Top bar */}
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
+              <Sparkles className="h-4 w-4 text-white/70" />
+              <span className="text-xs text-white/70">Copilot Launch</span>
+              <span className="mx-1 h-3 w-px bg-white/15" />
+              <span className="text-xs text-white/55">Step {step} of 3</span>
+            </div>
+
+            <h1 className="mt-4 text-3xl md:text-4xl font-semibold tracking-tight">
+              Launch your interview session
+              <span className="text-white/60"> in minutes</span>
+            </h1>
+
+            <p className="mt-2 text-white/60 max-w-2xl">
+              Configure persona + domain, verify readiness, then start the Copilot.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/[0.10] transition-colors"
+              aria-label="Help"
+              title="Help"
+            >
+              <HelpCircle className="h-4 w-4" />
+              Help
+            </button>
+
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/[0.10] transition-colors"
+              onClick={() => setShowSettings(true)}
+              aria-label="Settings"
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </button>
+          </div>
+        </div>
+
+        {/* Main */}
+        <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left: Vertical step timeline + summary */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">Setup Progress</p>
+                <Chip>{step === 1 ? "Persona" : step === 2 ? "Domain" : "Confirm"}</Chip>
+              </div>
+
+              <div className="mt-6 space-y-5">
+                {/* Step 1 */}
+                <div className="flex items-start gap-4">
+                  <StepDot active={step === 1} done={step > 1} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-semibold">Persona</p>
+                      {step > 1 ? (
+                        <button
+                          onClick={() => handleEditStep(1)}
+                          className="text-xs text-white/60 hover:text-white transition-colors"
+                        >
+                          Edit
+                        </button>
+                      ) : null}
+                    </div>
+                    <p className="text-sm text-white/55 mt-1">
+                      {selectedPersonaData
+                        ? `${selectedPersonaData.position ?? "Role"} @ ${selectedPersonaData.company_name ?? "Company"}`
+                        : "Select a persona to load role/company context."}
+                    </p>
+
+                    {step === 1 ? (
+                      <button
+                        onClick={() => navigate("/personas")}
+                        className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-white text-black px-4 py-2.5 text-sm font-semibold hover:bg-white/90 transition-colors"
+                      >
+                        Create Persona <ChevronRight className="h-4 w-4" />
+                      </button>
+                    ) : null}
+
+                    {step > 1 && selectedPersonaData ? (
+                      <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-white">
+                              {selectedPersonaData.position} @ {selectedPersonaData.company_name}
+                            </p>
+                            {selectedPersonaData.company_description ? (
+                              <p className="mt-1 text-xs text-white/55 line-clamp-2">
+                                {selectedPersonaData.company_description.substring(0, 140)}…
+                              </p>
+                            ) : null}
+                          </div>
+                          <ShieldCheck className="h-5 w-5 text-white/50" />
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          {selectedPersonaData.resume_text ? (
+                            <Chip tone="ok">✓ Resume context loaded</Chip>
+                          ) : null}
+                          {processingResume ? (
+                            <Chip tone="warn">
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              Processing resume…
+                            </Chip>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Connector */}
+                <div className="ml-[18px] h-6 w-px bg-gradient-to-b from-white/20 to-transparent" />
+
+                {/* Step 2 */}
+                <div className={cn("flex items-start gap-4", step < 2 && "opacity-60")}>
+                  <StepDot active={step === 2} done={step > 2} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-semibold">Interview Domain</p>
+                      {step > 2 ? (
+                        <button
+                          onClick={() => handleEditStep(2)}
+                          className="text-xs text-white/60 hover:text-white transition-colors"
+                        >
+                          Edit
+                        </button>
+                      ) : null}
+                    </div>
+                    <p className="text-sm text-white/55 mt-1">
+                      {selectedDomain ? selectedDomain : "Choose a domain to customize the answers."}
+                    </p>
+
+                    {step > 2 && selectedDomain ? (
+                      <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <p className="text-sm font-semibold">{selectedDomain}</p>
+                        <p className="mt-1 text-xs text-white/55">
+                          Domain signals tone + examples for more relevant responses.
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Connector */}
+                <div className="ml-[18px] h-6 w-px bg-gradient-to-b from-white/20 to-transparent" />
+
+                {/* Step 3 */}
+                <div className={cn("flex items-start gap-4", step < 3 && "opacity-60")}>
+                  <StepDot active={step === 3} done={false} />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold">Confirm</p>
+                    <p className="text-sm text-white/55 mt-1">
+                      Review selections and launch when ready.
+                    </p>
+                    {step === 3 ? (
+                      <div className="mt-4 rounded-2xl border border-emerald-400/15 bg-emerald-400/10 p-4">
+                        <p className="text-emerald-200 text-sm font-semibold">Ready to launch</p>
+                        <p className="mt-1 text-xs text-emerald-200/70">
+                          Persona + domain selected. Checklist is available on the right.
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
+              {/* Launch CTA */}
+              <div className="mt-6">
+                <button
+                  onClick={handleLaunch}
+                  disabled={!canLaunch}
+                  className={cn(
+                    "w-full rounded-2xl py-4 px-5 font-semibold flex items-center justify-center gap-2 transition-all",
+                    canLaunch
+                      ? "bg-gradient-to-r from-white to-white/90 text-black hover:opacity-95"
+                      : "bg-white/10 text-white/35 cursor-not-allowed"
+                  )}
+                >
+                  <Rocket className="h-5 w-5" />
+                  {processingResume
+                    ? "Processing resume…"
+                    : step < 3
+                    ? "Complete steps to launch"
+                    : "Launch Interview Copilot"}
+                </button>
+
+                <div className="mt-3 flex items-center justify-between text-xs text-white/50">
+                  <span>
+                    {processingResume
+                      ? "Preparing resume context…"
+                      : canLaunch
+                      ? "All set."
+                      : "Finish setup to enable launch."}
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1">
+                    Launch Protected
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Primary work area */}
+          <div className="lg:col-span-8 space-y-6">
+            <Card
+              title={headerTitle}
+              subtitle={headerSubtitle}
+              right={
+                <div className="flex items-center gap-2">
+                  <Chip>
+                    {step === 1 ? "Select" : step === 2 ? "Choose" : "Review"}
+                  </Chip>
+                </div>
+              }
+            >
+              {step === 1 && <PersonaSelection onSelect={handlePersonaSelect} />}
+              {step === 2 && <InterviewDomainSelection onSelect={handleDomainSelect} />}
+              {step === 3 && (
+                <LaunchChecklist
+                  persona={selectedPersona}
+                  personaData={selectedPersonaData}
+                  domain={selectedDomain}
+                />
+              )}
+            </Card>
+          </div>
+        </div>
+
+        {/* SETTINGS MODAL */}
+        {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      </div>
     </div>
   );
 }
