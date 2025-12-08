@@ -3,29 +3,11 @@ import MarkdownRenderer from "./MarkdownRenderer";
 import { Sparkles, MessageCircle } from "lucide-react";
 
 function StreamingAnswer({ text, isComplete }) {
-  const [displayedText, setDisplayedText] = React.useState("");
-  const [currentIndex, setCurrentIndex] = React.useState(0);
-
-  useEffect(() => {
-    if (isComplete) {
-      setDisplayedText(text);
-      return;
-    }
-
-    if (currentIndex < text.length) {
-      const timer = setTimeout(() => {
-        setDisplayedText(text.slice(0, currentIndex + 1));
-        setCurrentIndex(currentIndex + 1);
-      }, 20);
-
-      return () => clearTimeout(timer);
-    }
-  }, [text, currentIndex, isComplete]);
-
+  // Super fast: always show the latest text, no artificial delay
   return (
     <div className="relative">
-      <MarkdownRenderer content={displayedText} />
-      {!isComplete && currentIndex < text.length && (
+      <MarkdownRenderer content={text} />
+      {!isComplete && text && (
         <span className="inline-block w-1 h-4 bg-purple-400 animate-pulse ml-1 rounded-sm" />
       )}
     </div>
@@ -57,7 +39,9 @@ function QAList({ qaList }) {
           <div className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <MessageCircle className="w-4 h-4 text-purple-300" />
-              <span className="text-sm font-bold text-purple-300">AI ANSWER</span>
+              <span className="text-sm font-bold text-purple-300">
+                AI ANSWER
+              </span>
             </div>
 
             <div className="text-gray-200 leading-relaxed">
@@ -74,7 +58,7 @@ export default function QACopilot({
   qaList,
   currentQuestion,
   currentAnswer,
-  isGenerating,
+  isGenerating,        // currently unused, but kept if you use it elsewhere
   isStreamingComplete,
   autoScroll,
 }) {
@@ -84,22 +68,18 @@ export default function QACopilot({
     if (autoScroll) {
       copilotEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [qaList, currentAnswer, autoScroll]);
+  }, [qaList.length, currentAnswer, autoScroll]);
 
   return (
     <div className="flex flex-col h-full bg-[#111111] border-l border-[#1A1A1A]">
-      
       {/* HEADER – EXACT MATCH WITH INTERVIEWER/CANDIDATE TABS */}
       <div className="h-12 flex items-center justify-between px-6 border-b border-[#242424] bg-[#111111]">
-
         {/* LEFT: ICON + TITLE */}
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-purple-300" />
-
           <span className="text-sm font-medium text-white">
             Interview Copilot
           </span>
-
           <span className="text-xs text-gray-500">
             AI-Powered Assistant
           </span>
@@ -113,7 +93,6 @@ export default function QACopilot({
 
       {/* CONTENT AREA */}
       <div className="flex-1 overflow-y-auto p-6">
-
         {/* EMPTY STATE */}
         {qaList.length === 0 && !currentQuestion ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
