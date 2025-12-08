@@ -95,7 +95,7 @@ export default function CopilotLaunchpad() {
   const [processingResume, setProcessingResume] = useState(false);
 
   // Backend base URL
-  const API = "http://127.0.0.1:8000";
+  const API = "https://verve-ai-ukec.onrender.com";
 
   // -------------------------------
   // HANDLE PERSONA SELECTION

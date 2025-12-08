@@ -1,24 +1,16 @@
+// utils/config.js
 
-// ============================================================================
-// FILE: utils/config.js
-// ============================================================================
+const PROD_HTTP = "https://verve-ai-ukec.onrender.com";
+const PROD_WS = "wss://verve-ai-ukec.onrender.com";
 
-// Production URLs
-// export const BACKEND_URL = "https://verve-ai-ukec.onrender.com";
-// export const WS_URL = "wss://verve-ai-ukec.onrender.com";
+const DEV_HTTP = "http://127.0.0.1:8000";
+const DEV_WS = "ws://127.0.0.1:8000";
 
-// Development URLs
-export const BACKEND_URL = "http://0.0.0.0:8000";
-export const WS_URL = "wss://0.0.0.0:8000";
+const isDev =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1");
 
-export const getWebSocketUrl = (path) => {
-  const isDevelopment =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
+export const BACKEND_URL = isDev ? DEV_HTTP : PROD_HTTP;
 
-  if (isDevelopment) {
-    return `ws://127.0.0.1:8000${path}`;
-  } else {
-    return `${WS_URL}${path}`;
-  }
-};
+export const getWebSocketUrl = (path) => `${isDev ? DEV_WS : PROD_WS}${path}`;

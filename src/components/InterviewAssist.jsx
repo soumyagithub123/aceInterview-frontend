@@ -37,7 +37,7 @@ export default function InterviewAssist() {
       };
       console.log("🟦 Payload:", payload);
 
-      const res = await fetch("http://127.0.0.1:8000/api/manual-generate", {
+      const res = await fetch("https://verve-ai-ukec.onrender.com/api/manual-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

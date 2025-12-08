@@ -126,12 +126,12 @@ export default function SettingsModal({ onClose }) {
     try {
       // update model selections via API (best-effort)
       try {
-        await fetch('http://127.0.0.1:8000/api/models/set-default', {
+        await fetch('https://verve-ai-ukec.onrender.com/api/models/set-default', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ provider: defaultModel, user_id: user.id })
         });
-        await fetch('http://127.0.0.1:8000/api/models/set-coding', {
+        await fetch('https://verve-ai-ukec.onrender.com/api/models/set-coding', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ provider: codingModel, user_id: user.id })
