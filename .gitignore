@@ -1,0 +1,65 @@
+# ---------------------------------------------------
+# NODE MODULES & BUILD
+# ---------------------------------------------------
+node_modules/
+dist/
+build/
+.cache/
+.temp/
+.vite/
+vite-dist/
+
+# ---------------------------------------------------
+# ENV FILES (never commit secrets)
+# ---------------------------------------------------
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# ---------------------------------------------------
+# SYSTEM & EDITOR FILES
+# ---------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---------------------------------------------------
+# LOGS
+# ---------------------------------------------------
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# ---------------------------------------------------
+# MISC FRONTEND GENERATED FILES
+# ---------------------------------------------------
+*.tsbuildinfo
+*.tgz
+*.zip
+
+# ---------------------------------------------------
+# TAILWIND / POSTCSS CACHES
+# ---------------------------------------------------
+.postcss-cache/
+.tailwind-cache/
+
+# ---------------------------------------------------
+# OPTIONAL: ignore your local dev build output
+# ---------------------------------------------------
+*.local
+
+# ---------------------------------------------------
+# FRONTEND STATIC FILES YOU DO NOT WANT IN GIT
+# (public folder assets are allowed unless unwanted)
+# ---------------------------------------------------
+# Add patterns here if you have auto-generated assets
+# example:
+# public/temp/
+# public/upload/

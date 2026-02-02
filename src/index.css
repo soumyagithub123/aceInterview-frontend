@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans text-surface-700 antialiased;
+  }
+}
+
+@layer components {
+  /* Primary gradient CTA - purple/blue like Interview Sidekick */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold
+      bg-gradient-to-r from-primary-500 to-primary-400 text-white
+      hover:from-primary-600 hover:to-primary-500
+      transition-all duration-200 ease-smooth
+      shadow-lg hover:shadow-glow-primary hover:scale-[1.02];
+  }
+  /* Dark charcoal button - Sensei style */
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold
+      bg-brand-charcoal text-white
+      hover:bg-black
+      transition-all duration-200 ease-smooth
+      shadow-lg hover:shadow-xl;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold
+      border-2 border-surface-300 text-surface-700
+      hover:border-surface-400 hover:bg-surface-50
+      transition-all duration-200 ease-smooth;
+  }
+  .input-base {
+    @apply w-full px-4 py-3 rounded-2xl border border-surface-200
+      focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
+      transition-all duration-200 outline-none;
+  }
+  .card-base {
+    @apply rounded-2xl bg-white border border-surface-100
+      shadow-card-soft hover:shadow-card-hover
+      transition-all duration-300 ease-smooth;
+  }
+}
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
