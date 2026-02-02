@@ -3,8 +3,8 @@
 const PROD_HTTP = "https://verve-ai-ukec.onrender.com";
 const PROD_WS = "wss://verve-ai-ukec.onrender.com";
 
-const DEV_HTTP = "http://127.0.0.1:8000";
-const DEV_WS = "ws://127.0.0.1:8000";
+const DEV_HTTP = "http://127.0.0.1:10000";
+const DEV_WS = "ws://127.0.0.1:10000";
 
 const isDev =
   typeof window !== "undefined" &&

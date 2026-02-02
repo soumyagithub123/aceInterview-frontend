@@ -9,14 +9,18 @@ import Navbar from "./Navbar";
 
 export default function LandingPage() {
   return (
-    <div className="bg-white text-gray-900 min-h-screen">
+    <div className="bg-white text-gray-900 min-h-screen overflow-x-hidden">
       <Navbar />
-      <Hero />
-      <Features />
-      <ToolsSection />
-      <FAQ />
-      <CTASection />
-      <Footer />
+
+      {/* Main Content Wrap */}
+      <main className="pt-20 sm:pt-24">
+        <Hero />
+        <Features />
+        <ToolsSection />
+        <FAQ />
+        <CTASection />
+        <Footer />
+      </main>
     </div>
   );
 }

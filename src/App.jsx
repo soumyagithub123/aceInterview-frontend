@@ -1,5 +1,3 @@
-// src/App.jsx
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/Auth/AuthContext";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
@@ -7,20 +5,19 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 // GLOBAL DATA PROVIDER
 import { AppDataProvider } from "./context/AppDataContext";
 
-// Pages
+// PAGES
 import LandingPage from "./components/Landing/LandingPage";
-import Interview from "./components/InterviewAssistent/Interview";
-import InterviewAssist from "./components/InterviewAssist";
+import Interview from "./components/InterviewAssistant/Pages/Interview";
+import InterviewAssist from "./components/InterviewAssistant/Pages/InterviewAssist";
 import Pricing from "./components/Payment/Pricing";
-import PersonasPage from "./components/InterviewAssistent/PersonasPage";
 import SignIn from "./components/Auth/SignIn";
 import SignUp from "./components/Auth/SignUp";
 
-// Resources
+// RESOURCES
 import Blog from "./components/Resources/Blog/Blog";
 import ResumeBuilder from "./components/Resources/Blog/ResumeBuilder";
 
-// ⭐ Payment Pages
+// PAYMENT
 import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import PaymentFailure from "./components/Payment/PaymentFailure";
 
@@ -43,7 +40,7 @@ function App() {
             <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/payment/failure" element={<PaymentFailure />} />
 
-            {/* ---------- PROTECTED ROUTES ---------- */}
+            {/* ---------- INTERVIEW SECTION ---------- */}
             <Route
               path="/interview"
               element={
@@ -54,19 +51,56 @@ function App() {
             />
 
             <Route
-              path="/interview-assist"
+              path="/interview/ai-mock"
               element={
                 <ProtectedRoute>
-                  <InterviewAssist />
+                  <Interview initialPage="ai-mock" />
                 </ProtectedRoute>
               }
             />
 
             <Route
-              path="/personas"
+              path="/interview/personas"
               element={
                 <ProtectedRoute>
-                  <PersonasPage />
+                  <Interview initialPage="personas" />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/interview/knowledge-base"
+              element={
+                <ProtectedRoute>
+                  <Interview initialPage="knowledge-base" />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/interview/questions"
+              element={
+                <ProtectedRoute>
+                  <Interview initialPage="questions" />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/interview/train"
+              element={
+                <ProtectedRoute>
+                  <Interview initialPage="trains" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ---------- LIVE INTERVIEW ---------- */}
+            <Route
+              path="/interview-assist"
+              element={
+                <ProtectedRoute>
+                  <InterviewAssist />
                 </ProtectedRoute>
               }
             />

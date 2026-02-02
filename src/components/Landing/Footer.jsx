@@ -1,51 +1,168 @@
+// import React from "react";
+
+// export default function Footer() {
+//   return (
+//     <footer className="bg-gray-900 text-gray-400 py-12">
+//       <div className="max-w-7xl mx-auto px-6">
+//         <div className="grid md:grid-cols-4 gap-8">
+//           <div>
+//             <div className="flex items-center gap-2 mb-4">
+//               <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+//                 <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+//                 </svg>
+//               </div>
+//               <span className="text-xl font-bold text-white">InterviewAI</span>
+//             </div>
+//             <p className="text-sm">AI-powered interview preparation platform</p>
+//           </div>
+          
+//           <div>
+//             <h4 className="text-white font-semibold mb-4">Product</h4>
+//             <ul className="space-y-2 text-sm">
+//               <li><a href="#" className="hover:text-white transition-colors">Interview Copilot</a></li>
+//               <li><a href="#" className="hover:text-white transition-colors">Mock Interview</a></li>
+//               <li><a href="#" className="hover:text-white transition-colors">Resume Editor</a></li>
+//             </ul>
+//           </div>
+          
+//           <div>
+//             <h4 className="text-white font-semibold mb-4">Company</h4>
+//             <ul className="space-y-2 text-sm">
+//               <li><a href="#" className="hover:text-white transition-colors">About</a></li>
+//               <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+//               <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+//             </ul>
+//           </div>
+          
+//           <div>
+//             <h4 className="text-white font-semibold mb-4">Legal</h4>
+//             <ul className="space-y-2 text-sm">
+//               <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
+//               <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
+//               <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
+//             </ul>
+//           </div>
+//         </div>
+        
+//         <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
+//           <p>&copy; 2025 InterviewAI. All rights reserved.</p>
+//         </div>
+//       </div>
+//     </footer>
+//   );
+// }
+
 import React from "react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400 py-12">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-8">
+    <footer className="bg-gray-900 text-gray-400 py-10 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 text-center sm:text-left">
+
+          {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center justify-center sm:justify-start gap-2 mb-4">
               <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-                <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg
+                  className="w-5 h-5 text-gray-900"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-white">InterviewAI</span>
+              <span className="text-xl font-bold text-white">
+                InterviewAI
+              </span>
             </div>
-            <p className="text-sm">AI-powered interview preparation platform</p>
+            <p className="text-sm max-w-xs mx-auto sm:mx-0">
+              AI-powered interview preparation platform
+            </p>
           </div>
-          
+
+          {/* Product */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Product</h4>
+            <h4 className="text-white font-semibold mb-4">
+              Product
+            </h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Interview Copilot</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Mock Interview</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Resume Editor</a></li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Interview Copilot
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Mock Interview
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Resume Editor
+                </a>
+              </li>
             </ul>
           </div>
-          
+
+          {/* Company */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
+            <h4 className="text-white font-semibold mb-4">
+              Company
+            </h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  About
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Blog
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Careers
+                </a>
+              </li>
             </ul>
           </div>
-          
+
+          {/* Legal */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
+            <h4 className="text-white font-semibold mb-4">
+              Legal
+            </h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Privacy
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Terms
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Security
+                </a>
+              </li>
             </ul>
           </div>
+
         </div>
-        
-        <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
+
+        <div className="border-t border-gray-800 mt-10 sm:mt-12 pt-6 sm:pt-8 text-sm text-center">
           <p>&copy; 2025 InterviewAI. All rights reserved.</p>
         </div>
       </div>

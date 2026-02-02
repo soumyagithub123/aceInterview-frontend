@@ -9,14 +9,14 @@ function Row({ icon: Icon, title, value, ok }) {
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-4 rounded-2xl border p-4",
+        "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 rounded-2xl border p-4",
         ok ? "border-emerald-400/20 bg-emerald-400/5" : "border-white/10 bg-white/[0.04]"
       )}
     >
       <div className="flex items-center gap-3 min-w-0">
         <div
           className={cn(
-            "h-11 w-11 rounded-xl border grid place-items-center flex-shrink-0",
+            "h-10 w-10 sm:h-11 sm:w-11 rounded-xl border grid place-items-center flex-shrink-0",
             ok ? "border-emerald-400/20 bg-emerald-400/10" : "border-white/10 bg-black/30"
           )}
         >
@@ -24,8 +24,8 @@ function Row({ icon: Icon, title, value, ok }) {
         </div>
 
         <div className="min-w-0">
-          <div className="text-white font-semibold">{title}</div>
-          <div className={cn("text-sm truncate", ok ? "text-white/70" : "text-white/45")}>
+          <div className="text-white font-semibold text-sm sm:text-base">{title}</div>
+          <div className={cn("text-xs sm:text-sm truncate", ok ? "text-white/70" : "text-white/45")}>
             {value}
           </div>
         </div>
@@ -33,7 +33,7 @@ function Row({ icon: Icon, title, value, ok }) {
 
       <span
         className={cn(
-          "text-xs font-semibold rounded-full px-3 py-1 border flex-shrink-0",
+          "self-start sm:self-auto text-xs font-semibold rounded-full px-3 py-1 border flex-shrink-0",
           ok ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200" : "border-white/10 bg-white/[0.03] text-white/55"
         )}
       >
@@ -70,11 +70,13 @@ export default function LaunchChecklist({ persona, personaData, domain }) {
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.04] overflow-hidden">
       {/* Header */}
-      <div className="px-7 py-6 border-b border-white/10 bg-gradient-to-r from-white/[0.06] to-transparent">
-        <div className="flex items-start justify-between gap-4">
+      <div className="px-4 sm:px-7 py-5 sm:py-6 border-b border-white/10 bg-gradient-to-r from-white/[0.06] to-transparent">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="min-w-0">
-            <h2 className="text-white text-lg font-semibold tracking-tight">Pre-flight Checklist</h2>
-            <p className="text-white/55 text-sm mt-1">
+            <h2 className="text-white text-base sm:text-lg font-semibold tracking-tight">
+              Pre-flight Checklist
+            </h2>
+            <p className="text-white/55 text-xs sm:text-sm mt-1">
               Confirm your setup before launching the interview assistant.
             </p>
           </div>
@@ -102,22 +104,22 @@ export default function LaunchChecklist({ persona, personaData, domain }) {
         </div>
       </div>
 
-      <div className="p-7 space-y-6">
+      <div className="p-4 sm:p-7 space-y-6">
         {/* Persona summary */}
         {personaData ? (
-          <div className="rounded-3xl border border-white/10 bg-black/30 p-5">
-            <div className="flex items-start gap-4">
-              <div className="h-14 w-14 rounded-2xl border border-white/10 bg-white/[0.06] grid place-items-center flex-shrink-0">
-                <span className="text-white font-semibold text-lg">
+          <div className="rounded-3xl border border-white/10 bg-black/30 p-4 sm:p-5">
+            <div className="flex gap-4">
+              <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl border border-white/10 bg-white/[0.06] grid place-items-center flex-shrink-0">
+                <span className="text-white font-semibold text-base sm:text-lg">
                   {personaData.company_name?.charAt(0)?.toUpperCase() || "C"}
                 </span>
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="text-white font-semibold tracking-tight">
+                <div className="text-white font-semibold tracking-tight truncate">
                   {personaData.position || "Position"}
                 </div>
-                <div className="text-white/60 text-sm mt-0.5">
+                <div className="text-white/60 text-sm mt-0.5 truncate">
                   @{personaData.company_name || "Company"}
                 </div>
 
@@ -144,8 +146,8 @@ export default function LaunchChecklist({ persona, personaData, domain }) {
           ))}
         </div>
 
-        {/* System status (visual only like your current one) */}
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+        {/* System status */}
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="text-white font-semibold">System Status</div>
             <span className="inline-flex items-center gap-2 text-xs text-white/55">
@@ -170,8 +172,8 @@ export default function LaunchChecklist({ persona, personaData, domain }) {
           </div>
         </div>
 
-        {/* Tips (no emoji) */}
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+        {/* Tips */}
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
           <div className="text-white font-semibold">Tips</div>
           <ul className="mt-3 text-sm text-white/55 space-y-2 list-disc pl-5">
             <li>Test your microphone before starting.</li>
