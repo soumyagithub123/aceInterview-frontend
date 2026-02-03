@@ -15,6 +15,7 @@ export default function TranscriptPanel({
   isRecording,
   onManualGenerate,
   autoScroll,
+  isMockMode,
 }) {
   const transcriptEndRef = useRef(null);
 
@@ -52,41 +53,48 @@ export default function TranscriptPanel({
     <div className="flex flex-col h-full bg-[#111111] w-full">
       {/* TOP TABS */}
       <div className="flex items-center justify-between border-b border-[#2A2A2A] bg-[#111111] px-2 sm:px-0">
-        <div className="flex overflow-x-auto scrollbar-hide">
-          <button
-            onClick={() => onViewChange("interviewer")}
-            className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium transition-all border-b-2 whitespace-nowrap ${
-              activeView === "interviewer"
-                ? "border-purple-500 text-purple-400 bg-[#181818]"
-                : "border-transparent text-gray-400 hover:text-gray-300"
-            }`}
-          >
-            <Volume2 className="w-4 h-4" />
-            Interviewer
-            {interviewerTranscript.length > 0 && (
-              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-[10px] sm:text-xs rounded-full">
-                {interviewerTranscript.length}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => onViewChange("candidate")}
-            className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium transition-all border-b-2 whitespace-nowrap ${
-              activeView === "candidate"
-                ? "border-amber-400 text-amber-300 bg-[#181818]"
-                : "border-transparent text-gray-400 hover:text-gray-300"
-            }`}
-          >
+        {isMockMode ? (
+          <div className="flex items-center gap-2 px-4 sm:px-6 py-3 text-sm font-medium text-amber-300 border-b-2 border-amber-400 bg-[#181818] w-full">
             <Mic className="w-4 h-4" />
-            Candidate (You)
-            {candidateTranscript.length > 0 && (
-              <span className="px-2 py-0.5 bg-amber-400/20 text-amber-300 text-[10px] sm:text-xs rounded-full">
-                {candidateTranscript.length}
-              </span>
-            )}
-          </button>
-        </div>
+            Your Transcript
+          </div>
+        ) : (
+          <div className="flex overflow-x-auto scrollbar-hide">
+            <button
+              onClick={() => onViewChange("interviewer")}
+              className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium transition-all border-b-2 whitespace-nowrap ${
+                activeView === "interviewer"
+                  ? "border-purple-500 text-purple-400 bg-[#181818]"
+                  : "border-transparent text-gray-400 hover:text-gray-300"
+              }`}
+            >
+              <Volume2 className="w-4 h-4" />
+              Interviewer
+              {interviewerTranscript.length > 0 && (
+                <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-[10px] sm:text-xs rounded-full">
+                  {interviewerTranscript.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => onViewChange("candidate")}
+              className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-medium transition-all border-b-2 whitespace-nowrap ${
+                activeView === "candidate"
+                  ? "border-amber-400 text-amber-300 bg-[#181818]"
+                  : "border-transparent text-gray-400 hover:text-gray-300"
+              }`}
+            >
+              <Mic className="w-4 h-4" />
+              Candidate (You)
+              {candidateTranscript.length > 0 && (
+                <span className="px-2 py-0.5 bg-amber-400/20 text-amber-300 text-[10px] sm:text-xs rounded-full">
+                  {candidateTranscript.length}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
 
         <button
           onClick={onPauseToggle}

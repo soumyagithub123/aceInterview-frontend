@@ -12,6 +12,7 @@ export default function InterviewHeader({
   onSettingsClick,
   onBackClick,
   onExit,
+  isMockMode,
 }) {
   return (
     <header className="w-full bg-[#0A0A0A] border-b border-[#1A1A1A] sticky top-0 z-50">
@@ -68,12 +69,16 @@ export default function InterviewHeader({
             {isRecording ? (
               <>
                 <MicOff className="w-4 h-4" />
-                <span className="hidden sm:inline">Stop</span>
+                <span className="hidden sm:inline">
+                  {isMockMode ? "End Mock" : "Stop"}
+                </span>
               </>
             ) : (
               <>
                 <Mic className="w-4 h-4" />
-                <span className="hidden sm:inline">Start Recording</span>
+                <span className="hidden sm:inline">
+                  {isMockMode ? "Start Mock" : "Start Recording"}
+                </span>
               </>
             )}
           </button>

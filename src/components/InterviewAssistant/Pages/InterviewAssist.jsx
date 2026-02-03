@@ -922,6 +922,10 @@ export default function InterviewAssist() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
+  // 🔥 DETECT MOCK MODE
+  const isMockMode = location.pathname === "/mock-interview";
+  const [showMockConfirm, setShowMockConfirm] = useState(false);
+
   // ============================================================================
   // PERSONA / DOMAIN
   // ============================================================================
@@ -1001,6 +1005,14 @@ export default function InterviewAssist() {
   // ============================================================================
   // RECORDING CONTROL (FLOW SAME)
   // ============================================================================
+  const handleStartRequest = () => {
+    if (isMockMode) {
+      setShowMockConfirm(true);
+    } else {
+      startRecording();
+    }
+  };
+
   const startRecording = async () => {
     try {
       audio.setTabAudioError("");
@@ -1014,7 +1026,9 @@ export default function InterviewAssist() {
 
       await transcription.connectDeepgram();
       await audio.startMicrophoneCapture();
-      audio.setShowTabModal(true);
+      if (!isMockMode) {
+        audio.setShowTabModal(true);
+      }
       await qa.connectQA();
       audio.setIsRecording(true);
     } catch (err) {
@@ -1066,11 +1080,12 @@ export default function InterviewAssist() {
         personaData={personaData}
         domain={domain}
         isRecording={audio.isRecording}
-        onStartRecording={startRecording}
+        onStartRecording={handleStartRequest}
         onStopRecording={stopRecording}
         onSettingsClick={() => setShowSettings(true)}
         onBackClick={() => navigate("/interview")}
         onExit={() => navigate("/interview")}
+        isMockMode={isMockMode} // Pass this down if Header needs to change title or button text
       />
 
       {audio.showTabModal && audio.isRecording && (
@@ -1090,8 +1105,8 @@ export default function InterviewAssist() {
         <div className="w-[30%] border-r border-gray-800">
           <div className="sticky top-0 h-[calc(100vh-64px-48px)] overflow-y-auto">
             <TranscriptPanel
-              activeView={activeView}
-              onViewChange={setActiveView}
+              activeView={isMockMode ? "candidate" : activeView} // 🔒 FORCE CANDIDATE VIEW IN MOCK
+              onViewChange={isMockMode ? () => {} : setActiveView} // 🔒 DISABLE TOGGLE
               interviewerTranscript={transcription.interviewerTranscript}
               candidateTranscript={transcription.candidateTranscript}
               currentInterviewerParagraph={
@@ -1109,6 +1124,7 @@ export default function InterviewAssist() {
               isRecording={audio.isRecording}
               onManualGenerate={qa.handleManualGenerate}
               autoScroll={settings?.autoScroll}
+              isMockMode={isMockMode} // 🆕 Pass Mock Mode flag
             />
           </div>
         </div>
@@ -1122,6 +1138,7 @@ export default function InterviewAssist() {
             isGenerating={qa.isGenerating}
             isStreamingComplete={qa.isStreamingComplete}
             autoScroll={settings?.autoScroll}
+            isMockMode={isMockMode} // 🆕 Pass Mock Mode flag
           />
         </div>
       </div>
@@ -1139,6 +1156,44 @@ export default function InterviewAssist() {
           backendUrl={BACKEND_URL}
           onClose={() => setShowSettings(false)}
         />
+      )}
+
+      {/* 🔥 MOCK CONFIRMATION MODAL */}
+      {showMockConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-[#0F1115] border border-white/10 rounded-2xl shadow-2xl p-6">
+            <div className="text-center">
+              <div className="mx-auto w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                <span className="text-2xl">🚀</span>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Ready to Start Mock Interview?
+              </h3>
+              <p className="text-gray-400 text-sm mb-6">
+                The AI will listen to your answers and generate follow-up questions.
+                Ensure your microphone is ready.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowMockConfirm(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMockConfirm(false);
+                    startRecording();
+                  }}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-white text-black hover:bg-gray-200 transition-colors"
+                >
+                  Start Mock
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

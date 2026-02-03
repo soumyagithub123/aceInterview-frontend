@@ -28,7 +28,7 @@ function App() {
         <BrowserRouter>
           <Routes>
 
-            {/* ---------- PUBLIC ROUTES ---------- */}
+            {/* ================= PUBLIC ROUTES ================= */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/sign-in" element={<SignIn />} />
@@ -36,25 +36,28 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/resume-builder" element={<ResumeBuilder />} />
 
-            {/* ---------- PAYMENT ROUTES ---------- */}
+            {/* ================= PAYMENT ROUTES ================= */}
             <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/payment/failure" element={<PaymentFailure />} />
 
-            {/* ---------- INTERVIEW SECTION ---------- */}
+            {/* ================= INTERVIEW (NORMAL) ================= */}
             <Route
               path="/interview"
               element={
                 <ProtectedRoute>
-                  <Interview />
+                  <Interview mode="assist" />
                 </ProtectedRoute>
               }
             />
 
+            {/* ================= MOCK INTERVIEW (SEPARATE ROUTE) ================= */}
+
+            {/* ================= INTERNAL INTERVIEW PAGES ================= */}
             <Route
               path="/interview/ai-mock"
               element={
                 <ProtectedRoute>
-                  <Interview initialPage="ai-mock" />
+                  <Interview mode="mock" />
                 </ProtectedRoute>
               }
             />
@@ -63,7 +66,7 @@ function App() {
               path="/interview/personas"
               element={
                 <ProtectedRoute>
-                  <Interview initialPage="personas" />
+                  <Interview mode="assist" initialPage="personas" />
                 </ProtectedRoute>
               }
             />
@@ -72,7 +75,7 @@ function App() {
               path="/interview/knowledge-base"
               element={
                 <ProtectedRoute>
-                  <Interview initialPage="knowledge-base" />
+                  <Interview mode="assist" initialPage="knowledge-base" />
                 </ProtectedRoute>
               }
             />
@@ -81,7 +84,7 @@ function App() {
               path="/interview/questions"
               element={
                 <ProtectedRoute>
-                  <Interview initialPage="questions" />
+                  <Interview mode="assist" initialPage="questions" />
                 </ProtectedRoute>
               }
             />
@@ -90,14 +93,23 @@ function App() {
               path="/interview/train"
               element={
                 <ProtectedRoute>
-                  <Interview initialPage="trains" />
+                  <Interview mode="assist" initialPage="trains" />
                 </ProtectedRoute>
               }
             />
 
-            {/* ---------- LIVE INTERVIEW ---------- */}
+            {/* ================= LIVE INTERVIEW ================= */}
             <Route
               path="/interview-assist"
+              element={
+                <ProtectedRoute>
+                  <InterviewAssist />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/mock-interview"
               element={
                 <ProtectedRoute>
                   <InterviewAssist />

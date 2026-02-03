@@ -361,12 +361,12 @@ export default function PersonaSelection({ onSelect }) {
   const [selectedPersona, setSelectedPersona] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const filteredPersonas = (personas || []).filter((persona) => {
+  const validPersonas = (personas || []).filter((p) => {
     // Exclude Knowledge Base items
-    if (persona.company_name === "Knowledge Base" || persona.is_resume_only) {
-      return false;
-    }
+    return !(p.company_name === "Knowledge Base" || p.is_resume_only);
+  });
 
+  const filteredPersonas = validPersonas.filter((persona) => {
     const term = searchTerm.toLowerCase();
     return (
       persona.company_name?.toLowerCase().includes(term) ||
@@ -423,7 +423,7 @@ export default function PersonaSelection({ onSelect }) {
     );
   }
 
-  const total = (personas || []).length;
+  const total = validPersonas.length;
   const shown = filteredPersonas.length;
 
   return (
@@ -491,7 +491,7 @@ export default function PersonaSelection({ onSelect }) {
         {/* Bottom */}
         <div className="px-5 sm:px-6 py-5 border-t border-white/10 bg-black/20">
           <button
-            onClick={() => (window.location.href = "/personas")}
+            onClick={() => (window.location.href = "/interview/personas")}
             className="w-full rounded-2xl border border-white/10 bg-white/[0.05] hover:bg-white/[0.08] text-white font-semibold py-3 flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />

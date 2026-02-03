@@ -225,6 +225,7 @@ export default function QACopilot({
   isGenerating,
   isStreamingComplete,
   autoScroll,
+  isMockMode,
 }) {
   const copilotEndRef = useRef(null);
 
@@ -265,10 +266,12 @@ export default function QACopilot({
             </div>
 
             <h3 className="text-base sm:text-lg font-semibold text-gray-300 mb-1">
-              Ready to Assist
+              {isMockMode ? "Ready for Mock Interview" : "Ready to Assist"}
             </h3>
             <p className="text-gray-500 max-w-sm text-sm sm:text-base">
-              AI answers will appear here once the interview begins.
+              {isMockMode
+                ? "Questions will appear here once the mock interview begins."
+                : "AI answers will appear here once the interview begins."}
             </p>
           </div>
         ) : (
