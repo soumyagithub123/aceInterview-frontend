@@ -25,7 +25,7 @@ export default function useAudioRecorder({
   const interviewerProcessorRef = useRef(null);
 
   // ======================
-  // MICROPHONE (CANDIDATE)
+  // MICROPHONE (CANDIDATE) - OPTIMIZED
   // ======================
   const startMicrophoneCapture = async () => {
     try {
@@ -48,7 +48,10 @@ export default function useAudioRecorder({
       candidateAudioContextRef.current = audioContext;
 
       const source = audioContext.createMediaStreamSource(stream);
-      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      
+      // ✅ OPTIMIZED: Reduced buffer size from 4096 to 2048
+      // This reduces latency by ~50% (from ~256ms to ~128ms at 16kHz)
+      const processor = audioContext.createScriptProcessor(2048, 1, 1);
       candidateProcessorRef.current = processor;
 
       processor.onaudioprocess = (e) => {
@@ -71,7 +74,7 @@ export default function useAudioRecorder({
       source.connect(processor);
       processor.connect(audioContext.destination);
 
-      console.log("✓ Microphone started");
+      console.log("✓ Microphone started (2048 buffer - LOW LATENCY)");
     } catch (err) {
       console.error("Microphone error:", err);
       setTabAudioError("Microphone denied");
@@ -80,7 +83,7 @@ export default function useAudioRecorder({
   };
 
   // ======================
-  // SYSTEM / TAB AUDIO
+  // SYSTEM / TAB AUDIO - OPTIMIZED
   // ======================
   const startSystemAudioCapture = async () => {
     if (interviewerStreamRef.current) {
@@ -125,7 +128,9 @@ export default function useAudioRecorder({
       interviewerAudioContextRef.current = audioContext;
 
       const source = audioContext.createMediaStreamSource(stream);
-      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      
+      // ✅ OPTIMIZED: Reduced buffer size from 4096 to 2048
+      const processor = audioContext.createScriptProcessor(2048, 1, 1);
       interviewerProcessorRef.current = processor;
 
       processor.onaudioprocess = (e) => {
@@ -148,7 +153,7 @@ export default function useAudioRecorder({
       source.connect(processor);
       processor.connect(audioContext.destination);
 
-      console.log("✓ System audio started");
+      console.log("✓ System audio started (2048 buffer - LOW LATENCY)");
       setShowTabModal(false);
     } catch (err) {
       console.error("System audio error:", err);

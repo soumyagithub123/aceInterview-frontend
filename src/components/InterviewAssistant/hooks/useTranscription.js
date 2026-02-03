@@ -1,292 +1,3 @@
-// import { useEffect, useRef, useState } from "react";
-// import { ReconnectingWebSocket } from "../../utils/websocket";
-// import { getWebSocketUrl } from "../../utils/config";
-
-// export default function useTranscription({
-//   settingsRef,
-//   reconnectingQaWsRef,
-// }) {
-//   // ======================
-//   // STATE
-//   // ======================
-//   const [candidateTranscript, setCandidateTranscript] = useState([]);
-//   const [interviewerTranscript, setInterviewerTranscript] = useState([]);
-
-//   const [currentCandidateParagraph, setCurrentCandidateParagraph] = useState("");
-//   const [currentInterviewerParagraph, setCurrentInterviewerParagraph] =
-//     useState("");
-
-//   const [candidateInterim, setCandidateInterim] = useState("");
-//   const [interviewerInterim, setInterviewerInterim] = useState("");
-
-//   const [deepgramStatus, setDeepgramStatus] = useState("Ready");
-
-//   // ======================
-//   // REFS
-//   // ======================
-//   const deepgramWsRef = useRef(null);
-//   const reconnectingDeepgramWsRef = useRef(null);
-
-//   const candidateParagraphRef = useRef("");
-//   const interviewerParagraphRef = useRef("");
-
-//   const candidatePauseTimerRef = useRef(null);
-//   const interviewerPauseTimerRef = useRef(null);
-
-//   // ======================
-//   // HANDLE TRANSCRIPT
-//   // ======================
-//   const handleDeepgramTranscript = (data) => {
-//     const { stream, transcript, is_final } = data;
-//     if (!transcript || !transcript.trim()) return;
-
-//     const basePause =
-//       (settingsRef.current?.pauseInterval || 2.0) * 1000;
-
-//     // 🔥 interviewer faster, candidate normal
-//     const pauseInterval =
-//       stream === "interviewer"
-//         ? Math.min(basePause, 700)
-//         : basePause;
-
-//     const finalizeParagraph = (
-//       ref,
-//       setState,
-//       setHistory,
-//       setInterim,
-//       sendToQA = false
-//     ) => {
-//       if (!ref.current) return;
-
-//       const finalText = ref.current;
-
-//       setHistory((prev) => [
-//         ...prev,
-//         {
-//           text: finalText,
-//           timestamp: new Date().toLocaleTimeString("en-US", {
-//             hour: "2-digit",
-//             minute: "2-digit",
-//             second: "2-digit",
-//           }),
-//           id: Date.now() + Math.random(),
-//           stream,
-//         },
-//       ]);
-
-//       // ✅ IMPORTANT: reset QA for every interviewer question
-//       if (sendToQA && reconnectingQaWsRef.current) {
-//         reconnectingQaWsRef.current.send({
-//           type: "transcript",
-//           transcript: finalText,
-//           is_final: true,
-//           speech_final: true,
-//           reset: true, // ⭐ FIX
-//         });
-
-//         console.log("📤 Sent to Q&A:", finalText.substring(0, 50) + "...");
-//       }
-
-//       ref.current = "";
-//       setState("");
-//       setInterim("");
-//     };
-
-//     // ======================
-//     // CANDIDATE
-//     // ======================
-//     if (stream === "candidate") {
-//       if (candidatePauseTimerRef.current) {
-//         clearTimeout(candidatePauseTimerRef.current);
-//       }
-
-//       if (!is_final) {
-//         setCandidateInterim(transcript.trim());
-//       } else {
-//         setCandidateInterim("");
-
-//         candidateParagraphRef.current = candidateParagraphRef.current
-//           ? `${candidateParagraphRef.current} ${transcript.trim()}`
-//           : transcript.trim();
-
-//         setCurrentCandidateParagraph(candidateParagraphRef.current);
-
-//         candidatePauseTimerRef.current = setTimeout(() => {
-//           finalizeParagraph(
-//             candidateParagraphRef,
-//             setCurrentCandidateParagraph,
-//             setCandidateTranscript,
-//             setCandidateInterim,
-//             false
-//           );
-//         }, pauseInterval);
-//       }
-//     }
-
-//     // ======================
-//     // INTERVIEWER
-//     // ======================
-//     if (stream === "interviewer") {
-//       if (interviewerPauseTimerRef.current) {
-//         clearTimeout(interviewerPauseTimerRef.current);
-//       }
-
-//       if (!is_final) {
-//         setInterviewerInterim(transcript.trim());
-//       } else {
-//         setInterviewerInterim("");
-
-//         interviewerParagraphRef.current = interviewerParagraphRef.current
-//           ? `${interviewerParagraphRef.current} ${transcript.trim()}`
-//           : transcript.trim();
-
-//         setCurrentInterviewerParagraph(interviewerParagraphRef.current);
-
-//         interviewerPauseTimerRef.current = setTimeout(() => {
-//           finalizeParagraph(
-//             interviewerParagraphRef,
-//             setCurrentInterviewerParagraph,
-//             setInterviewerTranscript,
-//             setInterviewerInterim,
-//             true
-//           );
-//         }, pauseInterval);
-//       }
-//     }
-//   };
-
-//   // ======================
-//   // CONNECT DEEPGRAM
-//   // ======================
-//   const connectDeepgram = () => {
-//     return new Promise((resolve, reject) => {
-//       const languageMap = {
-//         English: "en",
-//         Spanish: "es",
-//         French: "fr",
-//         German: "de",
-//         Hindi: "hi",
-//         Mandarin: "zh",
-//       };
-
-//       const language =
-//         languageMap[settingsRef.current?.audioLanguage] || "en";
-
-//       const wsUrl = getWebSocketUrl(
-//         `/ws/dual-transcribe?language=${language}`
-//       );
-
-//       console.log(`🔗 Connecting to Deepgram: ${wsUrl}`);
-
-//       const handleMessage = (event) => {
-//         try {
-//           const data = JSON.parse(event.data);
-//           if (data.type === "transcript") {
-//             handleDeepgramTranscript(data);
-//           } else if (data.type === "error") {
-//             console.error("Deepgram error:", data.message);
-//           } else if (
-//             data.type === "ready" ||
-//             data.type === "connected"
-//           ) {
-//             console.log("✓ Deepgram:", data.message);
-//           }
-//         } catch (e) {
-//           console.error("Deepgram parse error:", e);
-//         }
-//       };
-
-//       const handleStatusChange = (status) => {
-//         if (status === "connected") {
-//           setDeepgramStatus("Ready");
-//           resolve(reconnectingDeepgramWsRef.current);
-//         } else if (status === "reconnecting") {
-//           setDeepgramStatus("🔄 Reconnecting...");
-//         } else if (status === "disconnected") {
-//           setDeepgramStatus("Disconnected");
-//         }
-//       };
-
-//       reconnectingDeepgramWsRef.current = new ReconnectingWebSocket(
-//         wsUrl,
-//         handleMessage,
-//         handleStatusChange,
-//         5
-//       );
-
-//       reconnectingDeepgramWsRef.current
-//         .connect()
-//         .then(() => {
-//           deepgramWsRef.current =
-//             reconnectingDeepgramWsRef.current.ws;
-//         })
-//         .catch(reject);
-//     });
-//   };
-
-//   // ======================
-//   // STOP DEEPGRAM
-//   // ======================
-//   const stopTranscription = () => {
-//     if (candidatePauseTimerRef.current) {
-//       clearTimeout(candidatePauseTimerRef.current);
-//     }
-//     if (interviewerPauseTimerRef.current) {
-//       clearTimeout(interviewerPauseTimerRef.current);
-//     }
-
-//     candidateParagraphRef.current = "";
-//     interviewerParagraphRef.current = "";
-
-//     setCurrentCandidateParagraph("");
-//     setCurrentInterviewerParagraph("");
-//     setCandidateInterim("");
-//     setInterviewerInterim("");
-
-//     if (reconnectingDeepgramWsRef.current) {
-//       reconnectingDeepgramWsRef.current.close();
-//       reconnectingDeepgramWsRef.current = null;
-//     }
-
-//     deepgramWsRef.current = null;
-//     console.log("✓ Deepgram stopped");
-//   };
-
-//   // ======================
-//   // CLEANUP
-//   // ======================
-//   useEffect(() => {
-//     return () => {
-//       stopTranscription();
-//     };
-//   }, []);
-
-//   // ======================
-//   // EXPOSE API
-//   // ======================
-//   return {
-//     candidateTranscript,
-//     interviewerTranscript,
-
-//     currentCandidateParagraph,
-//     currentInterviewerParagraph,
-
-//     candidateInterim,
-//     interviewerInterim,
-
-//     deepgramStatus,
-
-//     reconnectingDeepgramWsRef,
-
-//     connectDeepgram,
-//     stopTranscription,
-//   };
-// }
-
-
-
-
-
 import { useEffect, useRef, useState } from "react";
 import { ReconnectingWebSocket } from "../../utils/websocket";
 import { getWebSocketUrl } from "../../utils/config";
@@ -323,19 +34,36 @@ export default function useTranscription({
   const interviewerPauseTimerRef = useRef(null);
 
   // ======================
-  // INTERNAL HELPERS
+  // SAFE SEND TO QA
   // ======================
-  const safeSendToQA = (payload) => {
-    if (!reconnectingQaWsRef?.current) {
-      console.warn("⚠️ [Transcription] QA WS not ready, skip send");
-      return;
+  const safeSendToQA = (message) => {
+    if (reconnectingQaWsRef?.current) {
+      try {
+        reconnectingQaWsRef.current.send(message);
+      } catch (err) {
+        console.error("❌ [Transcription] Failed to send to QA:", err);
+      }
+    } else {
+      console.warn("⚠️ [Transcription] QA WS not available");
     }
+  };
 
-    try {
-      reconnectingQaWsRef.current.send(payload);
-    } catch (err) {
-      console.error("❌ [Transcription] Failed sending to QA:", err);
-    }
+  // ======================
+  // ✅ SMART PAUSE DETECTION
+  // ======================
+  const hasStrongPauseIndicator = (text) => {
+    if (!text) return false;
+    
+    // Question mark at end
+    if (text.trim().endsWith('?')) return true;
+    
+    // Period/exclamation followed by capital letter
+    if (/[.!]\s+[A-Z]/.test(text)) return true;
+    
+    // Multiple sentences
+    if ((text.match(/[.!?]/g) || []).length >= 2) return true;
+    
+    return false;
   };
 
   // ======================
@@ -345,14 +73,8 @@ export default function useTranscription({
     const { stream, transcript, is_final } = data;
     if (!transcript || !transcript.trim()) return;
 
-    const basePause =
-      (settingsRef.current?.pauseInterval || 2.0) * 1000;
-
-    // interviewer faster, candidate normal
-    const pauseInterval =
-      stream === "interviewer"
-        ? Math.min(basePause, 700)
-        : basePause;
+    // ✅ OPTIMIZED PAUSE INTERVALS
+    const basePause = (settingsRef.current?.pauseInterval || 2.0) * 1000;
 
     const finalizeParagraph = (
       ref,
@@ -425,6 +147,9 @@ export default function useTranscription({
 
         setCurrentCandidateParagraph(candidateParagraphRef.current);
 
+        // ✅ REDUCED from 2000ms to 1500ms
+        const pauseInterval = 1500;
+
         candidatePauseTimerRef.current = setTimeout(() => {
           finalizeParagraph(
             candidateParagraphRef,
@@ -438,7 +163,7 @@ export default function useTranscription({
     }
 
     // ======================
-    // INTERVIEWER STREAM
+    // INTERVIEWER STREAM (OPTIMIZED)
     // ======================
     if (stream === "interviewer") {
       if (interviewerPauseTimerRef.current) {
@@ -456,6 +181,16 @@ export default function useTranscription({
 
         setCurrentInterviewerParagraph(interviewerParagraphRef.current);
 
+        // ✅ SMART PAUSE DETECTION
+        // - 200ms for clear questions (has ? or strong punctuation)
+        // - 300ms default (reduced from 700ms)
+        let pauseInterval = 300; // ✅ REDUCED from 700ms
+        
+        if (hasStrongPauseIndicator(interviewerParagraphRef.current)) {
+          pauseInterval = 200; // ✅ Even faster for obvious questions
+          console.log("⚡ [Fast-track] Question detected, sending in 200ms");
+        }
+
         interviewerPauseTimerRef.current = setTimeout(() => {
           finalizeParagraph(
             interviewerParagraphRef,
@@ -468,6 +203,7 @@ export default function useTranscription({
       }
     }
   };
+  
   // ======================
   // CONNECT DEEPGRAM
   // ======================
