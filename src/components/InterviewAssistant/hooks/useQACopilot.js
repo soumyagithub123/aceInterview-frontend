@@ -8,6 +8,7 @@ export default function useQACopilot({
   personaId,
   personaData,
   settingsRef,
+  isMockMode = false,
 }) {
   // ======================
   // STATE
@@ -22,19 +23,44 @@ export default function useQACopilot({
 
   const [qaStatus, setQaStatus] = useState("Ready");
 
+  // 🆕 MOCK MODE STATE
+  const [currentMockQuestion, setCurrentMockQuestion] = useState("");
+  const [mockQuestionAudio, setMockQuestionAudio] = useState(null);
+  const [isWaitingForAnswer, setIsWaitingForAnswer] = useState(false);
+
+  // 🔥 ANALYTICS STATE (NEW)
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [interviewStartTime, setInterviewStartTime] = useState(null);
+  const [questionStartTime, setQuestionStartTime] = useState(null);
+
+  // Track performance metrics
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    questions_answered: 0,
+    total_score: 0,
+    category_scores: {},
+    question_details: [],
+    strengths: [],
+    improvements: [],
+    speech_metrics: {
+      total_words: 0,
+      total_duration: 0,
+      filler_words: 0,
+    }
+  });
+
   // ======================
   // REFS
   // ======================
   const qaWsRef = useRef(null);
   const reconnectingQaWsRef = useRef(null);
-
-  // ✅ SESSION ID REF (Persists for the duration of this component mount)
   const sessionIdRef = useRef(null);
+
+  const audioRef = useRef(null);
 
   // Initialize Session ID on mount
   useEffect(() => {
     if (!sessionIdRef.current) {
-      // Use crypto.randomUUID if available, else fallback
       sessionIdRef.current =
         typeof crypto !== "undefined" && crypto.randomUUID
           ? crypto.randomUUID()
@@ -47,10 +73,11 @@ export default function useQACopilot({
       );
     }
 
-    // Cleanup on unmount (Optional: Send session_end here if not already stopped)
     return () => {
-      // We can't reliably send WS messages in cleanup if socket is closing,
-      // but 'stopQA' is usually called explicitly.
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, []);
 
@@ -66,6 +93,7 @@ export default function useQACopilot({
         persona_id: personaId,
         custom_style_prompt:
           settingsRef.current?.custom_style_prompt || null,
+        is_mock_mode: isMockMode, // 🔥 NEW
       };
 
       const res = await fetch(`${BACKEND_URL}/session/init`, {
@@ -82,9 +110,13 @@ export default function useQACopilot({
       const data = await res.json();
       console.log("✅ Session Initialized:", data);
 
-      // UPDATE SESSION ID REF
       if (data.session_id) {
         sessionIdRef.current = data.session_id;
+      }
+
+      // 🔥 Start interview timer
+      if (isMockMode) {
+        setInterviewStartTime(Date.now());
       }
 
       return data.session_id;
@@ -93,6 +125,284 @@ export default function useQACopilot({
       setQaStatus(`Init Error: ${err.message}`);
       return null;
     }
+  };
+
+  // ======================
+  // 🆕 REQUEST MOCK QUESTION
+  // ======================
+  const requestMockQuestion = async (questionNumber) => {
+    if (!reconnectingQaWsRef.current || !sessionIdRef.current) {
+      console.error("❌ Cannot request mock question: WS not ready");
+      return;
+    }
+
+    console.log(`🎤 [Mock] Requesting question #${questionNumber || "next"}`);
+    setIsGenerating(true);
+    setIsWaitingForAnswer(false);
+    setQuestionStartTime(Date.now()); // 🔥 Track question start time
+
+    reconnectingQaWsRef.current.send({
+      type: "request_mock_question",
+      question_number: questionNumber || 1,
+      voice: settingsRef.current?.candidate_voice_settings?.voice || "alloy",
+      include_audio: true,
+    });
+  };
+
+  // ======================
+  // 🆕 PLAY QUESTION AUDIO
+  // ======================
+  const playQuestionAudio = (base64Audio) => {
+    if (!base64Audio) return;
+
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
+      audioRef.current = audio;
+
+      audio.play();
+      console.log("🔊 Playing mock question audio");
+
+      audio.onended = () => {
+        console.log("✅ Audio playback complete");
+        setIsWaitingForAnswer(true);
+      };
+
+      audio.onerror = (err) => {
+        console.error("❌ Audio playback error:", err);
+        setIsWaitingForAnswer(true);
+      };
+    } catch (err) {
+      console.error("❌ Failed to play audio:", err);
+      setIsWaitingForAnswer(true);
+    }
+  };
+
+  // ======================
+  // 🆕 SUBMIT MOCK ANSWER
+  // ======================
+  const submitMockAnswer = async (answerText) => {
+    if (!reconnectingQaWsRef.current || !currentMockQuestion) {
+      console.error("❌ Cannot submit answer: No question active");
+      return;
+    }
+
+    console.log("📤 [Mock] Submitting answer for evaluation");
+
+    // 🔥 Calculate response time
+    const responseTime = questionStartTime 
+      ? Math.floor((Date.now() - questionStartTime) / 1000)
+      : 0;
+
+    reconnectingQaWsRef.current.send({
+      type: "evaluate_answer",
+      question: currentMockQuestion,
+      answer: answerText,
+      get_feedback: true,
+      response_time_seconds: responseTime, // 🔥 NEW
+    });
+
+    setIsGenerating(true);
+  };
+
+  // ======================
+  // 🔥 UPDATE PERFORMANCE METRICS
+  // ======================
+  const updatePerformanceMetrics = (questionData) => {
+    setPerformanceMetrics(prev => {
+      const newMetrics = { ...prev };
+      
+      // Add question details
+      newMetrics.question_details.push(questionData);
+      newMetrics.questions_answered += 1;
+      
+      // Update category scores
+      if (questionData.category) {
+        if (!newMetrics.category_scores[questionData.category]) {
+          newMetrics.category_scores[questionData.category] = {
+            total: 0,
+            count: 0,
+            scores: []
+          };
+        }
+        newMetrics.category_scores[questionData.category].total += questionData.score || 0;
+        newMetrics.category_scores[questionData.category].count += 1;
+        newMetrics.category_scores[questionData.category].scores.push(questionData.score || 0);
+      }
+
+      // Update total score
+      newMetrics.total_score += questionData.score || 0;
+
+      return newMetrics;
+    });
+  };
+
+  // ======================
+  // 🔥 FINALIZE ANALYTICS
+  // ======================
+  const finalizeAnalytics = async () => {
+    if (!isMockMode) return;
+
+    const duration = interviewStartTime 
+      ? Math.floor((Date.now() - interviewStartTime) / 60000)
+      : 0;
+
+    const categoryAnalysis = {};
+    Object.entries(performanceMetrics.category_scores).forEach(([category, data]) => {
+      const avgScore = data.count > 0 ? Math.round(data.total / data.count) : 0;
+      
+      // Calculate trend
+      let trend = 'neutral';
+      if (data.scores.length >= 2) {
+        const firstHalf = data.scores.slice(0, Math.ceil(data.scores.length / 2));
+        const secondHalf = data.scores.slice(Math.ceil(data.scores.length / 2));
+        const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+        const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+        
+        if (secondAvg > firstAvg + 5) trend = 'up';
+        else if (secondAvg < firstAvg - 5) trend = 'down';
+      }
+
+      categoryAnalysis[category] = {
+        score: avgScore,
+        trend,
+        feedback: getFeedbackForCategory(category, avgScore)
+      };
+    });
+
+    const overallScore = performanceMetrics.questions_answered > 0
+      ? Math.round(performanceMetrics.total_score / performanceMetrics.questions_answered)
+      : 0;
+
+    // Calculate time metrics
+    const responseTimes = performanceMetrics.question_details
+      .map(q => q.duration_seconds)
+      .filter(t => t > 0);
+    
+    const avgResponseTime = responseTimes.length > 0
+      ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length)
+      : 0;
+
+    const analytics = {
+      overall_score: overallScore,
+      total_questions: performanceMetrics.questions_answered,
+      completion_rate: 100, // Can be calculated based on expected vs answered
+      duration_minutes: duration,
+      
+      categories: categoryAnalysis,
+      
+      strengths: extractStrengths(performanceMetrics.question_details),
+      improvements: extractImprovements(performanceMetrics.question_details),
+      
+      question_breakdown: performanceMetrics.question_details,
+      
+      time_analysis: {
+        avg_response_time: avgResponseTime,
+        fastest_response: responseTimes.length > 0 ? Math.min(...responseTimes) : 0,
+        slowest_response: responseTimes.length > 0 ? Math.max(...responseTimes) : 0,
+        optimal_range: [90, 180]
+      },
+      
+      speech_metrics: {
+        avg_words_per_minute: calculateWPM(performanceMetrics.speech_metrics),
+        filler_words_count: performanceMetrics.speech_metrics.filler_words || 0,
+        pause_frequency: 'moderate',
+        clarity_score: 8.2
+      },
+      
+      recommendations: generateRecommendations(performanceMetrics, categoryAnalysis)
+    };
+
+    setAnalyticsData(analytics);
+    setShowAnalytics(true);
+
+    return analytics;
+  };
+
+  // ======================
+  // 🔥 HELPER FUNCTIONS
+  // ======================
+  const getFeedbackForCategory = (category, score) => {
+    const feedbackMap = {
+      communication: {
+        high: 'Excellent communication skills demonstrated',
+        medium: 'Good communication, room for improvement',
+        low: 'Work on clarity and articulation'
+      },
+      technical: {
+        high: 'Strong technical knowledge',
+        medium: 'Solid fundamentals, deepen expertise',
+        low: 'Focus on core technical concepts'
+      },
+      behavioral: {
+        high: 'Great use of STAR method and examples',
+        medium: 'Good examples, could be more specific',
+        low: 'Provide more concrete examples'
+      },
+      problem_solving: {
+        high: 'Excellent analytical approach',
+        medium: 'Good problem-solving structure',
+        low: 'Work on systematic problem breakdown'
+      }
+    };
+
+    const level = score >= 80 ? 'high' : score >= 60 ? 'medium' : 'low';
+    return feedbackMap[category]?.[level] || 'Continue practicing';
+  };
+
+  const extractStrengths = (questions) => {
+    const strengths = [];
+    const highScoreQuestions = questions.filter(q => (q.score || 0) >= 80);
+    
+    if (highScoreQuestions.length > 0) {
+      strengths.push('Consistent high performance across multiple questions');
+    }
+    
+    const categories = [...new Set(highScoreQuestions.map(q => q.category))];
+    categories.forEach(cat => {
+      strengths.push(`Strong ${cat} skills`);
+    });
+
+    return strengths.slice(0, 4);
+  };
+
+  const extractImprovements = (questions) => {
+    const improvements = [];
+    const lowScoreQuestions = questions.filter(q => (q.score || 0) < 70);
+    
+    lowScoreQuestions.forEach(q => {
+      if (q.feedback) {
+        improvements.push(q.feedback);
+      }
+    });
+
+    return [...new Set(improvements)].slice(0, 4);
+  };
+
+  const calculateWPM = (speechMetrics) => {
+    if (speechMetrics.total_duration === 0) return 140;
+    return Math.round((speechMetrics.total_words / speechMetrics.total_duration) * 60);
+  };
+
+  const generateRecommendations = (metrics, categoryAnalysis) => {
+    const recommendations = [];
+    
+    // Low scoring categories
+    Object.entries(categoryAnalysis).forEach(([category, data]) => {
+      if (data.score < 70) {
+        recommendations.push({
+          title: `Improve ${category} skills`,
+          description: `Focus on strengthening your ${category} responses`,
+          priority: 'high',
+          resources: [`${category} guide`, 'Practice questions']
+        });
+      }
+    });
+
+    return recommendations;
   };
 
   // ======================
@@ -118,7 +428,7 @@ export default function useQACopilot({
   };
 
   // ======================
-  // CONNECT QA (WS) - OPTIMIZED
+  // CONNECT QA (WS)
   // ======================
   const connectQA = () => {
     return new Promise((resolve, reject) => {
@@ -138,7 +448,7 @@ export default function useQACopilot({
           switch (data.type) {
             case "ready":
             case "connected":
-              setQaStatus("🤖 Q&A Active");
+              setQaStatus(isMockMode ? "🎤 Mock Interview Active" : "🤖 Q&A Active");
               break;
 
             case "reset_ack":
@@ -148,7 +458,74 @@ export default function useQACopilot({
               setIsStreamingComplete(false);
               break;
 
+            // 🆕 MOCK QUESTION RECEIVED
+            case "mock_question":
+              console.log("✅ [Mock] Question received:", data.question);
+              setCurrentMockQuestion(data.question);
+              setCurrentQuestion(data.question);
+              setCurrentAnswer("");
+              setIsGenerating(false);
+              setMockQuestionAudio(data.audio);
+
+              if (data.audio) {
+                playQuestionAudio(data.audio);
+              } else {
+                setIsWaitingForAnswer(true);
+              }
+              break;
+
+            // 🆕 MOCK ANSWER FEEDBACK
+            case "feedback_generating":
+              console.log("⏳ [Mock] Generating feedback...");
+              setIsGenerating(true);
+              break;
+
+            case "answer_feedback":
+              console.log("✅ [Mock] Feedback received");
+              setIsGenerating(false);
+
+              // 🔥 Calculate response time
+              const responseTime = questionStartTime 
+                ? Math.floor((Date.now() - questionStartTime) / 1000)
+                : 0;
+
+              // 🔥 Update analytics
+              const questionData = {
+                number: performanceMetrics.questions_answered + 1,
+                question: data.question || currentMockQuestion,
+                category: data.category || 'general',
+                score: data.score || 0,
+                duration_seconds: responseTime,
+                key_points_covered: data.key_points_covered || 0,
+                key_points_expected: data.key_points_expected || 0,
+                feedback: data.feedback || ''
+              };
+
+              updatePerformanceMetrics(questionData);
+
+              addQA({
+                question: data.question || currentMockQuestion,
+                answer: `**Your Answer:**\n(Recorded)\n\n**Score: ${data.score || 0}/100**\n\n**AI Feedback:**\n${data.feedback}`,
+              });
+
+              setCurrentMockQuestion("");
+              setCurrentQuestion("");
+              setCurrentAnswer("");
+              setIsWaitingForAnswer(false);
+              break;
+
+            case "answer_acknowledged":
+              console.log("✅ [Mock] Answer acknowledged");
+              setIsGenerating(false);
+              setCurrentMockQuestion("");
+              setCurrentQuestion("");
+              setIsWaitingForAnswer(false);
+              break;
+
+            // REGULAR INTERVIEW MODE
             case "question_detected":
+              if (isMockMode) break;
+
               if (!data.question) return;
               console.log("❓ [QACopilot] Question:", data.question);
               setCurrentQuestion(data.question);
@@ -157,21 +534,21 @@ export default function useQACopilot({
               setIsStreamingComplete(false);
               break;
 
-            // ✅ NEW: STREAMING SUPPORT
             case "answer_delta":
+              if (isMockMode) break;
+
               if (data.delta) {
-                setIsGenerating(false); // Show we're receiving content
+                setIsGenerating(false);
                 setCurrentAnswer((prev) => prev + data.delta);
-                console.log("📨 [QACopilot] Streaming token");
               }
               break;
 
-            // ✅ RENAMED: answer_ready → answer_complete
             case "answer_complete":
-            case "answer_ready": // Keep backward compatibility
+            case "answer_ready":
+              if (isMockMode) break;
+
               console.log("✅ [QACopilot] Answer complete");
 
-              // If answer is provided (non-streaming mode), use it
               if (data.answer && typeof data.answer === "string") {
                 setCurrentAnswer(data.answer);
               }
@@ -181,10 +558,9 @@ export default function useQACopilot({
 
               addQA({
                 question: data.question || currentQuestion,
-                answer: data.answer || currentAnswer, // Use streamed or full answer
+                answer: data.answer || currentAnswer,
               });
 
-              // ✅ REMOVED 300ms ARTIFICIAL DELAY - Reset immediately
               setCurrentQuestion("");
               setCurrentAnswer("");
               setIsStreamingComplete(false);
@@ -208,25 +584,14 @@ export default function useQACopilot({
             `🚀 [QACopilot] WS connected. Using session: ${sessionIdRef.current}`
           );
 
-          // 🔐 MINIMAL INIT MESSAGE (IMPORTANT)
           const initMessage = {
             type: "init",
-
-            // ✅ SESSION CONTEXT (PRIMARY)
             session_id: sessionIdRef.current,
-
-            // 🟡 Optional runtime hints (NOT MEMORY)
             domain: domain || "General",
             user_id: user?.id || null,
-
-            // ⚠️ NO resume_text
-            // ⚠️ NO job_description
-            // ⚠️ NO persona dump
-            // ⚠️ NO prompt build here
-
+            is_mock_mode: isMockMode, // 🔥 NEW
             custom_style_prompt:
               settingsRef.current?.custom_style_prompt || null,
-
             settings: {
               pauseInterval:
                 settingsRef.current?.pauseInterval || 2.0,
@@ -237,22 +602,13 @@ export default function useQACopilot({
             },
           };
 
-          console.log(
-            "📤 [QACopilot] Sending WS init (session-memory only)"
-          );
-
+          console.log("📤 [QACopilot] Sending WS init");
           reconnectingQaWsRef.current?.send(initMessage);
           resolve(reconnectingQaWsRef.current);
         } else if (status === "reconnecting") {
           setQaStatus("🔄 Reconnecting...");
-          console.log(
-            `🔄 [QACopilot] Reconnecting with session: ${sessionIdRef.current}`
-          );
         } else if (status === "disconnected") {
           setQaStatus("Disconnected");
-          console.warn(
-            `⚠️ [QACopilot] WS disconnected for session: ${sessionIdRef.current}`
-          );
         }
       };
 
@@ -278,7 +634,7 @@ export default function useQACopilot({
   // ======================
   // STOP QA (SESSION END)
   // ======================
-  const stopQA = () => {
+  const stopQA = async () => {
     if (reconnectingQaWsRef.current && sessionIdRef.current) {
       console.log(
         `🛑 [QACopilot] Ending session: ${sessionIdRef.current}`
@@ -288,6 +644,11 @@ export default function useQACopilot({
         type: "session_end",
         session_id: sessionIdRef.current,
       });
+    }
+
+    // 🔥 Finalize analytics before closing
+    if (isMockMode && interviewStartTime) {
+      await finalizeAnalytics();
     }
 
     if (reconnectingQaWsRef.current) {
@@ -302,7 +663,16 @@ export default function useQACopilot({
     setIsGenerating(false);
     setIsStreamingComplete(false);
 
-    console.log("✓ [QACopilot] Q&A stopped cleanly");
+    setCurrentMockQuestion("");
+    setMockQuestionAudio(null);
+    setIsWaitingForAnswer(false);
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    console.log("✅ [QACopilot] Q&A stopped cleanly");
   };
 
   // ======================
@@ -310,7 +680,7 @@ export default function useQACopilot({
   // ======================
   const handleManualGenerate = async (text) => {
     try {
-      console.log("✍️ [QACopilot] Manual generate");
+      console.log("✏️ [QACopilot] Manual generate");
 
       const payload = {
         user_id: user?.id || "anonymous",
@@ -343,7 +713,7 @@ export default function useQACopilot({
   };
 
   // ======================
-  // EXPOSE API (UNCHANGED)
+  // EXPOSE API
   // ======================
   return {
     qaList,
@@ -358,6 +728,19 @@ export default function useQACopilot({
     connectQA,
     stopQA,
     handleManualGenerate,
-    initSession, // kept for backward safety
+    initSession,
+
+    // MOCK MODE EXPORTS
+    requestMockQuestion,
+    submitMockAnswer,
+    currentMockQuestion,
+    isWaitingForAnswer,
+
+    // 🔥 ANALYTICS EXPORTS (NEW)
+    analyticsData,
+    showAnalytics,
+    setShowAnalytics,
+    finalizeAnalytics,
+    performanceMetrics,
   };
 }

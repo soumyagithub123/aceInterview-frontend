@@ -1,3 +1,4 @@
+//
 import React from "react";
 import { Check, FileText, Building2, Globe2, AlertTriangle } from "lucide-react";
 

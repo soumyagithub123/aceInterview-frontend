@@ -15,7 +15,7 @@ export default function InterviewHeader({
   isMockMode,
 }) {
   return (
-    <header className="w-full bg-[#0A0A0A] border-b border-[#1A1A1A] sticky top-0 z-50">
+    <header className="w-full bg-[#0A0A0A] border-b border-[#1A1A1A] sticky top-0 z-0">
       <div className="w-full px-3 sm:px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
         {/* LEFT SECTION */}

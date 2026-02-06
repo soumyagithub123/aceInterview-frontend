@@ -176,7 +176,7 @@ function StreamingAnswer({ text, isComplete }) {
   );
 }
 
-function QAList({ qaList }) {
+function QAList({ qaList, isMockMode }) {
   return (
     <div className="space-y-4 sm:space-y-5">
       {qaList.map((item, index) => (
@@ -199,19 +199,21 @@ function QAList({ qaList }) {
             {item.question}
           </p>
 
-          {/* ANSWER BLOCK */}
-          <div className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg p-3 sm:p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <MessageCircle className="w-4 h-4 text-purple-300" />
-              <span className="text-xs sm:text-sm font-bold text-purple-300">
-                AI ANSWER
-              </span>
-            </div>
+          {/* ✅ HIDE ANSWER IN MOCK MODE */}
+          {!isMockMode && (
+            <div className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg p-3 sm:p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <MessageCircle className="w-4 h-4 text-purple-300" />
+                <span className="text-xs sm:text-sm font-bold text-purple-300">
+                  AI ANSWER
+                </span>
+              </div>
 
-            <div className="text-gray-200 leading-relaxed text-sm sm:text-base break-words">
-              <MarkdownRenderer content={item.answer} />
+              <div className="text-gray-200 leading-relaxed text-sm sm:text-base break-words">
+                <MarkdownRenderer content={item.answer} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       ))}
     </div>
@@ -251,7 +253,10 @@ export default function QACopilot({
         </div>
 
         <div className="px-3 py-1 bg-[#1A1A1A] border border-[#2D2D2D] rounded-md text-purple-300 text-xs font-medium">
-          {qaList.length} {qaList.length === 1 ? "Answer" : "Answers"}
+          {isMockMode 
+            ? `Question ${qaList.length + (currentQuestion ? 1 : 0)}`
+            : `${qaList.length} ${qaList.length === 1 ? "Answer" : "Answers"}`
+          }
         </div>
       </div>
 
@@ -278,7 +283,7 @@ export default function QACopilot({
           <div className="space-y-4 sm:space-y-5">
 
             {/* PREVIOUS QA */}
-            {qaList.length > 0 && <QAList qaList={qaList} />}
+            {qaList.length > 0 && <QAList qaList={qaList} isMockMode={isMockMode} />}
 
             {/* CURRENT STREAMING QUESTION */}
             {currentQuestion && (
@@ -296,27 +301,30 @@ export default function QACopilot({
                   {currentQuestion}
                 </p>
 
-                <div className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <MessageCircle className="w-4 h-4 text-purple-300" />
-                    <span className="text-xs sm:text-sm font-bold text-purple-300">
-                      AI ANSWER
-                    </span>
-                  </div>
+                {/* ✅ HIDE ANSWER SECTION IN MOCK MODE */}
+                {!isMockMode && (
+                  <div className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg p-3 sm:p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageCircle className="w-4 h-4 text-purple-300" />
+                      <span className="text-xs sm:text-sm font-bold text-purple-300">
+                        AI ANSWER
+                      </span>
+                    </div>
 
-                  <div className="text-gray-200 leading-relaxed text-sm sm:text-base break-words">
-                    {currentAnswer ? (
-                      <StreamingAnswer
-                        text={currentAnswer}
-                        isComplete={isStreamingComplete}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center py-6 sm:py-8">
-                        <div className="w-7 sm:w-8 h-7 sm:h-8 border-4 border-purple-500/40 border-t-purple-500 rounded-full animate-spin" />
-                      </div>
-                    )}
+                    <div className="text-gray-200 leading-relaxed text-sm sm:text-base break-words">
+                      {currentAnswer ? (
+                        <StreamingAnswer
+                          text={currentAnswer}
+                          isComplete={isStreamingComplete}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center py-6 sm:py-8">
+                          <div className="w-7 sm:w-8 h-7 sm:h-8 border-4 border-purple-500/40 border-t-purple-500 rounded-full animate-spin" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
