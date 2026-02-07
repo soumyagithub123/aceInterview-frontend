@@ -7,6 +7,86 @@ import { supabase } from "./supabaseClient";
  * Note: User profiles are auto-created via database trigger on signup
  */
 
+// ========================================
+// 🆕 NEW: Backend API Functions
+// ========================================
+
+/**
+ * Get user profile from backend API (includes subscription status)
+ */
+export const getUserProfile = async () => {
+  try {
+    const session = await supabase.auth.getSession();
+    const token = session?.data?.session?.access_token;
+
+    if (!token) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:10000";
+
+    const res = await fetch(`${BACKEND_URL}/api/users/me`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("❌ Failed to fetch user profile:", res.status, errorText);
+      throw new Error(`Failed to fetch user profile: ${res.status} ${errorText}`);
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+
+  } catch (error) {
+    console.error("Error fetching user profile from backend:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Get user quota from backend API
+ */
+export const getUserQuota = async () => {
+  try {
+    const session = await supabase.auth.getSession();
+    const token = session?.data?.session?.access_token;
+
+    if (!token) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:10000";
+
+    const res = await fetch(`${BACKEND_URL}/api/payments/quota`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch quota");
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+
+  } catch (error) {
+    console.error("Error fetching quota from backend:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// ========================================
+// EXISTING FUNCTIONS (Keep as is)
+// ========================================
+
 /**
  * Get current user profile
  */

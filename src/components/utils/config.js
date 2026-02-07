@@ -14,3 +14,6 @@ const isDev =
 export const BACKEND_URL = isDev ? DEV_HTTP : PROD_HTTP;
 
 export const getWebSocketUrl = (path) => `${isDev ? DEV_WS : PROD_WS}${path}`;
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL;
+
