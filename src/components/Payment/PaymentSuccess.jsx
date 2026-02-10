@@ -21,7 +21,7 @@ export default function PaymentSuccess() {
 
       // ⏱️ Small delay for UX
       setTimeout(() => {
-        navigate("/interview-domain"); // 👈 jahan unlock dikhana ho
+        navigate("/interview"); // 👈 jahan unlock dikhana ho
       }, 1500);
     };
 

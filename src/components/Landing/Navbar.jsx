@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Auth/AuthContext";
+import { useAppData } from "../../context/AppDataContext";
+
 
 // -------------------- FEATURES DROPDOWN --------------------
 const FeaturesDropdown = ({ isOpen, onClose }) => {
@@ -164,7 +166,8 @@ const ResourcesDropdown = ({ isOpen, onClose, onBlogClick }) => {
 };
 
 // -------------------- USER MENU --------------------
-const UserMenu = ({ user, onSignOut }) => {
+const UserMenu = ({ user, onSignOut, userProfile }) => {
+
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
@@ -181,11 +184,24 @@ const UserMenu = ({ user, onSignOut }) => {
 
   const firstLetter = user?.email?.[0]?.toUpperCase() || "U";
 
+  // Determine styles based on plan
+  const plan = userProfile?.subscription_tier || "free";
+  
+  const ringColor = 
+    plan === "pro" ? "ring-yellow-400" :
+    plan === "basic" ? "ring-green-500" : 
+    "ring-gray-200"; // default/free
+
+  const badgeColor = 
+    plan === "pro" ? "text-yellow-600 bg-yellow-50 border-yellow-200" :
+    plan === "basic" ? "text-green-600 bg-green-50 border-green-200" :
+    "text-gray-500 bg-gray-50 border-gray-200";
+
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300"
+        className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ring-2 ring-offset-2 ${ringColor} bg-gradient-to-br from-indigo-500 to-purple-600`}
       >
         {firstLetter}
       </button>
@@ -196,7 +212,23 @@ const UserMenu = ({ user, onSignOut }) => {
             <p className="text-sm font-medium text-gray-900 truncate">
               {user?.email}
             </p>
+            {/* PLAN INDICATOR */}
+            <div className="flex items-center justify-between mt-2">
+               <span className={`text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${badgeColor}`}>
+                 {plan} Plan
+               </span>
+               <button 
+                 onClick={() => {
+                   navigate("/pricing");
+                   setIsOpen(false);
+                 }}
+                 className="text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+               >
+                 Manage
+               </button>
+            </div>
           </div>
+
 
           <button
             onClick={() => {
@@ -234,7 +266,9 @@ const UserMenu = ({ user, onSignOut }) => {
 // -------------------- NAVBAR --------------------
 export default function Navbar() {
   const { user, signOut } = useAuth();
+  const { userProfile } = useAppData();
   const navigate = useNavigate();
+
 
   const [scrolled, setScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
@@ -409,8 +443,9 @@ export default function Navbar() {
               Start for free
             </button>
           ) : (
-            <UserMenu user={user} onSignOut={handleSignOut} />
+            <UserMenu user={user} onSignOut={handleSignOut} userProfile={userProfile} />
           )}
+
         </div>
 
         {/* Mobile Menu */}

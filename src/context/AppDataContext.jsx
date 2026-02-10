@@ -32,11 +32,20 @@ export function AppDataProvider({ children }) {
   const isPaidUser = userProfile?.subscription_tier !== "free" && 
                      userProfile?.subscription_status === "active";
 
+  // TRACK PREVIOUS USER to avoid full reload on token refresh
+  const lastUserIdRef = React.useRef(null);
+
   // AUTO-LOAD WHEN USER LOGS IN
   useEffect(() => {
     if (user) {
-      preloadAllData();
+      // If user ID changed, show loading screen. 
+      // If same user (just token refresh), do background update.
+      const isNewUser = user.id !== lastUserIdRef.current;
+      lastUserIdRef.current = user.id;
+      
+      preloadAllData(isNewUser); 
     } else {
+      lastUserIdRef.current = null;
       setSettings(null);
       setStyles([]);
       setPersonas([]);
@@ -49,8 +58,8 @@ export function AppDataProvider({ children }) {
   // =============================
   // 🔥 MASTER LOADER
   // =============================
-  const preloadAllData = async () => {
-    setLoading(true);
+  const preloadAllData = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     setError(null);
 
     try {

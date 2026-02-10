@@ -9,10 +9,16 @@ import {
   HelpCircle,
   User,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Auth/AuthContext";
+import { useAppData } from "../../context/AppDataContext";
+
 
 export default function Sidebar({ currentPage, onNavigate }) {
   const { user } = useAuth();
+  const { userProfile } = useAppData();
+  const navigate = useNavigate();
+
 
   const getInitials = () => {
     if (user?.user_metadata?.full_name) {
@@ -29,6 +35,13 @@ export default function Sidebar({ currentPage, onNavigate }) {
     if (user?.email) return user.email;
     return "User";
   };
+
+  const plan = userProfile?.subscription_tier || "free";
+  const planColor = 
+    plan === "pro" ? "text-yellow-400" : 
+    plan === "basic" ? "text-green-400" : 
+    "text-gray-500";
+
 
   const NavButton = ({ icon: Icon, label, page }) => {
     const isActive = currentPage === page;
@@ -81,9 +94,19 @@ export default function Sidebar({ currentPage, onNavigate }) {
             <p className="text-white text-sm font-medium truncate">
               {getUserName()}
             </p>
-            <p className="text-gray-500 text-[11px]">
-              Free Plan • Manage
-            </p>
+            <div className="flex items-center gap-1.5 text-[11px] mt-0.5">
+               <span className={`font-semibold capitalize ${planColor}`}>
+                 {plan} Plan
+               </span>
+               <span className="text-gray-600">•</span>
+               <button 
+                 onClick={() => navigate("/pricing")}
+                 className="text-gray-400 hover:text-white transition-colors hover:underline"
+               >
+                 Manage
+               </button>
+            </div>
+
           </div>
         </div>
       </div>
