@@ -409,7 +409,9 @@ const CircularProgress = ({ value, color, label }) => {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <div className={`text-3xl font-bold ${color === '#f59e0b' ? 'text-amber-500' : 'text-emerald-500'}`}>
+        <div
+          className={`text-3xl font-bold ${color === "#f59e0b" ? "text-amber-500" : "text-emerald-500"}`}
+        >
           {progress}
         </div>
         <div className="text-xs text-gray-400 mt-1">{label}</div>
@@ -437,97 +439,99 @@ const ProgressBar = ({ delay = 0 }) => {
     </div>
   );
 };
-
 const InterviewReportVisual = () => {
-  const [cursorPos, setCursorPos] = useState(0);
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCursorPos((prev) => (prev + 1) % 3);
-    }, 2000);
-    return () => clearInterval(interval);
+    const t = setTimeout(() => setScore(82), 300);
+    return () => clearTimeout(t);
   }, []);
+
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 shadow-2xl border border-gray-700">
-        {/* Header Tabs */}
-        <div className="flex gap-6 mb-8 border-b border-gray-700 pb-4">
-          <button className="text-white font-semibold pb-2 border-b-2 border-indigo-500">
-            Overview
-          </button>
-          <button className="text-gray-400 font-semibold pb-2">Analytics</button>
+      <div
+        className="bg-gradient-to-br from-gray-900 to-gray-800 
+        rounded-3xl p-6 shadow-2xl border border-gray-700"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-bold text-white">Interview Report</h3>
+            <p className="text-sm text-gray-400">Behavioral · June 18, 2025</p>
+          </div>
+          <span
+            className="px-4 py-1.5 rounded-full 
+            bg-indigo-600/20 text-indigo-400 text-sm font-semibold"
+          >
+            AI
+          </span>
         </div>
 
-        {/* Top Stats */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
-          <div>
-            <div className="text-gray-400 text-sm mb-1">Interview Type</div>
-            <div className="text-white font-semibold">Behavioral</div>
-          </div>
-          <div>
-            <div className="text-gray-400 text-sm mb-1">Date</div>
-            <div className="text-white font-semibold">June 18, 2025</div>
-          </div>
-          <div>
-            <div className="text-gray-400 text-sm mb-1">Elapsed Time</div>
-            <div className="text-white font-semibold">45 minutes interview</div>
-          </div>
-          <div>
-            <div className="text-gray-400 text-sm mb-1">Duration</div>
-            <div className="text-white font-semibold">3.8 minutes</div>
-          </div>
-        </div>
+        {/* Pie Chart + Stats */}
+        <div className="flex items-center gap-6 mb-6">
+          {/* Pie Chart */}
+          <div className="relative w-28 h-28">
+            <svg className="w-full h-full -rotate-90">
+              <circle
+                cx="56"
+                cy="56"
+                r={radius}
+                stroke="#374151"
+                strokeWidth="8"
+                fill="none"
+              />
+              <circle
+                cx="56"
+                cy="56"
+                r={radius}
+                stroke="#6366f1"
+                strokeWidth="8"
+                fill="none"
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
 
-        {/* Circular Charts */}
-        <div className="flex justify-around mb-8 bg-gray-800/50 rounded-2xl p-6">
-          <CircularProgress value={8} color="#f59e0b" label="Score" />
-          <CircularProgress value={9} color="#10b981" label="Rating" />
-        </div>
-
-        {/* Questions Section */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-white font-semibold">Questions</h3>
-            <span className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded-full">3</span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="text-2xl font-bold text-white">{score}%</div>
+              <div className="text-xs text-gray-400">Overall</div>
+            </div>
           </div>
 
-          <div className="space-y-4">
+          {/* Right Stats */}
+          <div className="flex-1 space-y-3">
             {[
-              {
-                q: "How did you complete the product roadmap and what do you prioritize?",
-                a: "I'd use streamlined strategy with high user impact and stable bonds...",
-              },
-              {
-                q: "QUESTION",
-                a: "YOUR ANSWER",
-              },
-            ].map((item, idx) => (
-              <div key={idx} className="bg-gray-800/70 rounded-xl p-5 border border-gray-700">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 text-sm">
-                      {idx + 1}
-                    </div>
-                    <div className="text-gray-300 text-sm flex-1">
-                      {item.q}
-                      {idx === cursorPos && (
-                        <span className="inline-block w-0.5 h-4 bg-indigo-500 ml-1 animate-pulse" />
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">AI</div>
-                    <div className="text-amber-500 font-bold">SCORE</div>
-                  </div>
-                </div>
-                <div className="pl-11">
-                  <div className="text-gray-400 text-sm mb-3">{item.a}</div>
-                  <ProgressBar delay={idx * 200} />
+              ["Clarity", "88%"],
+              ["Confidence", "84%"],
+              ["Structure", "90%"],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="bg-gray-800/60 rounded-xl p-3 border border-gray-700"
+              >
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">{label}</span>
+                  <span className="text-white font-semibold">{value}</span>
                 </div>
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Feedback */}
+        <div className="bg-gray-800/50 rounded-2xl p-5 border border-gray-700">
+          <h4 className="text-sm font-semibold text-white mb-2">AI Feedback</h4>
+          <p className="text-sm text-gray-300 leading-relaxed">
+            Strong answers with clear flow. Add numbers & impact metrics to
+            reach top score.
+            <span className="inline-block w-0.5 h-4 bg-indigo-500 ml-1 animate-pulse" />
+          </p>
         </div>
       </div>
     </div>
@@ -567,7 +571,9 @@ const StealthModeVisual = () => {
             <div
               key={label}
               className={`bg-gray-800/70 rounded-2xl p-5 border transition-all duration-300 ${
-                activeMetric === idx ? "border-indigo-500 shadow-lg shadow-indigo-500/20" : "border-gray-700"
+                activeMetric === idx
+                  ? "border-indigo-500 shadow-lg shadow-indigo-500/20"
+                  : "border-gray-700"
               }`}
             >
               <div className="text-sm text-gray-400 mb-1">{label}</div>
@@ -641,7 +647,9 @@ const TrainModelVisual = () => {
               </svg>
             </div>
             <div>
-              <div className="font-bold text-white text-lg">AI Model Training</div>
+              <div className="font-bold text-white text-lg">
+                AI Model Training
+              </div>
               <div className="text-sm text-gray-400">Personalized Learning</div>
             </div>
           </div>
@@ -650,7 +658,7 @@ const TrainModelVisual = () => {
           </span>
         </div>
 
-        <div className="space-y-6 mb-8">
+        <div className="space-y-4 mb-5">
           <div className="bg-gray-800/70 border border-gray-700 rounded-2xl p-5">
             <div className="flex justify-between items-center mb-3">
               <p className="text-gray-300">Neural Network Optimization</p>
@@ -715,7 +723,8 @@ const CodingInterviewVisual = () => {
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 shadow-2xl border border-gray-700">
+      {/* <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 shadow-2xl border border-gray-700"> */}
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-5 shadow-xl border border-gray-700 scale-80">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-white">Code Challenge</h3>
           <span className="px-4 py-1.5 rounded-xl bg-emerald-600/20 text-emerald-400 font-bold border border-emerald-500/30">
@@ -726,32 +735,39 @@ const CodingInterviewVisual = () => {
         <div className="bg-gray-950 rounded-xl p-6 mb-6 font-mono text-sm border border-gray-700">
           <div className="text-emerald-500 mb-2">// Two Sum Problem</div>
           <div className="text-gray-400 mb-4">
-            Given an array of integers, return indices of two numbers that add up to target.
+            Given an array of integers, return indices of two numbers that add
+            up to target.
           </div>
           <div className="text-purple-400">function</div>
           <div className="text-gray-300 ml-4">
             twoSum(nums, target) {"{"}
             <div className="ml-4 text-gray-500">
-              <div className="h-1 bg-indigo-500 rounded transition-all duration-300" style={{ width: `${typingProgress}%` }} />
+              <div
+                className="h-1 bg-indigo-500 rounded transition-all duration-300"
+                style={{ width: `${typingProgress}%` }}
+              />
             </div>
             {"}"}
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {["Arrays", "Hash Table", "Two Pointers", "Google", "Meta"].map((tag) => (
-            <span
-              key={tag}
-              className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-800 text-gray-300 border border-gray-700"
-            >
-              {tag}
-            </span>
-          ))}
+          {["Arrays", "Hash Table", "Two Pointers", "Google", "Meta"].map(
+            (tag) => (
+              <span
+                key={tag}
+                className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-800 text-gray-300 border border-gray-700"
+              >
+                {tag}
+              </span>
+            ),
+          )}
         </div>
 
         <div className="flex items-center justify-between text-sm">
           <div className="text-gray-400">
-            Difficulty: <span className="text-emerald-500 font-semibold">3 / 5</span>
+            Difficulty:{" "}
+            <span className="text-emerald-500 font-semibold">3 / 5</span>
           </div>
           <div className="flex gap-4">
             <div className="text-amber-500">⭐ 4.8</div>
@@ -779,7 +795,8 @@ export default function Features() {
     {
       label: "WHY CHOOSE",
       title: "Train your Model",
-      description: "Personalize AI to understand your experience and interview style.",
+      description:
+        "Personalize AI to understand your experience and interview style.",
       bullets: [
         "Resume-aware responses",
         "Custom training data",
@@ -832,23 +849,25 @@ export default function Features() {
   ];
 
   return (
-    <section className="py-24 px-4 bg-gray-50">
+    <section className="py-8 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-6">
           <p className="text-gray-600 text-sm font-bold uppercase tracking-wide mb-3">
             Advanced features
           </p>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+          {/* <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4"> */}
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
             What Interview AI offers?
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Transcribe interviews in real-time, analyze interview questions, and generate expert-level responses
+            Transcribe interviews in real-time, analyze interview questions, and
+            generate expert-level responses
           </p>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex justify-center gap-4 mb-16 flex-wrap">
+        <div className="flex justify-center gap-4 mb-2 flex-wrap">
           {features.map((feature, index) => (
             <button
               key={index}
@@ -865,22 +884,23 @@ export default function Features() {
         </div>
 
         {/* Content Area */}
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
+        <div className="flex-1 w-full relative overflow-hidden min-h-[500px] flex items-center justify-center">
           {/* Left Side - Text Content */}
           <div className="flex-1 max-w-xl">
             <span className="text-gray-600 text-sm font-bold uppercase tracking-wide">
               {features[activeTab].label}
             </span>
 
-            <h3 className="text-4xl lg:text-5xl font-bold text-gray-900 mt-3 mb-4">
+            {/* <h3 className="text-4xl lg:text-5xl font-bold text-gray-900 mt-3 mb-4"> */}
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mt-2 mb-2">
               {features[activeTab].title}
             </h3>
 
-            <p className="text-xl text-gray-700 mb-8">
+            <p className="text-xl text-gray-700 mb-5 max-w-md leading-relaxed">
               {features[activeTab].description}
             </p>
 
-            <ul className="space-y-4 mb-10">
+            <ul className="space-y-3 mb-6">
               {features[activeTab].bullets.map((b, i) => (
                 <li key={i} className="flex gap-3">
                   <CheckIcon />
@@ -891,7 +911,7 @@ export default function Features() {
 
             <button
               onClick={() => navigate("/interview")}
-              className="px-8 py-4 rounded-xl text-white font-semibold text-lg
+              className="px-6 py-3 rounded-xl text-white font-semibold text-lg
                 bg-indigo-600 transition-all duration-200 shadow-2xl"
             >
               {features[activeTab].cta}
@@ -899,7 +919,8 @@ export default function Features() {
           </div>
 
           {/* Right Side - Visual with Animation */}
-          <div className="flex-1 w-full relative overflow-hidden min-h-[700px] flex items-center justify-center">
+          {/* <div className="flex-1 w-full relative overflow-hidden min-h-[700px] flex items-center justify-center"> */}
+          <div className="flex-1 w-full relative overflow-hidden min-h-[600px] flex items-center justify-center">
             {features.map((feature, index) => (
               <div
                 key={index}
@@ -907,8 +928,8 @@ export default function Features() {
                   activeTab === index
                     ? "opacity-100 translate-x-0 scale-100"
                     : activeTab > index
-                    ? "opacity-0 -translate-x-full scale-95"
-                    : "opacity-0 translate-x-full scale-95"
+                      ? "opacity-0 -translate-x-full scale-95"
+                      : "opacity-0 translate-x-full scale-95"
                 }`}
               >
                 {feature.visual}
