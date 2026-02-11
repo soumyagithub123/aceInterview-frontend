@@ -1,26 +1,56 @@
-import React from "react";
+import React, { useEffect } from "react";
+import Navbar from "./Navbar";
 import Hero from "./Hero";
+import SocialProof from "./SocialProof";
 import Features from "./Features";
 import ToolsSection from "./ToolsSection";
+import HowItWorks from "./HowItWorks";
+import Testimonials from "./Testimonials";
 import FAQ from "./FAQ";
 import CTASection from "./CTASection";
 import Footer from "./Footer";
-import Navbar from "./Navbar";
 
 export default function LandingPage() {
+  useEffect(() => {
+    if (window.location.hash === "#faq") {
+      document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
   return (
-    <div className="bg-white text-gray-900 min-h-screen overflow-x-hidden">
+    <div className="min-h-screen bg-white text-surface-900">
+      
+      {/* 🔽 GLOBAL FIX FOR LARGE GAPS */}
+      <style>
+        {`
+          section {
+            padding-top: 3rem !important;
+            padding-bottom: 3rem !important;
+          }
+        `}
+      </style>
+
       <Navbar />
 
-      {/* Main Content Wrap */}
-      <main className="pt-20 sm:pt-24">
-        <Hero />
+      <main className="overflow-hidden">
+        {/* Hero only */}
+        <div className="pt-20">
+          <Hero />
+        </div>
+        <SocialProof />
         <Features />
         <ToolsSection />
-        <FAQ />
+        <HowItWorks />
+        <Testimonials />
+
+        <section id="faq">
+          <FAQ />
+        </section>
+
         <CTASection />
-        <Footer />
       </main>
+
+      <Footer />
     </div>
   );
 }

@@ -11,39 +11,34 @@ import { getUserProfile, getUserQuota } from "../database/userService";
 // Auth
 import { useAuth } from "../components/Auth/AuthContext";
 
-// Create context
 const AppDataContext = createContext();
 export const useAppData = () => useContext(AppDataContext);
 
 export function AppDataProvider({ children }) {
-  const { user } = useAuth();
+  const { user, subscriptionStatus } = useAuth();
 
-  // GLOBAL STATES
-  const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState(null);
-  const [styles, setStyles] = useState([]);
-  const [personas, setPersonas] = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [settings,    setSettings]    = useState(null);
+  const [styles,      setStyles]      = useState([]);
+  const [personas,    setPersonas]    = useState([]);
   const [userProfile, setUserProfile] = useState(null);
-  const [quota, setQuota] = useState(null);
+  const [quota,       setQuota]       = useState(null);
+  const [error,       setError]       = useState(null);
 
-  const [error, setError] = useState(null);
+  // ✅ isPaidUser — AuthContext ke subscriptionStatus se derive karo
+  // DB mein subscription_status "active" hi rehta hai even after expiry
+  // isliye hamesha backend ke calculated status pe depend karo
+  const isPaidUser =
+    subscriptionStatus === "active" || subscriptionStatus === "expiring";
 
-  // 💳 DERIVED: Check if user has paid subscription
-  const isPaidUser = userProfile?.subscription_tier !== "free" && 
-                     userProfile?.subscription_status === "active";
-
-  // TRACK PREVIOUS USER to avoid full reload on token refresh
+  // Track previous user to avoid full reload on token refresh
   const lastUserIdRef = React.useRef(null);
 
-  // AUTO-LOAD WHEN USER LOGS IN
   useEffect(() => {
     if (user) {
-      // If user ID changed, show loading screen. 
-      // If same user (just token refresh), do background update.
       const isNewUser = user.id !== lastUserIdRef.current;
       lastUserIdRef.current = user.id;
-      
-      preloadAllData(isNewUser); 
+      preloadAllData(isNewUser);
     } else {
       lastUserIdRef.current = null;
       setSettings(null);
@@ -63,27 +58,18 @@ export function AppDataProvider({ children }) {
     setError(null);
 
     try {
-      // 1️⃣ USER PROFILE (subscription status)
       const profileRes = await getUserProfile();
-      if (profileRes.success) {
-        setUserProfile(profileRes.data);
-      }
+      if (profileRes.success) setUserProfile(profileRes.data);
 
-      // 2️⃣ USER QUOTA (remaining sessions)
       const quotaRes = await getUserQuota();
-      if (quotaRes.success) {
-        setQuota(quotaRes.data);
-      }
+      if (quotaRes.success) setQuota(quotaRes.data);
 
-      // 3️⃣ SETTINGS
       const userSettings = await settingsService.loadSettingsWithFallback(user.id);
       setSettings(userSettings);
 
-      // 4️⃣ RESPONSE STYLES
       const styleList = await responseStyleService.getAllStyles(user.id);
       setStyles(styleList);
 
-      // 5️⃣ PERSONAS
       const personaRes = await getUserPersonas();
       if (personaRes.success) {
         setPersonas(personaRes.data);
@@ -100,25 +86,23 @@ export function AppDataProvider({ children }) {
   };
 
   // =============================
-  // 🎯 QUOTA CHECKS
+  // QUOTA CHECKS
   // =============================
   const canUseCopilot = () => {
     if (!quota) return false;
-    if (quota.copilot.total === -1) return true; // unlimited
+    if (quota.copilot.total === -1) return true;
     return quota.copilot.remaining > 0;
   };
 
   const canUseMockInterview = () => {
     if (!quota) return false;
-    if (quota.mock_interview.total === -1) return true; // unlimited
+    if (quota.mock_interview.total === -1) return true;
     return quota.mock_interview.remaining > 0;
   };
 
   const getQuotaMessage = (type) => {
     if (!quota) return "Loading...";
-    
     const data = type === "copilot" ? quota.copilot : quota.mock_interview;
-    
     if (data.total === -1) return "Unlimited";
     return `${data.remaining}/${data.total} remaining`;
   };
@@ -128,24 +112,16 @@ export function AppDataProvider({ children }) {
       value={{
         loading,
         error,
-
-        // GLOBAL DATA
         settings,
         styles,
         personas,
         userProfile,
         quota,
-
-        // SUBSCRIPTION
         isPaidUser,
-
-        // QUOTA CHECKS
         canUseCopilot,
         canUseMockInterview,
         getQuotaMessage,
-
-        // Reload function
-        reloadAll: preloadAllData
+        reloadAll: preloadAllData,
       }}
     >
       {children}
