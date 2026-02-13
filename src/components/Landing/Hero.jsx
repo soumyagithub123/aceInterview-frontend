@@ -1,77 +1,3 @@
-// import React from "react";
-// import { useNavigate } from "react-router-dom";
-
-// export default function Hero() {
-//   const navigate = useNavigate();
-
-//   return (
-//     <section className="relative pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 bg-gradient-to-br from-purple-300 via-purple-100 to-indigo-200 overflow-hidden">
-//       {/* Decorative sparkles */}
-//       <div className="absolute top-16 left-4 sm:left-10 text-purple-400 text-4xl sm:text-6xl opacity-30">✦</div>
-//       <div className="absolute top-32 sm:top-40 right-6 sm:right-20 text-purple-300 text-3xl sm:text-4xl opacity-20">✦</div>
-//       <div className="absolute top-52 sm:top-60 left-1/2 text-indigo-300 text-4xl sm:text-5xl opacity-20">✦</div>
-
-//       {/* Main content */}
-//       <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center sm:text-left">
-//         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight">
-//           Rambling answers,<br />
-//           generic responses,<br />
-//           nervous pauses?
-//         </h1>
-
-//         <p className="text-lg sm:text-xl md:text-2xl mb-2 text-gray-700">
-//           Become interview-ready today with
-//         </p>
-
-//         <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#6C63FF] mb-8 sm:mb-10">
-//           AI Interview Copilot
-//         </p>
-
-//         {/* Button */}
-//         <div className="flex justify-center sm:justify-start">
-//           <button
-//             onClick={() => navigate("/interview")}
-//             className="px-6 sm:px-8 py-3 sm:py-4 bg-indigo-900 text-white rounded-xl font-semibold text-base sm:text-lg hover:bg-indigo-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-//           >
-//             Start Now for Free
-//           </button>
-//         </div>
-
-//         {/* Stats */}
-//         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 sm:mt-20 max-w-3xl mx-auto sm:mx-0">
-//           <div className="group cursor-default text-center sm:text-left">
-//             <div className="text-3xl sm:text-4xl font-bold text-indigo-600 mb-2 group-hover:scale-110 transition-transform">
-//               10K+
-//             </div>
-//             <div className="text-gray-600 text-sm">Active Users</div>
-//           </div>
-
-//           <div className="group cursor-default text-center sm:text-left">
-//             <div className="text-3xl sm:text-4xl font-bold text-indigo-600 mb-2 group-hover:scale-110 transition-transform">
-//               95%
-//             </div>
-//             <div className="text-gray-600 text-sm">Success Rate</div>
-//           </div>
-
-//           <div className="group cursor-default text-center sm:text-left">
-//             <div className="text-3xl sm:text-4xl font-bold text-indigo-600 mb-2 group-hover:scale-110 transition-transform">
-//               50K+
-//             </div>
-//             <div className="text-gray-600 text-sm">Interviews Aced</div>
-//           </div>
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-
-
-
-
-
-
-
 
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -357,7 +283,9 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white pt-28 pb-20 md:pt-36 md:pb-28">
+    // <section className="relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white pt-28 pb-20 md:pt-36 md:pb-28">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white pt-20 pb-16 md:pt-24 md:pb-20">
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl animate-pulse" />
@@ -366,12 +294,13 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Main Content Grid - Left: Content, Right: Cards */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
+      <div className="grid lg:grid-cols-2 gap-8 items-center mb-14">
+
           
           {/* Left Side - All Content */}
           <div className="text-left">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 mb-8 animate-fade-in shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 mb-5 animate-fade-in shadow-sm hover:shadow-md transition-all duration-300">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
@@ -384,7 +313,7 @@ export default function Hero() {
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-gray-900 leading-tight mb-6 animate-fade-in">
+            <h1 className="text-5xl sm:text-6xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-6 animate-fade-in">
               Real-time assistance for{" "}
               <span className="relative inline-block">
                 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent animate-gradient">
@@ -411,7 +340,7 @@ export default function Hero() {
             </p>
 
             {/* Social proof */}
-            <div className="flex items-center gap-4 mb-8 animate-fade-in">
+            <div className="flex items-center gap-4 mb-4 animate-fade-in">
               <div className="flex -space-x-3">
                 {[
                   'https://randomuser.me/api/portraits/men/32.jpg',
@@ -423,7 +352,7 @@ export default function Hero() {
                     key={i}
                     src={img}
                     alt={`User ${i + 1}`}
-                    className="w-10 h-10 rounded-full border-3 border-white shadow-lg hover:scale-110 transition-transform duration-300 object-cover"
+                    className="w-8 h-8 rounded-full border-3 border-white shadow-lg hover:scale-110 transition-transform duration-300 object-cover"
                   />
                 ))}
               </div>
@@ -441,7 +370,7 @@ export default function Hero() {
             <div className="animate-fade-in">
               <button
                 onClick={() => navigate("/interview")}
-                className="group relative bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-10 py-5 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-2xl"
+                className="group relative bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-4 text-base rounded-full font-semibold transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-2xl"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   Try for free
@@ -457,7 +386,7 @@ export default function Hero() {
 
           {/* Right Side - Animated Card with Swap Effect */}
           <div className="relative animate-fade-in">
-            <div className="relative h-[550px] overflow-hidden">
+            <div className="relative h-[460px] overflow-hidden">
               {cards.map((card, index) => {
                 const isActive = index === activeCard;
                 
@@ -553,7 +482,7 @@ export default function Hero() {
               style={{ perspective: "1000px" }}
             >
               <div
-                className="relative rounded-2xl bg-white p-8 border border-gray-200/80"
+                className="relative rounded-2xl bg-white p-3 border border-gray-200/80"
                 style={{
                   boxShadow: `
                     0 20px 40px -10px rgba(0, 0, 0, 0.15),

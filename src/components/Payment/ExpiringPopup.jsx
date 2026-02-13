@@ -44,25 +44,22 @@ export default function ExpiringPopup({ status, daysRemaining, onClose }) {
 
           {/* Title */}
           <h2 className="text-xl font-bold mb-2">
-            {isExpired ? "Subscription Expire Ho Gayi" : "Subscription Expiring Soon!"}
+            {isExpired ? "Subscription Expired" : "Subscription Is Expiring Soon!"}
           </h2>
 
           {/* Message */}
           <p className="text-gray-400 text-sm mb-6 leading-relaxed">
             {isExpired ? (
               <>
-                Aapka premium plan{" "}
-                <span className="text-red-400 font-semibold">expire ho chuka hai</span>.{" "}
-                Coding Interview, Online Assessment, Phone Interview aur baaki
-                premium features dobara use karne ke liye naya plan lo.
+                Your premium plan has <span className="text-red-400 font-semibold">expired</span>. 
+                Renew now to regain access to Coding Interviews, Online Assessments, Phone Screens, and other exclusive features.
               </>
             ) : (
               <>
-                Aapka premium plan sirf{" "}
-                <span className="text-yellow-400 font-bold">
-                  {daysRemaining} {daysRemaining === 1 ? "din" : "din"} mein expire
-                </span>{" "}
-                ho jaayega. Abhi renew karo taaki koi feature band na ho.
+                Your premium plan will expire in only <span className="text-yellow-400 font-bold">
+                  {daysRemaining} {daysRemaining === 1 ? "day" : "days"}
+                </span>. 
+                Renew to ensure uninterrupted access to all premium features.
               </>
             )}
           </p>
@@ -76,7 +73,7 @@ export default function ExpiringPopup({ status, daysRemaining, onClose }) {
                 : "bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-900/40"
               }`}
           >
-            {isExpired ? "🔓 Naya Plan Lo" : "⚡ Abhi Renew Karo"}
+            {isExpired ? "Renew Plan Now" : "Renew Now"}
           </button>
 
           {/* Secondary — dismiss */}
@@ -84,7 +81,7 @@ export default function ExpiringPopup({ status, daysRemaining, onClose }) {
             onClick={onClose}
             className="w-full text-gray-500 hover:text-gray-300 text-xs transition py-1"
           >
-            {isExpired ? "Baad mein dekhta hoon" : "Baad mein remind karo"}
+            {isExpired ? "Maybe later" : "Remind me later"}
           </button>
         </div>
       </div>

@@ -24,34 +24,35 @@ export default function Testimonials() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 md:py-32 bg-gradient-to-b from-surface-50 to-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Heading */}
-        <div className="text-center mb-16">
-          <p className="text-primary-600 font-semibold mb-3 uppercase text-sm tracking-widest">
+    
+    <section className="py-16 md:py-20 bg-gradient-to-b from-surface-50 to-white">
+      <div className="max-w-6xl mx-auto px-6 lg:px-8">
+
+        {/* 🔥 COMPACT HEADING */}
+        <div className="text-center mb-10">
+          <p className="text-primary-600 font-semibold mb-2 uppercase text-xs tracking-widest">
             Testimonials
           </p>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-surface-900 mb-6 drop-shadow-lg">
+          <h2 className="text-2xl md:text-4xl font-extrabold text-surface-900 mb-3">
             What Our Customers Say
           </h2>
-          <p className="text-surface-600 text-lg max-w-3xl mx-auto">
-            Don’t just take our word for it. Our users have shared how InterviewAI
-            transformed their career journeys.
+          <p className="text-surface-600 text-sm md:text-base max-w-2xl mx-auto">
+            Our users share how InterviewAI transformed their career journeys.
           </p>
         </div>
 
-        {/* Scrolling Testimonials */}
-        <div className="overflow-x-auto scrollbar-hide relative">
-          <div className="flex gap-8 animate-scroll-slow">
+        {/* 🔥 SCROLLING TESTIMONIALS (SMALLER CARDS + GAP) */}
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex gap-5 animate-scroll-slow">
             {TESTIMONIALS.concat(TESTIMONIALS).map((t, i) => (
               <div
                 key={i}
-                className="min-w-[320px] max-w-sm bg-white rounded-3xl border border-surface-200 p-8 shadow-xl flex flex-col justify-between transform transition-transform hover:scale-105 hover:shadow-2xl"
+                className="min-w-[280px] max-w-xs bg-white rounded-2xl border border-surface-200 p-6 shadow-lg flex flex-col justify-between transition-transform hover:scale-103"
               >
                 {/* Quote Icon */}
-                <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center mb-6 shadow-md">
+                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mb-4">
                   <svg
-                    className="w-6 h-6 text-primary-600"
+                    className="w-4 h-4 text-primary-600"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -59,38 +60,38 @@ export default function Testimonials() {
                   </svg>
                 </div>
 
-                {/* Testimonial Text */}
-                <p className="text-surface-700 leading-relaxed mb-6 italic text-base md:text-lg">
+                {/* Text */}
+                <p className="text-surface-700 leading-relaxed mb-4 italic text-sm">
                   “{t.text}”
                 </p>
 
                 {/* Author */}
                 <div>
-                  <p className="font-semibold text-surface-900 text-lg">{t.author}</p>
-                  <p className="text-sm text-surface-500">{t.role}</p>
+                  <p className="font-semibold text-surface-900 text-sm">{t.author}</p>
+                  <p className="text-xs text-surface-500">{t.role}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* CTA Button */}
-        <div className="text-center mt-16">
+        {/* 🔥 CTA COMPACT */}
+        <div className="text-center mt-10">
           <button
             onClick={() => navigate("/sign-in")}
-            className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-10 py-4 rounded-full text-lg shadow-lg transition-all duration-300 hover:scale-105"
+            className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-7 py-3 rounded-full text-sm shadow-md transition hover:scale-105"
           >
-            Try InterviewAI - Free
+            Try InterviewAI – Free
           </button>
         </div>
       </div>
 
-      {/* Extra Styles */}
+      {/* Styles */}
       <style>
         {`
           .animate-scroll-slow {
             display: flex;
-            animation: scroll 30s linear infinite;
+            animation: scroll 25s linear infinite;
           }
           @keyframes scroll {
             0% { transform: translateX(0); }
@@ -100,8 +101,8 @@ export default function Testimonials() {
             display: none;
           }
           .scrollbar-hide {
-            -ms-overflow-style: none; 
-            scrollbar-width: none; 
+            -ms-overflow-style: none;
+            scrollbar-width: none;
           }
         `}
       </style>

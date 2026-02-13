@@ -1,3 +1,6 @@
+// src/components/Interview/Copilot/CopilotLaunchpad.jsx
+// ✅ FIXED VERSION - KB Integration
+
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -143,17 +146,33 @@ export default function CopilotLaunchpad({ mode }) {
     setStep(3);
   };
 
-  /* -------------------- LAUNCH -------------------- */
+  /* -------------------- LAUNCH (✅ FIXED WITH KB) -------------------- */
   const handleLaunch = async () => {
     if (!selectedPersona || !selectedDomain || launching) return;
 
     try {
       setLaunching(true);
 
+      // ✅ FIX 1: Get selected KB IDs from localStorage
+      const selectedKBIds = (() => {
+        try {
+          const stored = localStorage.getItem("selectedKBIds");
+          if (!stored) return [];
+          const parsed = JSON.parse(stored);
+          return Array.isArray(parsed) ? parsed.slice(0, 3) : [];
+        } catch {
+          return [];
+        }
+      })();
+
+      console.log("📚 [LAUNCH] Selected KB IDs:", selectedKBIds);
+
+      // ✅ FIX 2: Include KB IDs in session payload
       const payload = {
         user_id: "anonymous",
         persona_id: selectedPersona,
         custom_style_prompt: null,
+        knowledge_base_ids: selectedKBIds, // ✅ NEW
       };
 
       const res = await fetch(`${API}/session/init`, {
@@ -166,18 +185,28 @@ export default function CopilotLaunchpad({ mode }) {
 
       const data = await res.json();
 
+      // ✅ Log session response (for debugging)
+      console.log("✅ [LAUNCH] Session initialized:", {
+        session_id: data.session_id,
+        kb_count: data.knowledge_bases?.length || 0,
+        kb_context_size: data.kb_context?.length || 0,
+      });
+
       sessionStorage.setItem("launchAuthorized", "true");
       sessionStorage.setItem("sessionId", data.session_id);
 
       const targetRoute =
         mode === "mock" ? "/mock-interview" : "/interview-assist";
 
+      // ✅ FIX 3: Pass session data to InterviewAssist (including KB)
       navigate(targetRoute, {
         state: {
           personaId: selectedPersona,
           personaData: selectedPersonaData,
           domain: selectedDomain,
-          sessionId: data.session_id,
+          sessionId: data.session_id,              // ✅ Existing session
+          sessionData: data,                       // ✅ NEW - Full session data
+          knowledgeBaseIds: selectedKBIds,         // ✅ NEW - KB IDs
           isMockMode: mode === "mock",
         },
       });
@@ -223,10 +252,11 @@ export default function CopilotLaunchpad({ mode }) {
 
   const headerSubtitle =
     step === 1
-      ? "Select a persona to set role, company and resume context."
+      ? "Select a persona (job + company + resume) to set interview context."
       : step === 2
-      ? "Choose a domain to tailor interview answers."
+      ? "Pick your interview domain to guide AI tone and examples."
       : "";
+
   return (
     <div className="min-h-screen bg-[#070A0F] text-white overflow-x-hidden">
       {/* BACKGROUND */}
@@ -395,7 +425,7 @@ export default function CopilotLaunchpad({ mode }) {
                   {launching
                     ? "Initializing interview session…"
                     : canLaunch
-                    ? "✓ All set. You’re ready to launch."
+                    ? "✓ All set. You're ready to launch."
                     : "Complete setup steps to enable launch."}
                 </p>
 
@@ -452,3 +482,15 @@ export default function CopilotLaunchpad({ mode }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+

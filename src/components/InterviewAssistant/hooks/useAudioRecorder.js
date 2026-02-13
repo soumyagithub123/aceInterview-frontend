@@ -86,12 +86,15 @@ export default function useAudioRecorder({
   // SYSTEM / TAB AUDIO - OPTIMIZED
   // ======================
   const startSystemAudioCapture = async () => {
+    console.log("🎤 startSystemAudioCapture called");
+
     if (interviewerStreamRef.current) {
-      console.warn("⚠️ Interviewer audio already capturing");
+      console.warn("⚠️ Interviewer audio already capturing (interviewerStreamRef.current is SET)");
       return;
     }
 
     try {
+      console.log("🖥️ Calling getDisplayMedia...");
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           width: { ideal: 1 },
@@ -107,6 +110,7 @@ export default function useAudioRecorder({
           suppressLocalAudioPlayback: false,
         },
       });
+      console.log("✅ getDisplayMedia success", stream);
 
       const videoTrack = stream.getVideoTracks()[0];
       if (videoTrack) {
@@ -207,7 +211,7 @@ export default function useAudioRecorder({
   // ======================
   // EXPOSE API
   // ======================
-  return {
+  const returnValue = {
     // state
     isRecording,
     setIsRecording,
@@ -226,4 +230,7 @@ export default function useAudioRecorder({
     startSystemAudioCapture,
     stopAudioCapture,
   };
+  
+  
+  return returnValue;
 }

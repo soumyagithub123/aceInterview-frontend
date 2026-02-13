@@ -9,6 +9,7 @@ export default function useQACopilot({
   personaData,
   settingsRef,
   isMockMode = false,
+  knowledgeBaseIds = [], // ✅ NEW: KB IDs prop
 }) {
   // ======================
   // STATE
@@ -33,6 +34,9 @@ export default function useQACopilot({
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [interviewStartTime, setInterviewStartTime] = useState(null);
   const [questionStartTime, setQuestionStartTime] = useState(null);
+
+  // ✅ NEW: Store KB data from session
+  const [knowledgeBasesData, setKnowledgeBasesData] = useState([]);
 
   // Track performance metrics
   const [performanceMetrics, setPerformanceMetrics] = useState({
@@ -82,7 +86,7 @@ export default function useQACopilot({
   }, []);
 
   // ======================
-  // INIT SESSION (API)
+  // ✅ INIT SESSION WITH KB (API)
   // ======================
   const initSession = async () => {
     try {
@@ -93,8 +97,10 @@ export default function useQACopilot({
         persona_id: personaId,
         custom_style_prompt:
           settingsRef.current?.custom_style_prompt || null,
-        is_mock_mode: isMockMode, // 🔥 NEW
+        knowledge_base_ids: knowledgeBaseIds || [], // ✅ NEW: Pass KB IDs
       };
+
+      console.log("📦 Session Init Payload:", payload);
 
       const res = await fetch(`${BACKEND_URL}/session/init`, {
         method: "POST",
@@ -112,6 +118,12 @@ export default function useQACopilot({
 
       if (data.session_id) {
         sessionIdRef.current = data.session_id;
+      }
+
+      // ✅ NEW: Store KB data from response
+      if (data.knowledge_bases) {
+        setKnowledgeBasesData(data.knowledge_bases);
+        console.log("📚 Knowledge Bases loaded:", data.knowledge_bases.length);
       }
 
       // 🔥 Start interview timer
@@ -259,222 +271,116 @@ export default function useQACopilot({
       if (data.scores.length >= 2) {
         const firstHalf = data.scores.slice(0, Math.ceil(data.scores.length / 2));
         const secondHalf = data.scores.slice(Math.ceil(data.scores.length / 2));
-        const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
-        const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+        const avgFirst = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+        const avgSecond = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
         
-        if (secondAvg > firstAvg + 5) trend = 'up';
-        else if (secondAvg < firstAvg - 5) trend = 'down';
+        if (avgSecond > avgFirst + 5) trend = 'improving';
+        else if (avgSecond < avgFirst - 5) trend = 'declining';
       }
 
       categoryAnalysis[category] = {
-        score: avgScore,
+        avgScore,
+        count: data.count,
         trend,
-        feedback: getFeedbackForCategory(category, avgScore)
+        scores: data.scores
       };
     });
 
-    const overallScore = performanceMetrics.questions_answered > 0
+    // Calculate strengths and improvements
+    const strengths = Object.entries(categoryAnalysis)
+      .filter(([, data]) => data.avgScore >= 70)
+      .map(([category]) => category);
+
+    const improvements = Object.entries(categoryAnalysis)
+      .filter(([, data]) => data.avgScore < 60)
+      .map(([category]) => category);
+
+    const avgScore = performanceMetrics.questions_answered > 0
       ? Math.round(performanceMetrics.total_score / performanceMetrics.questions_answered)
       : 0;
 
-    // Calculate time metrics
-    const responseTimes = performanceMetrics.question_details
-      .map(q => q.duration_seconds)
-      .filter(t => t > 0);
-    
-    const avgResponseTime = responseTimes.length > 0
-      ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length)
-      : 0;
-
-    const analytics = {
-      overall_score: overallScore,
-      total_questions: performanceMetrics.questions_answered,
-      completion_rate: 100, // Can be calculated based on expected vs answered
+    const analyticsPayload = {
+      session_id: sessionIdRef.current,
+      user_id: user?.id,
+      persona_id: personaId,
       duration_minutes: duration,
-      
-      categories: categoryAnalysis,
-      
-      strengths: extractStrengths(performanceMetrics.question_details),
-      improvements: extractImprovements(performanceMetrics.question_details),
-      
-      question_breakdown: performanceMetrics.question_details,
-      
-      time_analysis: {
-        avg_response_time: avgResponseTime,
-        fastest_response: responseTimes.length > 0 ? Math.min(...responseTimes) : 0,
-        slowest_response: responseTimes.length > 0 ? Math.max(...responseTimes) : 0,
-        optimal_range: [90, 180]
-      },
-      
-      speech_metrics: {
-        avg_words_per_minute: calculateWPM(performanceMetrics.speech_metrics),
-        filler_words_count: performanceMetrics.speech_metrics.filler_words || 0,
-        pause_frequency: 'moderate',
-        clarity_score: 8.2
-      },
-      
-      recommendations: generateRecommendations(performanceMetrics, categoryAnalysis)
+      questions_answered: performanceMetrics.questions_answered,
+      avg_score: avgScore,
+      category_scores: categoryAnalysis,
+      strengths,
+      improvements,
+      question_details: performanceMetrics.question_details,
     };
 
-    setAnalyticsData(analytics);
-    setShowAnalytics(true);
+    console.log("📊 Analytics Payload:", analyticsPayload);
+    setAnalyticsData(analyticsPayload);
 
-    return analytics;
-  };
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/analytics/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(analyticsPayload),
+      });
 
-  // ======================
-  // 🔥 HELPER FUNCTIONS
-  // ======================
-  const getFeedbackForCategory = (category, score) => {
-    const feedbackMap = {
-      communication: {
-        high: 'Excellent communication skills demonstrated',
-        medium: 'Good communication, room for improvement',
-        low: 'Work on clarity and articulation'
-      },
-      technical: {
-        high: 'Strong technical knowledge',
-        medium: 'Solid fundamentals, deepen expertise',
-        low: 'Focus on core technical concepts'
-      },
-      behavioral: {
-        high: 'Great use of STAR method and examples',
-        medium: 'Good examples, could be more specific',
-        low: 'Provide more concrete examples'
-      },
-      problem_solving: {
-        high: 'Excellent analytical approach',
-        medium: 'Good problem-solving structure',
-        low: 'Work on systematic problem breakdown'
+      if (res.ok) {
+        console.log("✅ Analytics submitted successfully");
       }
-    };
-
-    const level = score >= 80 ? 'high' : score >= 60 ? 'medium' : 'low';
-    return feedbackMap[category]?.[level] || 'Continue practicing';
-  };
-
-  const extractStrengths = (questions) => {
-    const strengths = [];
-    const highScoreQuestions = questions.filter(q => (q.score || 0) >= 80);
-    
-    if (highScoreQuestions.length > 0) {
-      strengths.push('Consistent high performance across multiple questions');
+    } catch (err) {
+      console.error("❌ Failed to submit analytics:", err);
     }
-    
-    const categories = [...new Set(highScoreQuestions.map(q => q.category))];
-    categories.forEach(cat => {
-      strengths.push(`Strong ${cat} skills`);
-    });
-
-    return strengths.slice(0, 4);
-  };
-
-  const extractImprovements = (questions) => {
-    const improvements = [];
-    const lowScoreQuestions = questions.filter(q => (q.score || 0) < 70);
-    
-    lowScoreQuestions.forEach(q => {
-      if (q.feedback) {
-        improvements.push(q.feedback);
-      }
-    });
-
-    return [...new Set(improvements)].slice(0, 4);
-  };
-
-  const calculateWPM = (speechMetrics) => {
-    if (speechMetrics.total_duration === 0) return 140;
-    return Math.round((speechMetrics.total_words / speechMetrics.total_duration) * 60);
-  };
-
-  const generateRecommendations = (metrics, categoryAnalysis) => {
-    const recommendations = [];
-    
-    // Low scoring categories
-    Object.entries(categoryAnalysis).forEach(([category, data]) => {
-      if (data.score < 70) {
-        recommendations.push({
-          title: `Improve ${category} skills`,
-          description: `Focus on strengthening your ${category} responses`,
-          priority: 'high',
-          resources: [`${category} guide`, 'Practice questions']
-        });
-      }
-    });
-
-    return recommendations;
   };
 
   // ======================
-  // ADD QA (DEDUP SAFE)
+  // ADD Q&A
   // ======================
-  const addQA = (qa) => {
-    setQaList((prev) => {
-      const isDuplicate = prev.some(
-        (item) =>
-          item.question.trim().toLowerCase() ===
-          qa.question.trim().toLowerCase()
-      );
-      if (isDuplicate) return prev;
+  const addQA = ({ question, answer }) => {
+    if (!question || !answer) return;
 
-      return [
-        ...prev,
-        {
-          ...qa,
-          id: Date.now() + Math.random(),
-        },
-      ];
-    });
+    setQaList((prev) => [
+      ...prev,
+      {
+        id: Date.now() + Math.random(),
+        question,
+        answer,
+      },
+    ]);
   };
 
   // ======================
   // CONNECT QA (WS)
   // ======================
-  const connectQA = () => {
-    return new Promise((resolve, reject) => {
-      if (!sessionIdRef.current) {
-        console.error("❌ [QACopilot] connectQA called without sessionId");
-        reject("No sessionId");
-        return;
-      }
-
+  const connectQA = async () => {
+    return new Promise((resolve) => {
       const qaUrl = getWebSocketUrl("/ws/live-interview");
-      console.log(`🔗 [QACopilot] Connecting WS → ${qaUrl}`);
+
+      console.log(`🔗 [QACopilot] Connecting to: ${qaUrl}`);
+      setQaStatus("Connecting...");
 
       const handleMessage = (event) => {
         try {
           const data = JSON.parse(event.data);
 
           switch (data.type) {
-            case "ready":
-            case "connected":
-              setQaStatus(isMockMode ? "🎤 Mock Interview Active" : "🤖 Q&A Active");
+            case "init_complete":
+              console.log("✅ [QACopilot] Init complete");
+              setQaStatus("Ready");
+              resolve();
               break;
 
-            case "reset_ack":
-              setCurrentQuestion("");
-              setCurrentAnswer("");
-              setIsGenerating(false);
-              setIsStreamingComplete(false);
-              break;
-
-            // 🆕 MOCK QUESTION RECEIVED
             case "mock_question":
-              console.log("✅ [Mock] Question received:", data.question);
-              setCurrentMockQuestion(data.question);
-              setCurrentQuestion(data.question);
-              setCurrentAnswer("");
+              console.log("🎤 [Mock] Question received");
+              setCurrentMockQuestion(data.question || "");
+              setCurrentQuestion(data.question || "");
               setIsGenerating(false);
-              setMockQuestionAudio(data.audio);
-
+              
               if (data.audio) {
+                setMockQuestionAudio(data.audio);
                 playQuestionAudio(data.audio);
               } else {
                 setIsWaitingForAnswer(true);
               }
               break;
 
-            // 🆕 MOCK ANSWER FEEDBACK
             case "feedback_generating":
               console.log("⏳ [Mock] Generating feedback...");
               setIsGenerating(true);
@@ -484,12 +390,10 @@ export default function useQACopilot({
               console.log("✅ [Mock] Feedback received");
               setIsGenerating(false);
 
-              // 🔥 Calculate response time
               const responseTime = questionStartTime 
                 ? Math.floor((Date.now() - questionStartTime) / 1000)
                 : 0;
 
-              // 🔥 Update analytics
               const questionData = {
                 number: performanceMetrics.questions_answered + 1,
                 question: data.question || currentMockQuestion,
@@ -522,7 +426,6 @@ export default function useQACopilot({
               setIsWaitingForAnswer(false);
               break;
 
-            // REGULAR INTERVIEW MODE
             case "question_detected":
               if (isMockMode) break;
 
@@ -589,7 +492,7 @@ export default function useQACopilot({
             session_id: sessionIdRef.current,
             domain: domain || "General",
             user_id: user?.id || null,
-            is_mock_mode: isMockMode, // 🔥 NEW
+            is_mock_mode: isMockMode,
             custom_style_prompt:
               settingsRef.current?.custom_style_prompt || null,
             settings: {
@@ -602,13 +505,12 @@ export default function useQACopilot({
             },
           };
 
-          console.log("📤 [QACopilot] Sending WS init");
-          reconnectingQaWsRef.current?.send(initMessage);
-          resolve(reconnectingQaWsRef.current);
-        } else if (status === "reconnecting") {
-          setQaStatus("🔄 Reconnecting...");
-        } else if (status === "disconnected") {
-          setQaStatus("Disconnected");
+          reconnectingQaWsRef.current.send(initMessage);
+          console.log("✅ [QACopilot] Init message sent");
+        }
+
+        if (status === "closed" || status === "error") {
+          setQaStatus("⚠️ Disconnected");
         }
       };
 
@@ -616,23 +518,19 @@ export default function useQACopilot({
         qaUrl,
         handleMessage,
         handleStatusChange,
-        5
+        3
       );
 
-      reconnectingQaWsRef.current
-        .connect()
-        .then(() => {
-          qaWsRef.current = reconnectingQaWsRef.current.ws;
-        })
-        .catch((err) => {
-          console.error("❌ [QACopilot] WS connect failed:", err);
-          reject(err);
-        });
+      // ✅ Trigger connection
+      reconnectingQaWsRef.current.connect();
+
+      qaWsRef.current = reconnectingQaWsRef.current;
+      resolve();
     });
   };
 
   // ======================
-  // STOP QA (SESSION END)
+  // STOP QA
   // ======================
   const stopQA = async () => {
     if (reconnectingQaWsRef.current && sessionIdRef.current) {
@@ -646,7 +544,6 @@ export default function useQACopilot({
       });
     }
 
-    // 🔥 Finalize analytics before closing
     if (isMockMode && interviewStartTime) {
       await finalizeAnalytics();
     }
@@ -676,7 +573,7 @@ export default function useQACopilot({
   };
 
   // ======================
-  // MANUAL GENERATE (SAFE)
+  // MANUAL GENERATE
   // ======================
   const handleManualGenerate = async (text) => {
     try {
@@ -736,11 +633,14 @@ export default function useQACopilot({
     currentMockQuestion,
     isWaitingForAnswer,
 
-    // 🔥 ANALYTICS EXPORTS (NEW)
+    // ANALYTICS EXPORTS
     analyticsData,
     showAnalytics,
     setShowAnalytics,
     finalizeAnalytics,
     performanceMetrics,
+
+    // ✅ NEW: KB DATA
+    knowledgeBasesData,
   };
 }
