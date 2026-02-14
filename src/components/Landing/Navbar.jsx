@@ -1,9 +1,8 @@
-// frontend/src/components/Landing/Navbar.jsx
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Auth/AuthContext";
 import { useAppData } from "../../context/AppDataContext";
+import { Crown, Zap } from "lucide-react";
 
 
 // -------------------- FEATURES DROPDOWN --------------------
@@ -187,21 +186,21 @@ const UserMenu = ({ user, onSignOut, userProfile }) => {
   // Determine styles based on plan
   const plan = userProfile?.subscription_tier || "free";
   
-  const ringColor = 
-    plan === "pro" ? "ring-yellow-400" :
-    plan === "basic" ? "ring-green-500" : 
-    "ring-gray-200"; // default/free
+  const ringClasses = 
+    plan === "pro" ? "ring-2 ring-offset-2 ring-yellow-400" :
+    plan === "basic" ? "ring-2 ring-offset-2 ring-emerald-500" : 
+    "ring-2 ring-offset-2 ring-gray-200"; // default/free
 
-  const badgeColor = 
-    plan === "pro" ? "text-yellow-600 bg-yellow-50 border-yellow-200" :
-    plan === "basic" ? "text-green-600 bg-green-50 border-green-200" :
+  const badgeClasses = 
+    plan === "pro" ? "bg-gradient-to-r from-amber-50 to-amber-100 text-amber-800 border-amber-200 font-bold" :
+    plan === "basic" ? "text-emerald-700 bg-emerald-50 border-emerald-200 font-medium" :
     "text-gray-500 bg-gray-50 border-gray-200";
 
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ring-2 ring-offset-2 ${ringColor} bg-gradient-to-br from-indigo-500 to-purple-600`}
+        className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-bold cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ${ringClasses} bg-gradient-to-br from-indigo-500 to-purple-600`}
       >
         {firstLetter}
       </button>
@@ -214,7 +213,9 @@ const UserMenu = ({ user, onSignOut, userProfile }) => {
             </p>
             {/* PLAN INDICATOR */}
             <div className="flex items-center justify-between mt-2">
-               <span className={`text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${badgeColor}`}>
+               <span className={`text-xs uppercase tracking-wide px-2 py-0.5 rounded border flex items-center gap-1.5 ${badgeClasses}`}>
+                 {plan === "pro" && <Crown className="w-3 h-3 text-amber-600" />}
+                 {plan === "basic" && <Zap className="w-3 h-3 text-emerald-500" />}
                  {plan} Plan
                </span>
                <button 

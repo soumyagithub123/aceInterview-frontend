@@ -15,19 +15,7 @@ import KBDetailsModal from "./KBDetailsModal";
 import DeleteConfirmationModal from "../Persona/DeleteConfirmationModal";
 
 const MAX_SELECTION = 3;
-const STORAGE_KEY   = "selectedKBIds";
 
-// ─── localStorage helpers ───────────────────────────────
-function loadStoredIds() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const ids  = raw ? JSON.parse(raw) : [];
-    return Array.isArray(ids) ? ids.slice(0, MAX_SELECTION) : [];
-  } catch { return []; }
-}
-function persistIds(ids) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ids)); } catch {}
-}
 
 // ═══════════════════════════════════════════════════════
 export default function KnowledgeBasePage() {
@@ -41,7 +29,28 @@ export default function KnowledgeBasePage() {
 
   // ui
   const [search,      setSearch]      = useState("");
-  const [selectedIds, setSelectedIds] = useState(loadStoredIds);
+  // ✅ FIX: State initialization moved to useEffect to depend on user.id
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  // ── Load Selection (User Specific) ────────────────────
+  useEffect(() => {
+    if (!user?.id) return;
+    const key = `selectedKBIds_${user.id}`;
+    try {
+      const raw = localStorage.getItem(key);
+      const ids = raw ? JSON.parse(raw) : [];
+      setSelectedIds(Array.isArray(ids) ? ids.slice(0, MAX_SELECTION) : []);
+    } catch {
+      setSelectedIds([]);
+    }
+  }, [user]);
+
+  // ✅ Helper to save valid selection
+  const saveSelection = (newIds) => {
+    if (!user?.id) return;
+    const key = `selectedKBIds_${user.id}`;
+    localStorage.setItem(key, JSON.stringify(newIds));
+  };
 
   // modals
   const [showUpload,    setShowUpload]    = useState(false);
@@ -94,12 +103,15 @@ export default function KnowledgeBasePage() {
         }
         next = [...prev, id];
       }
-      persistIds(next);
+      saveSelection(next); // ✅ Persist with user-specific key
       return next;
     });
   };
 
-  const clearAll = () => { setSelectedIds([]); persistIds([]); };
+  const clearAll = () => { 
+    setSelectedIds([]); 
+    saveSelection([]); 
+  };
 
   // ── Delete ────────────────────────────────────────────
   const confirmDelete = async () => {
@@ -112,7 +124,7 @@ export default function KnowledgeBasePage() {
       // remove from selection
       setSelectedIds((prev) => {
         const next = prev.filter((x) => x !== deleteTarget);
-        persistIds(next);
+        saveSelection(next); // ✅ Persist with user-specific key
         return next;
       });
 

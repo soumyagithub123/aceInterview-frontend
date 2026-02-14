@@ -3,6 +3,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Auth/AuthContext"; // ✅ Import useAuth
 import {
   Settings,
   HelpCircle,
@@ -98,6 +99,7 @@ function Card({ title, subtitle, right, children }) {
 
 export default function CopilotLaunchpad({ mode }) {
   const navigate = useNavigate();
+  const { user } = useAuth(); // ✅ Get current user
 
   /* -------------------- STEPS -------------------- */
   const [step, setStep] = useState(1);
@@ -153,10 +155,12 @@ export default function CopilotLaunchpad({ mode }) {
     try {
       setLaunching(true);
 
-      // ✅ FIX 1: Get selected KB IDs from localStorage
+      // ✅ FIX 1: Get selected KB IDs from USER-SPECIFIC localStorage
       const selectedKBIds = (() => {
         try {
-          const stored = localStorage.getItem("selectedKBIds");
+          if (!user?.id) return [];
+          const key = `selectedKBIds_${user.id}`; // ✅ Unique key per user
+          const stored = localStorage.getItem(key);
           if (!stored) return [];
           const parsed = JSON.parse(stored);
           return Array.isArray(parsed) ? parsed.slice(0, 3) : [];
@@ -169,10 +173,10 @@ export default function CopilotLaunchpad({ mode }) {
 
       // ✅ FIX 2: Include KB IDs in session payload
       const payload = {
-        user_id: "anonymous",
+        user_id: user?.id || "anonymous", // ✅ Send actual user ID
         persona_id: selectedPersona,
         custom_style_prompt: null,
-        knowledge_base_ids: selectedKBIds, // ✅ NEW
+        knowledge_base_ids: selectedKBIds,
       };
 
       const res = await fetch(`${API}/session/init`, {
@@ -195,8 +199,23 @@ export default function CopilotLaunchpad({ mode }) {
       sessionStorage.setItem("launchAuthorized", "true");
       sessionStorage.setItem("sessionId", data.session_id);
 
-      const targetRoute =
-        mode === "mock" ? "/mock-interview" : "/interview-assist";
+      // ✅ ROUTING LOGIC based on Domain
+      let targetRoute = mode === "mock" ? "/mock-interview" : "/interview-assist";
+      let featureName = "Interview Assistant";
+
+      if (selectedDomain === "Coding Interview") {
+        targetRoute = "/interview/coding";
+        featureName = "Coding Interview";
+      } else if (selectedDomain === "Online Assessment") {
+        targetRoute = "/interview/online-assessment";
+        featureName = "Online Assessment";
+      } else if (selectedDomain === "Phone Interview") {
+        targetRoute = "/interview/phone";
+        featureName = "Phone Interview";
+      } else if (selectedDomain === "Professional Meeting") {
+        targetRoute = "/interview/meeting";
+        featureName = "Meeting Copilot";
+      }
 
       // ✅ FIX 3: Pass session data to InterviewAssist (including KB)
       navigate(targetRoute, {
@@ -208,6 +227,7 @@ export default function CopilotLaunchpad({ mode }) {
           sessionData: data,                       // ✅ NEW - Full session data
           knowledgeBaseIds: selectedKBIds,         // ✅ NEW - KB IDs
           isMockMode: mode === "mock",
+          featureName: featureName,                // ✅ For Coming Soon page
         },
       });
     } catch (err) {

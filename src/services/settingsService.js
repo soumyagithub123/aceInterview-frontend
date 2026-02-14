@@ -50,23 +50,29 @@ export const settingsService = {
   // Loads settings from Supabase; returns safe defaults if no row
   // ============================================================
   loadSettingsWithFallback: async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from("copilot_settings")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
+    let retries = 3;
+    let delay = 500;
 
-      // PGRST116 = no row found — first-time user, return defaults
-      if (error && error.code !== "PGRST116") {
-        console.error("loadSettingsWithFallback DB error:", error);
-        return { ...DEFAULT_SETTINGS };
+    while (retries > 0) {
+      try {
+        const { data, error } = await supabase
+          .from("copilot_settings")
+          .select("*")
+          .eq("user_id", userId)
+          .limit(1);
+
+        if (error) throw error;
+
+        return mapDbToSettings(data?.[0]);
+      } catch (err) {
+        retries--;
+        if (retries === 0) {
+          console.error("loadSettingsWithFallback final error:", err);
+          return { ...DEFAULT_SETTINGS };
+        }
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= 2; // Exponential backoff
       }
-
-      return mapDbToSettings(data);
-    } catch (err) {
-      console.error("loadSettingsWithFallback error:", err);
-      return { ...DEFAULT_SETTINGS };
     }
   },
 
@@ -79,10 +85,10 @@ export const settingsService = {
         .from("copilot_settings")
         .select("*")
         .eq("user_id", userId)
-        .single();
+        .limit(1);
 
-      if (error && error.code !== "PGRST116") throw error;
-      return data || null;
+      if (error) throw error;
+      return data?.[0] || null;
     } catch (error) {
       console.error("getUserSettings error:", error);
       throw error;

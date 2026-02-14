@@ -8,8 +8,10 @@ import {
   BookOpen,
   HelpCircle,
   User,
+  Crown,
+  Zap,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../Auth/AuthContext";
 import { useAppData } from "../../context/AppDataContext";
 
@@ -38,8 +40,8 @@ export default function Sidebar({ currentPage, onNavigate }) {
 
   const plan = userProfile?.subscription_tier || "free";
   const planColor = 
-    plan === "pro" ? "text-yellow-400" : 
-    plan === "basic" ? "text-green-400" : 
+    plan === "pro" ? "bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent font-bold" : 
+    plan === "basic" ? "text-emerald-400 font-medium" : 
     "text-gray-500";
 
 
@@ -72,14 +74,14 @@ export default function Sidebar({ currentPage, onNavigate }) {
     >
       {/* Header Logo */}
       <div className="px-4 sm:px-5 py-5 border-b border-[#1F2024]">
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="w-9 h-9 bg-[#1D1E22] rounded-lg flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-purple-300" />
           </div>
           <span className="hidden sm:inline text-[17px] font-semibold text-white">
             InterviewAI
           </span>
-        </div>
+        </Link>
       </div>
 
       {/* User Profile */}
@@ -95,7 +97,9 @@ export default function Sidebar({ currentPage, onNavigate }) {
               {getUserName()}
             </p>
             <div className="flex items-center gap-1.5 text-[11px] mt-0.5">
-               <span className={`font-semibold capitalize ${planColor}`}>
+               <span className={`font-semibold capitalize flex items-center gap-1 ${planColor}`}>
+                 {plan === "pro" && <Crown className="w-3 h-3 text-yellow-500" />}
+                 {plan === "basic" && <Zap className="w-3 h-3 text-emerald-400 fill-emerald-400/20" />}
                  {plan} Plan
                </span>
                <span className="text-gray-600">•</span>

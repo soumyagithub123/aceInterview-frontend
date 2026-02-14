@@ -20,6 +20,7 @@ import SignUp          from "./components/Auth/SignUp";
 // RESOURCES
 import Blog          from "./components/Resources/Blog/Blog";
 import ResumeBuilder from "./components/Resources/Blog/ResumeBuilder";
+import ComingSoon    from "./components/Shared/ComingSoon";
 
 // PAYMENT
 import PaymentSuccess from "./components/Payment/PaymentSuccess";
@@ -63,7 +64,7 @@ function App() {
             <Route
               path="/interview/ai-mock"
               element={
-                <ProtectedRoute requirePaid>
+                <ProtectedRoute >
                   <Interview mode="mock" />
                 </ProtectedRoute>
               }
@@ -71,7 +72,7 @@ function App() {
             <Route
               path="/interview-assist"
               element={
-                <ProtectedRoute requirePaid>
+                <ProtectedRoute>
                   <InterviewAssist />
                 </ProtectedRoute>
               }
@@ -79,11 +80,20 @@ function App() {
             <Route
               path="/mock-interview"
               element={
-                <ProtectedRoute requirePaid>
+                <ProtectedRoute>
                   <InterviewAssist />
                 </ProtectedRoute>
               }
             />
+
+            {/* ── COMING SOON FEATURES ── */}
+            <Route path="/interview/coding"                   element={<ComingSoon />} />
+            <Route path="/interview/online-assessment"        element={<ComingSoon />} />
+            <Route path="/interview/phone"                    element={<ComingSoon />} />
+            <Route path="/interview/meeting"                  element={<ComingSoon />} />
+            <Route path="/interview/software-engineering"     element={<ComingSoon />} />
+            <Route path="/interview/data-science"             element={<ComingSoon />} />
+            <Route path="/interview/product-management"       element={<ComingSoon />} />
 
             {/* ── INTERNAL PAGES — free users bhi ── */}
             <Route

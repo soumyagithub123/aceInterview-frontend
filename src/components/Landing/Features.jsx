@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -119,7 +118,7 @@ const InterviewReportVisual = () => {
         {/* Pie Chart + Stats */}
         <div className="flex items-center gap-6 mb-6">
           {/* Pie Chart */}
-          <div className="relative w-28 h-28">
+          <div className="relative w-28 h-24 sm:w-28 sm:h-28">
             <svg className="w-full h-full -rotate-90">
               <circle
                 cx="56"
@@ -206,7 +205,7 @@ const StealthModeVisual = () => {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {[
             ["Confidence", "94%", "#f59e0b"],
             ["Clarity", "A+", "#10b981"],
@@ -369,7 +368,7 @@ const CodingInterviewVisual = () => {
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       {/* <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 shadow-2xl border border-gray-700"> */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-5 shadow-xl border border-gray-700 scale-80">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-5 shadow-xl border border-gray-700 w-full">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-white">Code Challenge</h3>
           <span className="px-4 py-1.5 rounded-xl bg-emerald-600/20 text-emerald-400 font-bold border border-emerald-500/30">
@@ -529,9 +528,9 @@ export default function Features() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 w-full relative overflow-hidden min-h-[500px] flex items-center justify-center">
+        <div className="w-full flex flex-col lg:flex-row gap-10 mt-6">
           {/* Left Side - Text Content */}
-          <div className="flex-1 max-w-xl">
+          <div className="w-full lg:w-1/2 max-w-xl">
             <span className="text-gray-600 text-sm font-bold uppercase tracking-wide">
               {features[activeTab].label}
             </span>
@@ -565,21 +564,10 @@ export default function Features() {
 
           {/* Right Side - Visual with Animation */}
           {/* <div className="flex-1 w-full relative overflow-hidden min-h-[700px] flex items-center justify-center"> */}
-          <div className="flex-1 w-full relative overflow-hidden min-h-[600px] flex items-center justify-center">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className={`absolute inset-0 transition-all duration-700 ease-in-out flex items-center justify-center ${
-                  activeTab === index
-                    ? "opacity-100 translate-x-0 scale-100"
-                    : activeTab > index
-                      ? "opacity-0 -translate-x-full scale-95"
-                      : "opacity-0 translate-x-full scale-95"
-                }`}
-              >
-                {feature.visual}
-              </div>
-            ))}
+          <div className="w-full lg:w-1/2 flex items-center justify-center">
+            <div className="w-full max-w-md sm:max-w-lg md:max-w-xl transition-all duration-500">
+              {features[activeTab].visual}
+            </div>
           </div>
         </div>
       </div>

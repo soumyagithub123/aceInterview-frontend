@@ -176,11 +176,17 @@ export function AppDataProvider({ children }) {
   const lastUserIdRef = React.useRef(null);
 
   useEffect(() => {
-    if (user) {
-      const isNewUser = user.id !== lastUserIdRef.current;
-      lastUserIdRef.current = user.id;
-      preloadAllData(isNewUser);
+    if (user?.id) {
+      // Only reload if user ID actually changed
+      if (user.id !== lastUserIdRef.current) {
+        lastUserIdRef.current = user.id;
+        preloadAllData(true); // showLoading=true for new user
+      } else {
+        // Same user (e.g. token refresh) — do nothing or silent update
+        // Optional: preloadAllData(false) if you want silent background refresh
+      }
     } else {
+      // No user
       lastUserIdRef.current = null;
       setSettings(null);
       setStyles([]);
@@ -188,7 +194,7 @@ export function AppDataProvider({ children }) {
       setUserProfile(null);
       setLoading(false);
     }
-  }, [user]);
+  }, [user?.id]); // ✅ Dependency only on ID, not full user object
 
   // =============================
   // 🔥 MASTER LOADER
