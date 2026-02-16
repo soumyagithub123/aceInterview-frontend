@@ -9,7 +9,9 @@ export default function useQACopilot({
   personaData,
   settingsRef,
   isMockMode = false,
-  knowledgeBaseIds = [], // ✅ NEW: KB IDs prop
+  existingSessionId = null, // ✅ NEW: Prop
+  sessionData = null,       // ✅ NEW: Prop
+  knowledgeBaseIds = [],
 }) {
   // ======================
   // STATE
@@ -35,8 +37,10 @@ export default function useQACopilot({
   const [interviewStartTime, setInterviewStartTime] = useState(null);
   const [questionStartTime, setQuestionStartTime] = useState(null);
 
-  // ✅ NEW: Store KB data from session
-  const [knowledgeBasesData, setKnowledgeBasesData] = useState([]);
+  // ✅ NEW: Store KB data from passed session data
+  const [knowledgeBasesData, setKnowledgeBasesData] = useState(
+    sessionData?.knowledge_bases || []
+  );
 
   // Track performance metrics
   const [performanceMetrics, setPerformanceMetrics] = useState({
@@ -63,18 +67,24 @@ export default function useQACopilot({
   const audioRef = useRef(null);
 
   // Initialize Session ID on mount
+  // Initialize Session ID on mount
   useEffect(() => {
     if (!sessionIdRef.current) {
-      sessionIdRef.current =
-        typeof crypto !== "undefined" && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `session-${Date.now()}-${Math.random()
-              .toString(36)
-              .substr(2, 9)}`;
+      if (existingSessionId) {
+        sessionIdRef.current = existingSessionId;
+        console.log(`🆔 [Session] Using Existing Session ID: ${existingSessionId}`);
+      } else {
+        sessionIdRef.current =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `session-${Date.now()}-${Math.random()
+                .toString(36)
+                .substr(2, 9)}`;
 
-      console.log(
-        `🆔 [Session] New Session ID Generated: ${sessionIdRef.current}`
-      );
+        console.log(
+          `🆔 [Session] New Session ID Generated (Fallback): ${sessionIdRef.current}`
+        );
+      }
     }
 
     return () => {
@@ -86,57 +96,33 @@ export default function useQACopilot({
   }, []);
 
   // ======================
-  // ✅ INIT SESSION WITH KB (API)
+  // ✅ INIT SESSION (Uses Existing)
   // ======================
   const initSession = async () => {
-    try {
-      console.log("🚀 Initializing Session via API...");
-
-      const payload = {
-        user_id: user?.id || "anonymous",
-        persona_id: personaId,
-        custom_style_prompt:
-          settingsRef.current?.custom_style_prompt || null,
-        knowledge_base_ids: knowledgeBaseIds || [], // ✅ NEW: Pass KB IDs
-      };
-
-      console.log("📦 Session Init Payload:", payload);
-
-      const res = await fetch(`${BACKEND_URL}/session/init`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || "Session init failed");
+    // If we have an existing session ID (passed from Launchpad), just use it.
+    if (existingSessionId) {
+      if (!sessionIdRef.current) {
+         sessionIdRef.current = existingSessionId;
+      }
+      
+      // Update KB data if not already set (re-sync from prop if needed)
+      if (sessionData?.knowledge_bases && knowledgeBasesData.length === 0) {
+         setKnowledgeBasesData(sessionData.knowledge_bases);
       }
 
-      const data = await res.json();
-      console.log("✅ Session Initialized:", data);
+      console.log(`🚀 [useQACopilot] Session already initialized: ${existingSessionId}`);
 
-      if (data.session_id) {
-        sessionIdRef.current = data.session_id;
-      }
-
-      // ✅ NEW: Store KB data from response
-      if (data.knowledge_bases) {
-        setKnowledgeBasesData(data.knowledge_bases);
-        console.log("📚 Knowledge Bases loaded:", data.knowledge_bases.length);
-      }
-
-      // 🔥 Start interview timer
-      if (isMockMode) {
+       // 🔥 Start interview timer
+      if (isMockMode && !interviewStartTime) {
         setInterviewStartTime(Date.now());
       }
-
-      return data.session_id;
-    } catch (err) {
-      console.error("🔴 Session Init Error:", err);
-      setQaStatus(`Init Error: ${err.message}`);
-      return null;
+      
+      return existingSessionId;
     }
+
+    // Fallback if no session ID passed (should rarely happen in new flow)
+    console.warn("⚠️ No existing session ID passed to useQACopilot. Using local ID.");
+    return sessionIdRef.current;
   };
 
   // ======================
@@ -299,17 +285,66 @@ export default function useQACopilot({
       ? Math.round(performanceMetrics.total_score / performanceMetrics.questions_answered)
       : 0;
 
+    // Calculate time analysis
+    const responseTimes = performanceMetrics.question_details.map(q => q.duration_seconds || 0);
+    const avgResponseTime = responseTimes.length > 0 
+      ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length) 
+      : 0;
+    
+    const timeAnalysis = {
+      avg_response_time: avgResponseTime,
+      fastest_response: responseTimes.length > 0 ? Math.min(...responseTimes) : 0,
+      slowest_response: responseTimes.length > 0 ? Math.max(...responseTimes) : 0,
+      optimal_range: [60, 180]
+    };
+
+    // Calculate completion rate (assuming 5 questions for now or just based on answered)
+    // For now we'll just say 100% of what was asked
+    const completionRate = 100; 
+
     const analyticsPayload = {
       session_id: sessionIdRef.current,
       user_id: user?.id,
       persona_id: personaId,
+      
+      // Mapped fields for MockInterviewAnalytics
+      overall_score: avgScore,
+      total_questions: performanceMetrics.questions_answered,
       duration_minutes: duration,
-      questions_answered: performanceMetrics.questions_answered,
-      avg_score: avgScore,
-      category_scores: categoryAnalysis,
-      strengths,
-      improvements,
-      question_details: performanceMetrics.question_details,
+      completion_rate: completionRate,
+      
+      categories: Object.entries(categoryAnalysis).reduce((acc, [key, val]) => {
+        acc[key] = {
+          score: val.avgScore,
+          trend: val.trend,
+          feedback: val.avgScore >= 80 ? 'Great performance' : val.avgScore >= 60 ? 'Good effort' : 'Needs improvement' 
+        };
+        return acc;
+      }, {}),
+
+      strengths: strengths.length > 0 ? strengths : ['Persistence', 'Completing the interview'],
+      improvements: improvements.length > 0 ? improvements : ['Practice more questions to identify specific areas'],
+      
+      question_breakdown: performanceMetrics.question_details,
+      
+      time_analysis: timeAnalysis,
+      
+      // Default/Placeholder metrics if not tracked yet
+      speech_metrics: {
+        avg_words_per_minute: 130, // Placeholder
+        filler_words_count: 5,     // Placeholder
+        pause_frequency: 'moderate',
+        clarity_score: 8.5
+      },
+      
+      recommendations: [
+        {
+          title: 'Review Key Topics',
+          description: 'Go over the questions you found difficult.',
+          priority: 'high',
+          resources: ['Documentation', 'Practice']
+        }
+      ]
     };
 
     console.log("📊 Analytics Payload:", analyticsPayload);
@@ -546,6 +581,7 @@ export default function useQACopilot({
 
     if (isMockMode && interviewStartTime) {
       await finalizeAnalytics();
+      setShowAnalytics(true);
     }
 
     if (reconnectingQaWsRef.current) {

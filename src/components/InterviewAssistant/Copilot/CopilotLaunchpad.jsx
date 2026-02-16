@@ -19,6 +19,7 @@ import PersonaSelection from "../Persona/PersonaSelection";
 import InterviewDomainSelection from "./InterviewDomainSelection";
 import LaunchChecklist from "./LaunchChecklist";
 import SettingsModal from "../Settings/SettingsModal";
+import { BACKEND_URL as API } from "../../utils/config";
 
 /* -------------------- UTILS -------------------- */
 function cn(...classes) {
@@ -117,7 +118,7 @@ export default function CopilotLaunchpad({ mode }) {
   const [launching, setLaunching] = useState(false);
 
   /* -------------------- API -------------------- */
-  const API = import.meta.env.VITE_API_URL || "http://localhost:10000";
+  // API is imported from config.js
 
   /* -------------------- PERSONA SELECT -------------------- */
   const handlePersonaSelect = async (personaId, personaData) => {
@@ -190,10 +191,9 @@ export default function CopilotLaunchpad({ mode }) {
       const data = await res.json();
 
       // ✅ Log session response (for debugging)
-      console.log("✅ [LAUNCH] Session initialized:", {
-        session_id: data.session_id,
-        kb_count: data.knowledge_bases?.length || 0,
-        kb_context_size: data.kb_context?.length || 0,
+      console.log("✅ Session Initialized:", {
+        ...data,
+        knowledge_base_ids: selectedKBIds,
       });
 
       sessionStorage.setItem("launchAuthorized", "true");

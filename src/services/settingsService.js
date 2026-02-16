@@ -1,8 +1,7 @@
 // frontend/src/services/settingsService.js
 
 import { supabase } from "../database/supabaseClient";
-
-const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:10000";
+import { BACKEND_URL } from "../components/utils/config";
 
 // ============================================================
 // DEFAULT SETTINGS (used when user has no saved settings yet)

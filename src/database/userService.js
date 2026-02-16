@@ -1,6 +1,7 @@
 // frontend/src/database/userService.js
 
 import { supabase } from "./supabaseClient";
+import { BACKEND_URL } from "../components/utils/config";
 
 /**
  * User Service - Simplified for Supabase Auth
@@ -23,7 +24,7 @@ export const getUserProfile = async () => {
       return { success: false, error: "Not authenticated" };
     }
 
-    const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:10000";
+
 
     const res = await fetch(`${BACKEND_URL}/api/users/me`, {
       method: "GET",
@@ -60,7 +61,7 @@ export const getUserQuota = async () => {
       return { success: false, error: "Not authenticated" };
     }
 
-    const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:10000";
+
 
     const res = await fetch(`${BACKEND_URL}/api/payments/quota`, {
       method: "GET",

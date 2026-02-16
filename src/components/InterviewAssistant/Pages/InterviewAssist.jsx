@@ -37,14 +37,15 @@ export default function InterviewAssist() {
   const [mockQuestionCount, setMockQuestionCount] = useState(0);
 
   // GET EXISTING SESSION & KB IDs
-  const existingSessionId = location.state?.sessionId || sessionStorage.getItem("sessionId");
+  const existingSessionId =
+    location.state?.sessionId || sessionStorage.getItem("sessionId");
   const knowledgeBaseIds = location.state?.knowledgeBaseIds || [];
 
   // PERSONA / DOMAIN
   const [personaId] = useState(
     location.state?.personaId ||
       localStorage.getItem("selectedPersona") ||
-      null
+      null,
   );
 
   const [personaData] = useState(() => {
@@ -58,7 +59,7 @@ export default function InterviewAssist() {
   });
 
   const [domain] = useState(
-    location.state?.domain || localStorage.getItem("selectedDomain") || ""
+    location.state?.domain || localStorage.getItem("selectedDomain") || "",
   );
 
   // GLOBAL SETTINGS
@@ -82,6 +83,7 @@ export default function InterviewAssist() {
     settingsRef,
     isMockMode,
     existingSessionId,
+    sessionData: location.state?.sessionData,
     knowledgeBaseIds,
   });
 
@@ -142,25 +144,27 @@ export default function InterviewAssist() {
   const startRecording = async () => {
     try {
       audio.setTabAudioError("");
-      
+
       // Ensure session exists
       const sessionId = await qa.initSession();
       if (!sessionId) {
         console.warn("❌ Session init failed");
-        return; 
+        return;
       }
 
       await transcription.connectDeepgram();
       await audio.startMicrophoneCapture();
-      
+
       if (!isMockMode) {
         audio.setShowTabModal(true);
       }
-      
+
       await qa.connectQA();
       audio.setIsRecording(true);
 
-      console.log(isMockMode ? "✅ Mock interview started" : "✅ Interview started");
+      console.log(
+        isMockMode ? "✅ Mock interview started" : "✅ Interview started",
+      );
     } catch (err) {
       console.error("Failed to start:", err);
       transcription.stopTranscription();
@@ -198,27 +202,30 @@ Completion Rate: ${qa.analyticsData.completion_rate}%
 CATEGORY SCORES:
 ${Object.entries(qa.analyticsData.categories)
   .map(([cat, data]) => `- ${cat}: ${data.score}/100 (${data.trend})`)
-  .join('\n')}
+  .join("\n")}
 
 STRENGTHS:
-${qa.analyticsData.strengths.map(s => `✓ ${s}`).join('\n')}
+${qa.analyticsData.strengths.map((s) => `✓ ${s}`).join("\n")}
 
 AREAS TO IMPROVE:
-${qa.analyticsData.improvements.map(i => `• ${i}`).join('\n')}
+${qa.analyticsData.improvements.map((i) => `• ${i}`).join("\n")}
 
 QUESTION BREAKDOWN:
 ${qa.analyticsData.question_breakdown
-  .map(q => `
+  .map(
+    (q) => `
 Q${q.number}: ${q.question}
 Score: ${q.score}/100
 Duration: ${q.duration_seconds}s
 Feedback: ${q.feedback}
-`).join('\n')}
+`,
+  )
+  .join("\n")}
     `.trim();
 
-    const blob = new Blob([report], { type: 'text/plain' });
+    const blob = new Blob([report], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `interview-report-${Date.now()}.txt`;
     a.click();
@@ -252,57 +259,60 @@ Feedback: ${q.feedback}
   if (!user) return null;
 
   // ✅ MOCK CONTROLS COMPONENT (reusable)
-  const mockControlsContent = isMockMode && audio.isRecording ? (
-    <div className="p-3 sm:p-4">
-      <div className="flex flex-col gap-3">
-        
-        {/* Status */}
-        <div className="flex items-center gap-2 text-xs sm:text-sm">
-          {qa.isGenerating ? (
-            <>
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse shrink-0" />
-              <span className="text-purple-300">Generating question...</span>
-            </>
-          ) : qa.isWaitingForAnswer ? (
-            <>
-              <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse shrink-0" />
-              <span className="text-amber-300">🎤 Answer the question (then click Next)</span>
-            </>
-          ) : (
-            <>
-              <div className="w-2 h-2 bg-green-400 rounded-full shrink-0" />
-              <span className="text-green-300">✅ Ready for next question</span>
-            </>
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-          
-          <button
-            onClick={requestNextMockQuestion}
-            disabled={qa.isGenerating}
-            className="w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-medium transition text-sm shadow-lg order-1 sm:order-none"
-          >
-            {qa.isGenerating ? "Generating..." : "Next Question"}
-          </button>
-
-          <div className="w-full sm:w-auto px-4 py-2.5 bg-[#1a1a1a] border border-gray-700 rounded-lg text-sm font-medium text-gray-300 text-center order-2 sm:order-none">
-            Question {mockQuestionCount}
+  const mockControlsContent =
+    isMockMode && audio.isRecording ? (
+      <div className="p-3 sm:p-4">
+        <div className="flex flex-col gap-3">
+          {/* Status */}
+          <div className="flex items-center gap-2 text-xs sm:text-sm">
+            {qa.isGenerating ? (
+              <>
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse shrink-0" />
+                <span className="text-purple-300">Generating question...</span>
+              </>
+            ) : qa.isWaitingForAnswer ? (
+              <>
+                <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse shrink-0" />
+                <span className="text-amber-300">
+                  🎤 Answer the question (then click Next)
+                </span>
+              </>
+            ) : (
+              <>
+                <div className="w-2 h-2 bg-green-400 rounded-full shrink-0" />
+                <span className="text-green-300">
+                  ✅ Ready for next question
+                </span>
+              </>
+            )}
           </div>
 
-          <button
-            onClick={async () => {
-              await stopRecording();
-            }}
-            className="w-full sm:w-auto sm:ml-auto px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition text-sm shadow-lg order-3 sm:order-none"
-          >
-            End & View Analytics
-          </button>
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <button
+              onClick={requestNextMockQuestion}
+              disabled={qa.isGenerating}
+              className="w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-medium transition text-sm shadow-lg order-1 sm:order-none"
+            >
+              {qa.isGenerating ? "Generating..." : "Next Question"}
+            </button>
+
+            <div className="w-full sm:w-auto px-4 py-2.5 bg-[#1a1a1a] border border-gray-700 rounded-lg text-sm font-medium text-gray-300 text-center order-2 sm:order-none">
+              Question {mockQuestionCount}
+            </div>
+
+            <button
+              onClick={async () => {
+                await stopRecording();
+              }}
+              className="w-full sm:w-auto sm:ml-auto px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition text-sm shadow-lg order-3 sm:order-none"
+            >
+              End & View Analytics
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  ) : null;
+    ) : null;
 
   // RENDER
   return (
@@ -342,44 +352,43 @@ Feedback: ${q.feedback}
 
         {/* MAIN CONTENT - Fully Responsive Layout */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-          
           {/* LEFT PANEL - TRANSCRIPT - 30% on all screens */}
           <div className="h-[30%] lg:h-auto w-full lg:w-[30%] border-b lg:border-b-0 lg:border-r border-gray-800 flex flex-col min-h-0 shrink-0">
             <TranscriptPanel
-                activeView={isMockMode ? "candidate" : activeView}
-                onViewChange={isMockMode ? () => {} : setActiveView}
-                interviewerTranscript={transcription.interviewerTranscript}
-                candidateTranscript={transcription.candidateTranscript}
-                currentInterviewerParagraph={
-                  transcription.currentInterviewerParagraph
-                }
-                currentCandidateParagraph={
-                  transcription.currentCandidateParagraph
-                }
-                interviewerInterim={transcription.interviewerInterim}
-                candidateInterim={transcription.candidateInterim}
-                isPaused={audio.isPaused}
-                onPauseToggle={() => audio.setIsPaused(!audio.isPaused)}
-                isRecording={audio.isRecording}
-                onManualGenerate={qa.handleManualGenerate}
-                autoScroll={settings?.autoScroll}
-                isMockMode={isMockMode}
-              />
+              activeView={isMockMode ? "candidate" : activeView}
+              onViewChange={isMockMode ? () => {} : setActiveView}
+              interviewerTranscript={transcription.interviewerTranscript}
+              candidateTranscript={transcription.candidateTranscript}
+              currentInterviewerParagraph={
+                transcription.currentInterviewerParagraph
+              }
+              currentCandidateParagraph={
+                transcription.currentCandidateParagraph
+              }
+              interviewerInterim={transcription.interviewerInterim}
+              candidateInterim={transcription.candidateInterim}
+              isPaused={audio.isPaused}
+              onPauseToggle={() => audio.setIsPaused(!audio.isPaused)}
+              isRecording={audio.isRecording}
+              onManualGenerate={qa.handleManualGenerate}
+              autoScroll={settings?.autoScroll}
+              isMockMode={isMockMode}
+            />
           </div>
 
           {/* RIGHT PANEL - QA COPILOT - 70% on all screens */}
           <div className="flex-1 lg:w-[70%] flex flex-col min-h-0">
             <QACopilot
-                qaList={qa.qaList}
-                currentQuestion={qa.currentQuestion}
-                currentAnswer={qa.currentAnswer}
-                isGenerating={qa.isGenerating}
-                isStreamingComplete={qa.isStreamingComplete}
-                autoScroll={settings?.autoScroll}
-                isMockMode={isMockMode}
-                mockQuestionCount={mockQuestionCount}
-                mockControls={mockControlsContent}
-              />
+              qaList={qa.qaList}
+              currentQuestion={qa.currentQuestion}
+              currentAnswer={qa.currentAnswer}
+              isGenerating={qa.isGenerating}
+              isStreamingComplete={qa.isStreamingComplete}
+              autoScroll={settings?.autoScroll}
+              isMockMode={isMockMode}
+              mockQuestionCount={mockQuestionCount}
+              mockControls={mockControlsContent}
+            />
 
             {/* ✅ MOCK CONTROLS - Only visible on mobile/tablet (lg:hidden) */}
             {mockControlsContent && (
@@ -417,11 +426,11 @@ Feedback: ${q.feedback}
                   Ready to Start Mock Interview?
                 </h3>
                 <p className="text-gray-400 text-xs sm:text-sm mb-6 leading-relaxed">
-                  The AI will ask you interview questions one by one.
-                  Answer each question, then click "Next Question" to continue.
-                  Your performance will be analyzed at the end.
+                  The AI will ask you interview questions one by one. Answer
+                  each question, then click "Next Question" to continue. Your
+                  performance will be analyzed at the end.
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={() => setShowMockConfirm(false)}
