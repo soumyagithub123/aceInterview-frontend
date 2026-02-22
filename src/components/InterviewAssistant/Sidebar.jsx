@@ -18,7 +18,7 @@ import { useAppData } from "../../context/AppDataContext";
 
 export default function Sidebar({ currentPage, onNavigate }) {
   const { user } = useAuth();
-  const { userProfile } = useAppData();
+  const { userProfile, currentPlan } = useAppData();
   const navigate = useNavigate();
 
 
@@ -38,7 +38,7 @@ export default function Sidebar({ currentPage, onNavigate }) {
     return "User";
   };
 
-  const plan = userProfile?.subscription_tier || "free";
+  const plan = currentPlan || "free";
   const planColor = 
     plan === "pro" ? "bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent font-bold" : 
     plan === "basic" ? "text-emerald-400 font-medium" : 

@@ -458,7 +458,7 @@ import { Check, Crown, Zap, ArrowRight } from "lucide-react";
 export default function Pricing() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, sessionQuota } = useAuth();
   const { reloadAll, userProfile, quota } = useAppData();
 
   const [billingPeriod, setBillingPeriod] = useState("monthly");
@@ -772,7 +772,19 @@ export default function Pricing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-7 max-w-6xl mx-auto mb-24">
             {plans.map((plan) => {
               const savings = getSavings(plan);
-              const isCurrentPlan = userProfile?.subscription_tier === plan.key;
+              const isCurrentPlan = plan.key === "free"
+                ? userProfile?.subscription_tier === "free"
+                : userProfile?.subscription_tier === plan.key &&
+                  sessionQuota?.billing_period === billingPeriod;
+              // ✅ Sessions khatam ho gayi hain? Recharge allow karo
+              const isSessionsExhausted =
+                isCurrentPlan &&
+                plan.key !== "free" &&
+                sessionQuota !== null &&
+                !sessionQuota?.is_unlimited &&
+                sessionQuota?.sessions_remaining === 0;
+              // Disable only if current plan AND sessions still remaining
+              const isDisabled = loading === plan.key || (isCurrentPlan && !isSessionsExhausted);
 
               return (
                 <div
@@ -835,16 +847,18 @@ export default function Pricing() {
 
                   {/* CTA Button */}
                   <button
-                    disabled={loading === plan.key || isCurrentPlan}
+                    disabled={isDisabled}
                     onClick={() => startPayment(plan)}
                     className={`w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all duration-300 mb-9 shadow-md ${
                       loading === plan.key
                         ? "opacity-50 cursor-not-allowed bg-gray-200 text-gray-500"
-                        : isCurrentPlan
+                        : isCurrentPlan && !isSessionsExhausted
                           ? "bg-gray-200 text-gray-500 border-2 border-gray-400 cursor-not-allowed"
-                          : plan.popular
-                            ? "bg-black text-white hover:bg-gray-800 shadow-lg"
-                            : "bg-white text-gray-900 border-2 border-gray-400 hover:border-gray-600 hover:bg-gray-50"
+                          : isSessionsExhausted
+                            ? "bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-200"
+                            : plan.popular
+                              ? "bg-black text-white hover:bg-gray-800 shadow-lg"
+                              : "bg-white text-gray-900 border-2 border-gray-400 hover:border-gray-600 hover:bg-gray-50"
                     }`}
                   >
                     {loading === plan.key ? (
@@ -852,8 +866,13 @@ export default function Pricing() {
                         <div className="w-5 h-5 border-3 border-gray-400 border-t-gray-700 rounded-full animate-spin" />
                         <span>Processing…</span>
                       </>
-                    ) : isCurrentPlan ? (
+                    ) : isCurrentPlan && !isSessionsExhausted ? (
                       <span>{plan.buttonText}</span>
+                    ) : isSessionsExhausted ? (
+                      <>
+                        <span>🔄 Recharge Sessions</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </>
                     ) : (
                       <>
                         <span>{plan.buttonText}</span>

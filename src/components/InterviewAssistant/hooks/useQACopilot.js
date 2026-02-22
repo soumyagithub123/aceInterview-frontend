@@ -66,6 +66,10 @@ export default function useQACopilot({
 
   const audioRef = useRef(null);
 
+  // ⚡ RAF delta buffer — accumulate tokens, flush at 60fps to avoid per-token re-renders
+  const answerBufferRef = useRef("");
+  const rafScheduledRef = useRef(false);
+
   // Initialize Session ID on mount
   // Initialize Session ID on mount
   useEffect(() => {
@@ -466,6 +470,9 @@ export default function useQACopilot({
 
               if (!data.question) return;
               console.log("❓ [QACopilot] Question:", data.question);
+              // ⚡ Reset delta buffer for new question
+              answerBufferRef.current = "";
+              rafScheduledRef.current = false;
               setCurrentQuestion(data.question);
               setCurrentAnswer("");
               setIsGenerating(true);
@@ -477,32 +484,52 @@ export default function useQACopilot({
 
               if (data.delta) {
                 setIsGenerating(false);
-                setCurrentAnswer((prev) => prev + data.delta);
+                // ⚡ Buffer delta and flush via RAF (~60fps) — avoids per-token re-render
+                answerBufferRef.current += data.delta;
+                if (!rafScheduledRef.current) {
+                  rafScheduledRef.current = true;
+                  requestAnimationFrame(() => {
+                    setCurrentAnswer(answerBufferRef.current);
+                    rafScheduledRef.current = false;
+                  });
+                }
               }
               break;
 
             case "answer_complete":
-            case "answer_ready":
+            case "answer_ready": {
               if (isMockMode) break;
 
               console.log("✅ [QACopilot] Answer complete");
 
-              if (data.answer && typeof data.answer === "string") {
-                setCurrentAnswer(data.answer);
-              }
+              // ⚡ Flush any remaining buffered delta before finalizing
+              // Block scope {} required here to use const inside switch-case
+              const finalAnswer = data.answer && typeof data.answer === "string"
+                ? data.answer
+                : answerBufferRef.current || currentAnswer;
 
+              // Clear RAF buffer
+              answerBufferRef.current = "";
+              rafScheduledRef.current = false;
+
+              setCurrentAnswer(finalAnswer);
               setIsGenerating(false);
               setIsStreamingComplete(true);
 
               addQA({
                 question: data.question || currentQuestion,
-                answer: data.answer || currentAnswer,
+                answer: finalAnswer,
               });
 
-              setCurrentQuestion("");
-              setCurrentAnswer("");
-              setIsStreamingComplete(false);
+              // Brief delay so user sees the completed answer before clearing
+              setTimeout(() => {
+                setCurrentQuestion("");
+                setCurrentAnswer("");
+                setIsStreamingComplete(false);
+                answerBufferRef.current = "";
+              }, 300);
               break;
+            }
 
             case "error":
               console.error("❌ [QACopilot] WS error:", data.message);
@@ -680,3 +707,9 @@ export default function useQACopilot({
     knowledgeBasesData,
   };
 }
+
+
+
+
+
+

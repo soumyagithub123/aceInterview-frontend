@@ -181,15 +181,12 @@ export default function useTranscription({
 
         setCurrentInterviewerParagraph(interviewerParagraphRef.current);
 
-        // ✅ SMART PAUSE DETECTION
-        // - 200ms for clear questions (has ? or strong punctuation)
-        // - 300ms default (reduced from 700ms)
-        let pauseInterval = 300; // ✅ REDUCED from 700ms
-        
-        if (hasStrongPauseIndicator(interviewerParagraphRef.current)) {
-          pauseInterval = 200; // ✅ Even faster for obvious questions
-          console.log("⚡ [Fast-track] Question detected, sending in 200ms");
-        }
+        // ✅ WAIT for full question: 2500ms of silence before sending to backend
+        // This prevents the AI from answering only the FIRST fragment of a long question.
+        // Deepgram fires is_final for each sentence chunk, but the interviewer may
+        // still be speaking. We accumulate all chunks during the pause window and
+        // send the complete text once the interviewer actually stops.
+        const pauseInterval = 2500;
 
         interviewerPauseTimerRef.current = setTimeout(() => {
           finalizeParagraph(

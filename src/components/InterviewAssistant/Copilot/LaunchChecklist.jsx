@@ -49,7 +49,7 @@ export default function LaunchChecklist({ persona, personaData, domain }) {
     {
       icon: Building2,
       title: "Persona",
-      description: persona || "No persona selected",
+      description: personaData?.name || (personaData?.position ? `${personaData.position} @ ${personaData.company_name}` : persona) || "No persona selected",
       status: !!persona,
     },
     {

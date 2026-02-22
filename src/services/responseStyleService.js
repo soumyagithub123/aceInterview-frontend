@@ -145,6 +145,20 @@ export const responseStyleService = {
    */
   async deleteStyle(styleId, userId) {
     try {
+      // 1. Unlink from settings if selected
+      const { error: settingsError } = await supabase
+        .from('copilot_settings')
+        .update({ selected_response_style_id: null })
+        .eq('user_id', userId)
+        .eq('selected_response_style_id', styleId);
+
+      if (settingsError) {
+        console.warn('Failed to unlink style from settings:', settingsError);
+        // Continue anyway, as the delete might fail if we didn't unlink, 
+        // effectively checking the constraint. 
+      }
+
+      // 2. Delete the style
       const { error } = await supabase
         .from('response_styles')
         .delete()
