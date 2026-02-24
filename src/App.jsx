@@ -17,9 +17,12 @@ import SignIn from "./components/Auth/SignIn";
 import SignUp from "./components/Auth/SignUp";
 
 // Resources
-import Blog from "./components/Resources/Blog/Blog";
-import ResumeBuilder from "./components/Resources/Blog/ResumeBuilder";
-
+//import Blog from "./components/Resources/Blog/oldBlog";
+// import ResumeBuilder from "./components/Resources/Blog/ResumeBuilder";
+// //import Blog from "./components/Resources/Blog/Blog";
+// import BlogDetail from "./components/Resources/Blog/oldBlogDetail";
+import BlogPage from "./components/Resources/Blog/BlogPage";
+import AtsFriendlyResume from "./components/Resources/Blog/AtsFriendlyResume";
 // ⭐ Payment Pages
 import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import PaymentFailure from "./components/Payment/PaymentFailure";
@@ -30,14 +33,13 @@ function App() {
       <AppDataProvider>
         <BrowserRouter>
           <Routes>
-
             {/* ---------- PUBLIC ROUTES ---------- */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/sign-in" element={<SignIn />} />
             <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/resume-builder" element={<ResumeBuilder />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<AtsFriendlyResume />} />
 
             {/* ---------- PAYMENT ROUTES ---------- */}
             <Route path="/payment/success" element={<PaymentSuccess />} />
@@ -70,7 +72,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
           </Routes>
         </BrowserRouter>
       </AppDataProvider>

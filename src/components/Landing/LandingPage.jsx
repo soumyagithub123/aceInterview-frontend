@@ -51,15 +51,26 @@ import CTASection from "./CTASection";
 import Footer from "./Footer";
 
 export default function LandingPage() {
+  // useEffect(() => {
+  //   if (window.location.hash === "#faq") {
+  //     document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, []);
   useEffect(() => {
-    if (window.location.hash === "#faq") {
-      document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
+    const hash = window.location.hash;
+
+    if (hash) {
+      const element = document.querySelector(hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
     }
   }, []);
 
   return (
     <div className="min-h-screen bg-white text-surface-900">
-      
       {/* 🔽 GLOBAL FIX FOR LARGE GAPS */}
       <style>
         {`
