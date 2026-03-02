@@ -302,11 +302,40 @@ export default function InterviewAssist() {
   }, [isMockMode, audio.isRecording, mockQuestionCount]);
 
   // REQUEST NEXT MOCK QUESTION
+  // 🔥 Fix 1: Submit current answer + ⚡ use prefetch if available
   const requestNextMockQuestion = () => {
     const nextCount = mockQuestionCount + 1;
     console.log(`➡️ [Mock] Requesting question #${nextCount}`);
+
+    // Collect candidate's spoken answer from transcript
+    const answeredParagraphs = transcription.candidateTranscript
+      .map((entry) => entry.text)
+      .filter(Boolean);
+    const inProgress = transcription.currentCandidateParagraph;
+    if (inProgress) answeredParagraphs.push(inProgress);
+    const answerText = answeredParagraphs.join(" ").trim();
+
+    // Submit for evaluation if there's anything spoken
+    if (answerText) {
+      console.log(`📊 [Mock] Submitting answer (${answerText.length} chars) for evaluation`);
+      qa.submitMockAnswer(answerText);
+    } else {
+      console.warn("[Mock] No answer text found to submit — skipping evaluation");
+    }
+
     setMockQuestionCount(nextCount);
-    qa.requestMockQuestion(nextCount);
+
+    // ⚡ Use prefetched question for instant display
+    if (qa.hasPrefetchedQuestion(nextCount)) {
+      console.log(`⚡ [Mock] Q#${nextCount} ready from prefetch — showing instantly`);
+      qa.usePrefetchedQuestion();
+      // Kick off prefetch for the question after this one
+      setTimeout(() => qa.prefetchNextQuestion(nextCount + 1), 600);
+    } else {
+      // Fallback: normal WS request (shows loading indicator)
+      console.log(`⏳ [Mock] Q#${nextCount} not prefetched yet — requesting normally`);
+      qa.requestMockQuestion(nextCount);
+    }
   };
 
   // RECORDING CONTROL
@@ -490,6 +519,19 @@ Feedback: ${q.feedback}
 
             <button
               onClick={async () => {
+                // 🔥 Fix 1 (end): Submit last answer before ending session
+                const lastParagraphs = transcription.candidateTranscript
+                  .map((entry) => entry.text)
+                  .filter(Boolean);
+                const lastInProgress = transcription.currentCandidateParagraph;
+                if (lastInProgress) lastParagraphs.push(lastInProgress);
+                const lastAnswer = lastParagraphs.join(" ").trim();
+                if (lastAnswer) {
+                  console.log("[Mock] Submitting last answer before ending session");
+                  qa.submitMockAnswer(lastAnswer);
+                  // Small delay so WS can process evaluate_answer before session_end
+                  await new Promise((r) => setTimeout(r, 300));
+                }
                 await stopRecording();
               }}
               className="w-full sm:w-auto sm:ml-auto px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition text-sm shadow-lg order-3 sm:order-none"
