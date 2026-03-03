@@ -499,7 +499,7 @@ const InterviewReportVisual = () => {
             </svg>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-2xl font-bold text-white">{score}%</div>
+              <div className="text-1xl font-bold text-white">{score}%</div>
               <div className="text-xs text-gray-400">Overall</div>
             </div>
           </div>

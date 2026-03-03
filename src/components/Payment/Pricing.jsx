@@ -572,7 +572,7 @@ export default function Pricing() {
       description: plan.title,
       handler: function (response) {
         navigate(
-          `/payment-success?txnid=${response.razorpay_payment_id}&amount=${plan.amountINR}`
+          `/payment-success?txnid=${response.razorpay_payment_id}&amount=${plan.amountINR}`,
         );
       },
       modal: {
@@ -623,14 +623,14 @@ export default function Pricing() {
         billingPeriod === "yearly"
           ? 1445
           : billingPeriod === "quarterly"
-          ? 3400
-          : 3825,
+            ? 3400
+            : 3825,
       price:
         billingPeriod === "yearly"
           ? "14.45"
           : billingPeriod === "quarterly"
-          ? "34"
-          : "38.25",
+            ? "34"
+            : "38.25",
       period: "/month",
       features: [
         "60-min Copilot Session x 5",
@@ -651,14 +651,14 @@ export default function Pricing() {
         billingPeriod === "yearly"
           ? 2550
           : billingPeriod === "quarterly"
-          ? 5100
-          : 5950,
+            ? 5100
+            : 5950,
       price:
         billingPeriod === "yearly"
           ? "25.5"
           : billingPeriod === "quarterly"
-          ? "51"
-          : "59.5",
+            ? "51"
+            : "59.5",
       period: "/month",
       features: [
         "Unlimited 90-min Copilot Sessions",
@@ -703,9 +703,9 @@ export default function Pricing() {
                 <button
                   key={period}
                   onClick={() => setBillingPeriod(period)}
-                 className={`flex-1 text-center py-2.5 font-semibold rounded-full transition-all duration-300 relative z-10 focus:outline-none focus:ring-0 active:outline-none active:ring-0 ${
-  billingPeriod === period ? "text-white" : "text-gray-700"
- }`}
+                  className={`flex-1 text-center py-2.5 font-semibold rounded-full transition-all duration-300 relative z-10 focus:outline-none focus:ring-0 active:outline-none active:ring-0 ${
+                    billingPeriod === period ? "text-white" : "text-gray-700"
+                  }`}
                 >
                   {period.charAt(0).toUpperCase() + period.slice(1)}
                 </button>
@@ -718,8 +718,8 @@ export default function Pricing() {
                     billingPeriod === "monthly"
                       ? "translateX(0%)"
                       : billingPeriod === "quarterly"
-                      ? "translateX(100%)"
-                      : "translateX(200%)",
+                        ? "translateX(100%)"
+                        : "translateX(200%)",
                 }}
               />
             </div>
@@ -731,16 +731,14 @@ export default function Pricing() {
               <div
                 key={i}
                 className={`relative rounded-3xl p-8 shadow-2xl transition-transform duration-300 transform  ${
-                  
                   plan.bestValue
                     ? "bg-primary-600 text-white"
                     : "bg-white text-surface-900"
                 }`}
                 style={{
-                  boxShadow:
-                    plan.bestValue
-                      ? "0 15px 35px rgba(99, 102, 241, 0.5)"
-                      : "0 10px 25px rgba(0,0,0,0.15)",
+                  boxShadow: plan.bestValue
+                    ? "0 15px 35px rgba(99, 102, 241, 0.5)"
+                    : "0 10px 25px rgba(0,0,0,0.15)",
                 }}
               >
                 <span
@@ -749,7 +747,9 @@ export default function Pricing() {
                   {plan.badge}
                 </span>
 
-                <h3 className="text-xl font-semibold mt-5 mb-2">{plan.title}</h3>
+                <h3 className="text-xl font-semibold mt-5 mb-2">
+                  {plan.title}
+                </h3>
 
                 <div className="mb-8">
                   <span className="text-5xl font-bold">{plan.price}</span>
@@ -766,12 +766,16 @@ export default function Pricing() {
                   {plan.features.map((f, j) => (
                     <li key={j} className="flex items-start gap-3">
                       <span
-                        className={plan.bestValue ? "text-white" : "text-primary-600"}
+                        className={
+                          plan.bestValue ? "text-white" : "text-primary-600"
+                        }
                       >
                         ✔
                       </span>
                       <span
-                        className={plan.bestValue ? "text-white/95" : "text-surface-700"}
+                        className={
+                          plan.bestValue ? "text-white/95" : "text-surface-700"
+                        }
                       >
                         {f}
                       </span>
@@ -786,8 +790,8 @@ export default function Pricing() {
                     loading === plan.key
                       ? "opacity-50 cursor-not-allowed"
                       : plan.bestValue
-                      ? "bg-white text-primary-600"
-                      : "border-2 border-surface-900 text-surface-900"
+                        ? "bg-white text-primary-600"
+                        : "border-2 border-surface-900 text-surface-900"
                   }`}
                 >
                   {loading === plan.key ? "Processing…" : plan.buttonText} →

@@ -2,18 +2,18 @@
 export const blogData = [{
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20114.png",
   imgAlt: "Stop Putting Quotes",
-  title: `Stop Putting Quotes on Your Resume in 2026 `,
-  description: "In the evolving landscape of professional presentation, certain once-common practices have become outdated, even bad. One such trend, the inclusion of quotes within a resume, is rapidly losing its relevance and should be decisively abandoned by 2026.",
+  title: `Stop Putting Quotes on Your Resume in 2025 `,
+  description: "In the evolving landscape of professional presentation, certain once-common practices have become outdated, even bad. One such trend, the inclusion of quotes within a resume, is rapidly losing its relevance and should be decisively abandoned by 2025.",
   category: "Resumes",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20115.png",
-  imgAlt: "How to Write a Resume to Get a Job in 2026",
-  title: `How to Write a Resume to Get a Job in 2026`,
+  imgAlt: "How to Write a Resume to Get a Job in 2025",
+  title: `How to Write a Resume to Get a Job in 2025`,
   description: "Let's delve into the essential strategies and actionable tips for crafting a compelling resume that not only captures the attention of human recruiters but also effectively navigates the complexities of Applicant Tracking Systems (ATS)",
   category: "Resumes",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20116.png",
@@ -21,15 +21,15 @@ export const blogData = [{
   title: `Why Your Resume Headline Matters (and How to Nail It)`,
   description: "This blog will delve into the critical role of crafting compelling resume headlines. We’ll be exploring how they can serve as a hook, demonstrating your value proposition and significantly boosting your chances of landing that coveted interview.",
   category: "Resumes",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20231.jpeg",
-  imgAlt: "Why You Should Be Using a Job Application Tracker in 2026",
-  title: `Why You Should Be Using a Job Application Tracker in 2026`,
+  imgAlt: "Why You Should Be Using a Job Application Tracker in 2025",
+  title: `Why You Should Be Using a Job Application Tracker in 2025`,
   description: "The average applicant in the US submits a staggering 100-200 applications before landing their next position. The solution? Using a dedicated job tracker to keep all your applications and documents in order and stay in control of your job search process.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20118.png",
@@ -37,15 +37,15 @@ export const blogData = [{
   title: `How to Keep Track of Job Applications The Easy Way`,
   description: "Without a solid system in place, it's easy to lose track of job applications, miss deadlines, and potentially miss out on opportunities. We're going to help you fix that today!",
   category: "JobApplications",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20119.png",
-  imgAlt: "How to Search for a Job on LinkedIn in 2026",
-  title: `How to Search for a Job on LinkedIn in 2026`,
-  description: "This guide isn't just another LinkedIn job search tutorial. We're diving deep into the strategies that will give you a competitive edge in 2026. Whether you're a seasoned LinkedIn user or just starting your job hunt, these actionable tips will help you!",
+  imgAlt: "How to Search for a Job on LinkedIn in 2025",
+  title: `How to Search for a Job on LinkedIn in 2025`,
+  description: "This guide isn't just another LinkedIn job search tutorial. We're diving deep into the strategies that will give you a competitive edge in 2025. Whether you're a seasoned LinkedIn user or just starting your job hunt, these actionable tips will help you!",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20120.png",
@@ -53,15 +53,15 @@ export const blogData = [{
   title: `Job Tracker Apps vs Spreadsheets: Which Should You Be Using?`,
   description: "It's important to stay on top of your job applications and all the moving parts that come with that process. The question is, should you be using dedicated online solutions, or sticking with spreadsheet templates? Let's take a closer look.",
   category: "JobApplications",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20233.png",
-  imgAlt: "How to Get a Data Analyst Job in 2026",
-  title: `How to Get a Data Analyst Job in 2026`,
-  description: "Landing a data analyst job in 2026's competitive market requires a strategic approach. This guide will provide you with the essential steps and resources you need to navigate the job search process successfully.",
+  imgAlt: "How to Get a Data Analyst Job in 2025",
+  title: `How to Get a Data Analyst Job in 2025`,
+  description: "Landing a data analyst job in 2025's competitive market requires a strategic approach. This guide will provide you with the essential steps and resources you need to navigate the job search process successfully.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 
 {
@@ -70,7 +70,7 @@ export const blogData = [{
   title: `What Is a Job Board and How Do They Help You Find a New Job?`,
   description: "Job boards can be an incredibly helpful tool when you're hunting for your next job. They can be an excellent way to cut through all the noise and find the exact types of jobs you're qualified for. This guide will walk you through everything you need to get them most from them.",
   category: "JobBoards",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20122.png",
@@ -78,7 +78,7 @@ export const blogData = [{
   title: `How Long Should a Senior-Level Resume Be?`,
   description: "Getting the length of your resume right can be more challenging than it sounds, especially for those with extensive industry experience. There's no simple answer, but this blog post will guide you through how to choose the right length for your resume.",
   category: "Resumes",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20123.png",
@@ -86,7 +86,7 @@ export const blogData = [{
   title: `How to Get a Job Doing Research for Podcasts`,
   description: "The world of podcasting is booming, captivating audiences with compelling narratives and insightful conversations. This guide is all about setting you up for a successful entry into the industry. More specifically, for those aiming for a podcast researcher position.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20234.png",
@@ -94,7 +94,7 @@ export const blogData = [{
   title: `How to Get a Job in Marketing: A Modern Guide`,
   description: "Unlike some professions, many entry-level marketing positions are attainable with a strong skill set and a proven ability to demonstrate your marketing acumen. Now is the perfect time to enter the field, given that AI tools have leveled the playing field to some extent.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20124.png",
@@ -102,15 +102,15 @@ export const blogData = [{
   title: `How to Create an Effective LinkedIn Banner in Minutes`,
   description: "Want to make a strong first impression on potential employers and clients? Your LinkedIn banner is your digital billboard, and it's time to make it shine! In this guide, we'll show you how to create a captivating banner in minutes, even if you're not a design expert.",
   category: "LinkedInProfile",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20168.png",
-  imgAlt: "How to Get a Job Without a Degree in 2026",
-  title: `How to Get a Job Without a Degree in 2026`,
+  imgAlt: "How to Get a Job Without a Degree in 2025",
+  title: `How to Get a Job Without a Degree in 2025`,
   description: "Want to make a strong first impression on potential employers and clients? Your LinkedIn banner is your digital billboard, and it's time to make it shine! In this guide, we'll show you how to create a captivating banner in minutes, even if you're not a design expert.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20127.png",
@@ -118,7 +118,7 @@ export const blogData = [{
   title: `How to List Publications on Your LinkedIn Profile`,
   description: "The LinkedIn Publications section offers a valuable platform to showcase your professional writing and creative endeavors. By strategically listing articles, book chapters, illustrations, and other published works, you can effectively demonstrate your expertise, writing prowess, and professional accomplishments.",
   category: "LinkedInProfile",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20128.png",
@@ -126,7 +126,7 @@ export const blogData = [{
   title: `When Is a Good Time to Apply for Jobs`,
   description: "When is the perfect time to hit 'submit' on that job application? This guide will walk you through when to submit your application for that new role to improve your chances of success.",
   category: "JobApplications",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20129.png",
@@ -134,7 +134,7 @@ export const blogData = [{
   title: `Is Too Much Space on a Resume Bad?`,
   description: "In this post, we'll explore the importance of white space in resume design, discuss the potential pitfalls of excessive spacing, and provide you with actionable tips to achieve the perfect balance.",
   category: "Resumes",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20130.png",
@@ -142,7 +142,7 @@ export const blogData = [{
   title: `An ATS Friendly Resume Is Your Key to Getting Hired`,
   description: "Up to 75% of qualified job applicants are screened out by automated systems (Applicant Tracking Systems) before a human ever sees their resume. But don't worry! With a few simple changes, you can ensure your resume passes through the ATS and lands directly on a recruiter's desk.",
   category: "Resumes",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20131.png",
@@ -150,7 +150,7 @@ export const blogData = [{
   title: `Tech Job Boards: What They Are and Why You Should Be Using Them`,
   description: "These online platforms are specifically designed to connect tech professionals like you with companies actively hiring. They act as a central hub for discovering open positions, tailoring your search to your specific skills and preferences, and ultimately, landing your dream job. ",
   category: "JobBoards",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20133.png",
@@ -158,7 +158,7 @@ export const blogData = [{
   title: `How to Get a Job in Tech With No Experience`,
   description: "This guide is your roadmap to success. We'll walk you through the steps to land your first tech job, even with zero technical background. We'll cover everything from identifying your interests and choosing a tech path to building essential skills and crafting a winning resume.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20132.png",
@@ -166,7 +166,7 @@ export const blogData = [{
   title: `Choosing the Best Font for Your Resume`,
   description: "Your resume is often the first impression you make on a potential employer. While content is king, presentation is also crucial. The right font can enhance your resume's readability and overall professional appeal. In this blog, let's delve and discover the best font choices for your resume.",
   category: "Resumes",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20134.png",
@@ -174,7 +174,7 @@ export const blogData = [{
   title: `Managing Stress When Searching for a Job`,
   description: "Job searching isn’t just stressful - it’s draining. You’re putting yourself out there, crafting the perfect resume, filling out endless applications, and getting no response, or worse, a generic rejection. It hits your self-esteem hard, leaving you questioning your abilities.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20137.png",
@@ -182,7 +182,7 @@ export const blogData = [{
   title: `How to Prepare for a Job Interview`,
   description: "In a world where recruiters are flooded with resumes, as soon as a job posting goes live, you’ve managed to stand out. Now, with an interview scheduled, you’re just one step away from landing your dream job.‍ This is your chance to prove you’re everything your resume promised - and more. It all starts with showing up on time, dressing the part, and coming prepared.",
   category: "Interviews",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 
 {
@@ -191,15 +191,15 @@ export const blogData = [{
   title: `How To Ask For A Raise: 8 Effective Tips`,
   description: "Let's explore the ways to ask for a raise, what not to say when asking for a raise, and how to negotiate a raise at work more effectively. ",
   category: "CareerAdvice",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20138.png",
-  imgAlt: "How to Get Your First Construction Job in 2026",
-  title: `How to Get Your First Construction Job in 2026`,
+  imgAlt: "How to Get Your First Construction Job in 2025",
+  title: `How to Get Your First Construction Job in 2025`,
   description: "Your first construction job can pave the way to a rewarding life-long career. Starting as a laborer is one of the easiest ways to break into this field, even with no prior experience. As you gain skills and experience, you'll become more valuable on the job site and build a stronger resume that opens doors to higher-paying, specialized roles within the trades.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 
 // {
@@ -208,7 +208,7 @@ export const blogData = [{
 //   title: `How to Find, Edit, and Shorten Your LinkedIn URL`,
 //   description: "A clean and professional LinkedIn URL can significantly enhance your online brand. It's a simple yet powerful tool to make your profile more memorable and easier to find. In this blog, we'll delve into the steps of locating, customizing, and shortening your LinkedIn URL. Let's optimize your digital identity together. To know more, keep reading👇!",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
@@ -217,7 +217,7 @@ export const blogData = [{
 //   title: `Discover Insights`,
 //   description: "Explore expert insights, actionable tips, and the latest trends to stay ahead. Our blog offers valuable information to help you excel in your field.",
 //   category: "BehavioralInterview",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/6714a5ecfdea83edad37e41a_ChatGPT%20For%20Career%20Networking.avif",
@@ -225,7 +225,7 @@ export const blogData = [{
 //   title: `ChatGPT For Career Networking`,
 //   description: "Enhance your career networking with ChatGPT and AI tools to streamline connections, craft personalized messages, and boost your professional reach.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 
@@ -235,7 +235,7 @@ export const blogData = [{
 //   title: `Microsoft Behavioral Interview Guide`,
 //   description: "Check out the invaluable insights and tips to help you ace Microsoft behavioral interviews and increase your chances of securing a coveted position.",
 //   category: "BehavioralInterview",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/66c7f10178d4efeee44da575_Apple%20Behavioral%20Interview%20Guide.avif",
@@ -243,7 +243,7 @@ export const blogData = [{
 //   title: `Apple Behavioral Interview Guide`,
 //   description: "Discover how to ace Apple’s behavioral interview by showcasing your problem-solving skills and fitting into the company’s culture with this guide.",
 //   category: "BehavioralInterview",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/66c1e98d394ba469d2639121_Meta%20Behavioral%20Interview%20Guide.avif",
@@ -251,7 +251,7 @@ export const blogData = [{
 //   title: `Meta Behavioral Interview Questions Guide`,
 //   description: "Read this comprehensive guide to ace Meta's behavioral interview. Learn strategies, key competencies, and the STAR method to secure your dream job.",
 //   category: "BehavioralInterview",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 
@@ -261,7 +261,7 @@ export const blogData = [{
 //   title: `How to Network on LinkedIn?`,
 //   description: "Check out the best strategies for effectively networking on LinkedIn, a powerful platform for connecting with industry professionals and potential employers.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/66910d59b99e078fd88c1165_Importance%20of%20Endorsements%20and%20Recommendations%20on%20LinkedIn_1.avif",
@@ -269,7 +269,7 @@ export const blogData = [{
 //   title: `Importance of Endorsements and Recommendations on LinkedIn`,
 //   description: "Let's delve into the importance of LinkedIn endorsements and recommendations, and how they can set your profile apart in the competitive job market.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 
@@ -284,7 +284,7 @@ export const blogData = [{
 //   title: `How to Use ChatGPT to Improve Job Applications`,
 //   description: "Learn how to unlock the full potential of ChatGPT for job application with its AI prowess and transform your job hunt into a strategic campaign.",
 //   category: "ChatGPT",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/657bca07db45c4ae5e6d7484_LinkedIn%20ChatGPT%20Prompts.avif",
@@ -292,7 +292,7 @@ export const blogData = [{
 //   title: `10 Best LinkedIn ChatGPT Prompts To Grow and Stand Out `,
 //   description: "Looking to revamp your LinkedIn profile? Enlisted here 10 best chatgpt prompts for linkedin profile optimization to help you unlock the full potential.",
 //   category: "ChatGPT",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/6575b90b29004f0811cc900a_chatgpt%20cover%20letter%20prompts.avif",
@@ -300,7 +300,7 @@ export const blogData = [{
 //   title: `How to Use ChatGPT Prompts to Upgrade Your Cover Letter`,
 //   description: "Read how to use ChatGPT to write irresistible cover letters that communicates your story effectively and increases your chances of landing that dream job. ",
 //   category: "ChatGPT",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
@@ -309,7 +309,7 @@ export const blogData = [{
 //   title: `How to Use ChatGPT to Optimize Your LinkedIn Profile`,
 //   description: "Learn how to create and use custom GPTs for interview preparation and significantly enhancing your readiness and interview skills.",
 //   category: "ChatGPT",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/6557a556756de8f43946405e_chatgpt%20prompts%20for%20resume.avif",
@@ -317,7 +317,7 @@ export const blogData = [{
 //   title: `9 of the Best ChatGPT Resume Prompts to Land More Interviews`,
 //   description: "Let's explore how job seekers can use best ChatGPT prompts to update resume with the help of cheat sheet shared here and their boost career prospects.",
 //   category: "ChatGPT",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
@@ -326,7 +326,7 @@ export const blogData = [{
 //   title: `Amazon Business Intelligence Engineer Interview Guide`,
 //   description: "Here is a comprehensive guide to ace Amazon business intelligence engineer interview covering each step from typical interview questions to SQL problems.",
 //   category: "Interviews",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/65275fda2d2a8429f8a6c47a_different%20tech%20sales%20roles.avif",
@@ -334,7 +334,7 @@ export const blogData = [{
 //   title: `Understanding Different Roles and Responsibilities in Tech Sales`,
 //   description: "Let's delve into different tech sales role in detail, exploring their specific responsibilities, required skill sets, and the impact they have on sales success. ",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
@@ -343,7 +343,7 @@ export const blogData = [{
 //   title: `How to Get Promotion as a SDE Manager?`,
 //   description: "Let's explore the key steps that software development engineer managers can take to position themselves for a promotion within their organizations.",
 //   category: "Interviews",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/6501cea61d6dc1f7dadbfa8c_chatgpt%20prompts%20interview.avif",
@@ -351,7 +351,7 @@ export const blogData = [{
 //   title: `Top 10 ChatGPT Prompts for Job Interview Preparation`,
 //   description: "Let's explore the key steps that software development engineer managers can take to position themselves for a promotion within their organizations.",
 //   category: "Interviews",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 
@@ -361,7 +361,7 @@ export const blogData = [{
 //   title: `Top 5 LinkedIn Profile Makeover Tips for Better Results`,
 //   description: "Ready for a revamp? We have some practical tips to help you transform your LinkedIn profile and stand out to potential clients and recruiters. Plus, we’ll highlight the best LinkedIn makeover services for expert support.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/64d51d30af93594b0b7ad5da_Amazon%20Business%20Analyst%20Interview.avif",
@@ -369,7 +369,7 @@ export const blogData = [{
 //   title: `Amazon Business Analyst Interview Guide`,
 //   description: "Here is comprehensive guide with valuable insights into the interview process specifically tailored for the role of Amazon Business Analyst.",
 //   category: "Interviews",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
@@ -378,15 +378,15 @@ export const blogData = [{
 //   title: `Google Data Analyst Interview Guide`,
 //   description: "Read here most commonly asked interview questions for Google data analyst role with tips on how to approach them to help you navigate interview process.",
 //   category: "",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/64e08d6613e6510b1c833e86_ai%20for%20job%20seekers.avif",
-//   imgAlt: "How to Use AI for Job Search: 7 Tools to Get Hired Faster in 2026",
-//   title: `How to Use AI for Job Search: 7 Tools to Get Hired Faster in 2026`,
-//   description: "In this article, we will explore how AI can assist job seekers and provide valuable tips on how to leverage AI for job search in 2026. Whether you're just starting the process or looking to enhance your current job search strategies, this guide has you covered! 🤗‍",
+//   imgAlt: "How to Use AI for Job Search: 7 Tools to Get Hired Faster in 2025",
+//   title: `How to Use AI for Job Search: 7 Tools to Get Hired Faster in 2025`,
+//   description: "In this article, we will explore how AI can assist job seekers and provide valuable tips on how to leverage AI for job search in 2025. Whether you're just starting the process or looking to enhance your current job search strategies, this guide has you covered! 🤗‍",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/64ad7c65852d19e5d5ead3f9_chatgpt%20for%20data%20science%20interview.avif",
@@ -394,16 +394,16 @@ export const blogData = [{
 //   title: `How to use ChatGPT for Data Science Interview Preparation`,
 //   description: "Read here key benefits of using ChatGPT along with strategies and techniques to help you prepare for your next data science interview.‍",
 //   category: "Interviews",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/6491d343ad2172d1ef25fefb_Amazon%20Data%20Engineer%20Interview.avif",
-//   imgAlt: "Amazon Data Engineer Interview Guide 2026",
-//   title: `Amazon Data Engineer Interview Guide 2026`,
+//   imgAlt: "Amazon Data Engineer Interview Guide 2024",
+//   title: `Amazon Data Engineer Interview Guide 2024`,
 //   description: "Read this comprehensive guide for valuable insights and tips to ace your Amazon data engineer interview with interview questions, process and timeline.",
 //   category: "Interviews",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/647d5db0754581b4b3d2bd8f_google%20bard%20vs%20chatgpt%20cover%20letter.avif",
@@ -411,7 +411,7 @@ export const blogData = [{
 //   title: `Google Bard Vs ChatGPT: How to Use Them to Write a Cover Letter`,
 //   description: "Let's do a thorough comparison of ChatGPT and Google Bard for writing a cover letter with pros and cons of each tool by evaluating its content quality.",
 //   category: "ChatGPT",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/647a1c11e1c2eb3fef3a42b3_chatgot%20for%20software%20engineer%20interview.avif",
@@ -419,7 +419,7 @@ export const blogData = [{
 //   title: `How to Use ChatGPT for SWE Interview Preparation`,
 //   description: "Let's understand how to effectively use ChatGPT to enhance your chances of success in software engineer interviews with detailed guide and prompts to use.",
 //   category: "Interviews",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
@@ -428,7 +428,7 @@ export const blogData = [{
 //   title: `How To Use ChatGPT to Crack Product Manager Interview`,
 //   description: "If you're an aspiring Product Manager preparing for your next PM interview. ChatGPT can be your go-to resource for PM interview preparation. Read more.",
 //   category: "Interviews",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 //--------
@@ -438,7 +438,7 @@ export const blogData = [{
 //   title: `HiredEasy has been Selected for Techstars 2023`,
 //   description: "HiredEasy has been selected for Techstars Accelerator Oakland Class of 2023, a highly selective global startup accelerator program powered by J.P. Morgan.",
 //   category: "",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
@@ -447,7 +447,7 @@ export const blogData = [{
 //   title: `How to Write A Cover Letter Using ChatGPT`,
 //   description: "Writing a compelling cover letter while job hunting can be tedious process. Read how you can craft the cover letter with ChatGPT for your dream job.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/64121a49fbc0b95a7af4a2b5_CHATGPT%20cover%20letter.avif",
@@ -455,7 +455,7 @@ export const blogData = [{
 //   title: `How to Write A Cover Letter Using ChatGPT`,
 //   description: "Writing a compelling cover letter while job hunting can be tedious process. Read how you can craft the cover letter with ChatGPT for your dream job.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/65e737a7ca26a16d7dc81286_women%20in%20tech%20challenges.avif",
@@ -463,7 +463,7 @@ export const blogData = [{
 //   title: `Women in Tech: Challenges and Tips to Overcome Them`,
 //   description: "Women in tech face a range of challenges in the industry. Read here 5 key challenges faced by women in tech with strategies to overcome them in detail.",
 //   category: "",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/63fe40197d4c6e520da5816b_chagpt%20resume.avif",
@@ -471,7 +471,7 @@ export const blogData = [{
 //   title: `How to Use ChatGPT to Write A Resume`,
 //   description: "Let's explore how to use ChatGPT to generate a compelling resume and stand out from the crowd to land the big tech job you've always wanted.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/63ea865ba4dfba7a000ad724_LINKEDIN%20LIVE.avif",
@@ -479,16 +479,16 @@ export const blogData = [{
 //   title: `How to Run a LinkedIn Live Event (Tutorials & Examples)`,
 //   description: "Let's take a look at how to use LinkedIn Live to connect with industry professionals and make the most of this powerful platform to reach a wider audience.",
 //   category: "LinkedInProfile",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/63ca520e959ad1aeb4ea07e7_google%20behavioral%20interview.avif",
-//   imgAlt: "Google Behavioral Interview Guide 2026 (Questions, G&L Round)",
-//   title: `Google Behavioral Interview Guide 2026 (Questions, G&L Round)`,
+//   imgAlt: "Google Behavioral Interview Guide 2024 (Questions, G&L Round)",
+//   title: `Google Behavioral Interview Guide 2024 (Questions, G&L Round)`,
 //   description: "Checkout these Google behavioral interview questions and answers to get ready for your Google interview with additional G&L round and preparation tips.",
 //   category: "BehavioralInterview",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/63c04ce6ec1b32565dd16f97_linkedin%20optimization%20tools.avif",
@@ -496,7 +496,7 @@ export const blogData = [{
 //   title: `Top 5 LinkedIn Optimization Tools | HiredEasy`,
 //   description: "Here is curated list of top 5 linkedIn optimization tools that you can use to optimize your LinkedIn profile instantly to create a visually appealing profile.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20167.png",
@@ -504,7 +504,7 @@ export const blogData = [{
   title: `How to use ChatGPT to Prepare for Behavioral interviews`,
   description: "A step-by-step guide on how to use ChatGPT, an artificial intelligence chatbot, to prepare for a behavioral interview. It includes tips on how to effectively ask questions of ChatGPT and how to simulate an interview using the chatbot.",
   category: "BehavioralInterview",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20159.png",
@@ -512,15 +512,15 @@ export const blogData = [{
   title: `How to Optimize Your LinkedIn Profile for 40X More Opportunities`,
   description: "How to Optimize Your LinkedIn Profile for 40X More Opportunities",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20158.png",
-  imgAlt: "Google Product Manager Interview Guide 2026 with Questions",
-  title: `Google Product Manager Interview Guide 2026 with Questions`,
+  imgAlt: "Google Product Manager Interview Guide 2024 with Questions",
+  title: `Google Product Manager Interview Guide 2024 with Questions`,
   description: "Read this comprehensive guide to know everything for cracking Google Product Manager interview with hiring process and interview questions in detail.",
   category: "Interviews",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20154.png",
@@ -528,7 +528,7 @@ export const blogData = [{
   title: `How To Find a Job During a Recession: Ultimate Guide 2023`,
   description: "Job hunting gets more challenging during a recession. We've compiled all the necessary information & tips to succeed in your job search during a recession 2023.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 // {
 //   imgSrc: "https://cdn.prod.website-files.com/635c591478332fd4db25d46e/65d260d829f6f9c10f2b82e0_linkedin%20experience%20section.avif",
@@ -536,7 +536,7 @@ export const blogData = [{
 //   title: `How To Write LinkedIn Work Experience Section (Examples & Tips)`,
 //   description: "Whether you are a new graduate or experienced professional an optimized LinkedIn profile is must with an updated LinkedIn work experience section.",
 //   category: "Jobsearch",
-//   date: "March 21, 2026",
+//   date: "March 21, 2025",
 // },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20153.png",
@@ -544,7 +544,7 @@ export const blogData = [{
   title: `Amazon Behavioral Interview Questions Guide`,
   description: "Amazon behavioral interviews require separate preparation to ace them. Learn how to prepare for it with this comprehensive sample questions guide.",
   category: "BehavioralInterview",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20150.png",
@@ -552,7 +552,7 @@ export const blogData = [{
   title: `Technical Program Manager Interview Questions (TPM Interview) `,
   description: "Here are some curated technical program manager interview questions example to help you practice for upcoming TPM interviews at FAANG companies.",
   category: "Interviews",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20146.png",
@@ -560,7 +560,7 @@ export const blogData = [{
   title: `How To Decline A Job Offer Politely (With Sample Email Template)`,
   description: "Declining a job offer can be a tricky and serious decision. Check out the factors to consider to decide whether you should accept or decline a job offer.",
   category: "Jobsearch",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20145.png",
@@ -568,7 +568,7 @@ export const blogData = [{
   title: `How To Write A Great LinkedIn Headline (With Examples)`,
   description: "Have you ever noticed what parts of a LinkedIn profile are visible on your feed, alongside their posts? Profile Picture, Name, and Headline. In this guide we’re going to walk you through how to write a compelling headline for your own LinkedIn profile.",
   category: "LinkedInProfile",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20147.png",
@@ -576,7 +576,7 @@ export const blogData = [{
   title: `Write a LinkedIn Summary That Stands Out (With Examples)`,
   description: "Your LinkedIn summary is your chance to make a powerful first impression and stand out to recruiters. A well-crafted summary, optimized with relevant keywords, boosts your visibility in search results, making it easier for the right opportunities to find you.",
   category: "LinkedInProfile",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 
 {
@@ -585,7 +585,7 @@ export const blogData = [{
   title: `Salary Negotiation 101 - How To Negotiate Your Job Offer`,
   description: "Dealing with the salary negotiation phase confidently can help you bag the best offer that you deserve with the help of these top 5 salary negotiation tips.",
   category: "Negotiation",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 {
   imgSrc: "https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20229.png",
@@ -593,6 +593,6 @@ export const blogData = [{
   title: `How to Follow Up on a Job Application (Phone & Email Sample Templates)`,
   description: "Here are tips to keep in mind when following up on a job application along with phone and email sample templates to make the task easier for you.",
   category: "JobApplications",
-  date: "March 21, 2026",
+  date: "March 21, 2025",
 },
 ];

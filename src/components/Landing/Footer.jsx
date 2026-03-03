@@ -222,7 +222,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/pricing"
                   className="text-slate-400 hover:text-white transition-colors inline-flex items-center group"
                 >
                   <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>

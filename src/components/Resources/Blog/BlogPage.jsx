@@ -1,10 +1,8 @@
-// src/components/Resources/Blog/BlogPage.jsx
-
 import React, { useEffect, useState } from "react";
-import Navbar from "../../Landing/Navbar"; // yeh path sahi rakh, agar galat lage to adjust kar lena
+import Navbar from "../../Landing/Navbar";
 import Footer from "../../Landing/Footer";
-import { Link } from "react-router-dom"; // react-router-dom ka Link (Next.js ka nahi)
-import { blogData } from "../../../data/blogData"; // agar blogData src/data/blogData.js mein hai
+import { Link } from "react-router-dom"; // ← yeh important (next/link nahi)
+import { blogData } from "../../../data/blogData"; // agar path galat hai to adjust kar lena
 
 function BlogPage() {
   const categoryColor = {
@@ -60,8 +58,10 @@ function BlogPage() {
   });
 
   const slugify = (title) => {
+    if (!title) return "";
     return title
       .toLowerCase()
+      .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
   };
@@ -70,17 +70,14 @@ function BlogPage() {
     <div>
       <Navbar />
 
-      {/* <section className="pt-[170.45px] pb-[80.55px] relative overflow-hidden"> */}
-      <section className="pt-28 md:pt-36 lg:pt-44 pb-12 md:pb-20 relative overflow-hidden">
+      <section className="pt-[170.45px] pb-[80.55px] relative overflow-hidden">
         <div className="z-3 flex flex-col items-stretch w-full max-w-[1280px] mb-0 ml-auto mr-auto pb-0 px-6 lg:px-8 relative">
           <div className="gap-x-3 gap-y-3 text-center flex flex-col justify-center items-center">
-            {/* <h1 className="tracking-[-.04em] mb-3 font-onest lg:text-7xl leading-[1.1] text-gray-800 mt-0 mb-8 text-[50px] font-bold leading-[56px]"> */}
-            <h1 className="tracking-tight font-onest text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-gray-800 font-bold leading-tight text-center">
-              Interview AI
+            <h1 className="tracking-[-.04em] mb-3 font-onest lg:text-7xl leading-[1.1] text-gray-800 mt-0 mb-8 text-[50px] font-bold leading-[56px]">
+              Hired Easy
               <span className="text-[#4D869C]"> Blogs and Guides</span>
             </h1>
-            {/* <div className="text-[#344054] font-semibold text-center tracking-[-.02em] font-inter text-xl font-medium leading-[1.5]"> */}
-            <div className="text-gray-600 text-base sm:text-lg md:text-xl text-center max-w-2xl">
+            <div className="text-[#344054] font-semibold text-center tracking-[-.02em] font-inter text-xl font-medium leading-[1.5]">
               Explore our extensive blog library for insights, tips,
               <br />
               and industry updates
@@ -109,32 +106,32 @@ function BlogPage() {
         <div className="relative z-[3] flex flex-col items-stretch w-full max-w-[1280px] mb-0 ml-auto mr-auto pb-0 px-4 lg:px-8 max-w-[1344px]">
           <div className="relative z-[1] mb-12">
             <div className="">
-              <a className="max-w-full inline-block" href="">
-                <div className="grid gap-x-[10px] lg:gap-x-[80px] gap-y-[14px] lg:gap-y-[80px] grid-rows-[auto] items-center grid grid-rows-[auto_auto] md:grid-cols-1 lg:grid-cols-2 auto-cols-fr">
+              {/* Featured Blog */}
+              <div className="max-w-full inline-block">
+                <div className="grid gap-x-[10px] lg:gap-x-[80px] gap-y-[14px] lg:gap-y-[80px] grid-rows-[auto] items-center md:grid-cols-1 lg:grid-cols-2 auto-cols-fr">
                   <div className="">
                     <div className="flex flex-col gap-x-6 gap-y-6">
-                      <div className="mb-6 block ">
+                      <div className="mb-6 block">
                         <div className="uppercase text-[#3A6B7C] font-bold">
                           featured Blog
                         </div>
                       </div>
                     </div>
                     <img
-                      // className="object-cover rounded-lg sm:w-[93vw] md:w-[94vw] lg:w-[90vw] border aspect-[16/9]"
-                      className="w-full h-auto object-cover rounded-lg border aspect-video"
+                      className="object-cover rounded-lg sm:w-[93vw] md:w-[94vw] lg:w-[90vw] border aspect-[16/9]"
                       src="https://cdn.jsdelivr.net/gh/gradhiresolutions/Blog/Frame%20130.png"
                       alt=""
                     />
                   </div>
                   <div className="gap-6 flex flex-col">
                     <div className="gap-[14px] flex flex-col items-start">
-                      <div className="relative group hidden lg:block border rounded-lg self-start bg-[#4D869C] text-white hover:bg-[#3A6B7C] p-[6px_14px] hover:shadow-2xl">
-                        <a
-                          href="/blog/ats-friendly-resume" // agar detail page ke liye route hai to yeh rakh
+                      <div className="relative group border rounded-lg self-start bg-[#4D869C] text-white hover:bg-[#3A6B7C] px-4 py-2 shadow-md w-fit">
+                        <Link
+                          to="/blog/an-ats-friendly-resume-is-your-key-to-getting-hired"
                           className="relative z-10 text-lg font-bold block"
                         >
                           Resumes
-                        </a>
+                        </Link>
                       </div>
                       <div>
                         <h2 className="mb-0 font-sans text-[43px] lg:text-[48px] leading-[42.8px] lg:leading-[52.8px] font-bold text-gray-700 mt-0">
@@ -150,29 +147,31 @@ function BlogPage() {
                         desk.
                       </div>
                     </div>
-                    <div className="bg-[#4d869c] text-white font-semibold lg:hidden w-[30%] ml-[40%] text-center block border-[#1570ef] text-[#101828] border rounded-lg self-start p-[6px_14px] font-sans font-normal">
+                    <div className="bg-[#4d869c] text-white font-semibold lg:hidden w-fit mx-auto text-center border rounded-lg px-4 py-2">
                       <div className="text-lg">Resumes</div>
                     </div>
                     <div className="gap-[20px] flex flex-wrap justify-between items-center">
                       <div className="gap-[20px] flex items-center">
                         <div className="text-[#3A6B7C] font-sans text-[18px] font-semibold leading-[26px]">
-                          January 15, 2026
+                          January 15, 2025
                         </div>
                       </div>
                       <div className="group gap-[8px] flex items-center">
                         <div className="text-[#3A6B7C] font-sans text-[18px] font-semibold leading-[26px]">
                           Read More
                         </div>
-                        <img
-                          className="transition-transform color-[#4D869C] duration-300 ease-in-out max-w-full inline-block group-hover:translate-x-[5px]"
-                          src="https://cdn.prod.website-files.com/635c591378332f38be25d45f/671239bf668d3a6c900923ec_arrow-right-02.svg"
-                          alt=""
-                        />
+                        <Link to="/blog/an-ats-friendly-resume-is-your-key-to-getting-hired">
+                          <img
+                            className="transition-transform color-[#4D869C] duration-300 ease-in-out max-w-full inline-block group-hover:translate-x-[5px]"
+                            src="https://cdn.prod.website-files.com/635c591378332f38be25d45f/671239bf668d3a6c900923ec_arrow-right-02.svg"
+                            alt=""
+                          />
+                        </Link>
                       </div>
                     </div>
                   </div>
                 </div>
-              </a>
+              </div>
             </div>
           </div>
         </div>
@@ -183,11 +182,12 @@ function BlogPage() {
           <div className="gap-[48px] flex flex-col">
             <div className="gap-[16px] flex flex-col items-stretch">
               <div className="mb-0 mb-[15px]">
-                {/* <form className="gap-[12px] flex flex-row" action=""> */}
-                <form className="flex flex-col md:flex-row gap-4" action="">
+                <form
+                  className="gap-[12px] flex flex-col md:flex-row"
+                  action=""
+                >
                   {/* Search Bar */}
-                  {/* <div className="pt-4 flex gap-[16px] mb-6"> */}
-                  <div className="w-full">
+                  <div className="pt-4 flex gap-[16px] mb-6 w-full">
                     <input
                       type="text"
                       placeholder="Search Blog"
@@ -197,8 +197,7 @@ function BlogPage() {
                     />
                   </div>
 
-                  {/* <div className="flex pt-4 gap-[12px] overflow-auto pb-4"> */}
-                  <div className="flex gap-3 overflow-x-auto pb-2">
+                  <div className="flex pt-4 gap-[12px] overflow-auto pb-4">
                     {[
                       "All",
                       ...new Set(
@@ -210,7 +209,11 @@ function BlogPage() {
                       <label
                         key={category}
                         onClick={() => setSelectedCategory(category)}
-                        className={`cursor-pointer rounded-[12px] px-[20px] py-[12px] font-bold uppercase text-center transition-all duration-[200ms] shadow-md block hover:scale-105 ${selectedCategory === category ? categoryColors.selected : categoryColors.default}`}
+                        className={`cursor-pointer rounded-[12px] px-[20px] py-[12px] font-bold uppercase text-center transition-all duration-[200ms] shadow-md block hover:scale-105 ${
+                          selectedCategory === category
+                            ? categoryColors.selected
+                            : categoryColors.default
+                        }`}
                       >
                         {category}
                       </label>
@@ -221,8 +224,7 @@ function BlogPage() {
             </div>
           </div>
 
-          {/* <div className="gap-x-6 gap-y-14 grid mt-6 grid-rows-[auto_auto] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-cols-fr"> */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          <div className="gap-x-6 gap-y-14 grid mt-6 grid-rows-[auto_auto] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-cols-fr">
             {filteredBlogs.slice(0, visibleBlogs).map((blog, index) => (
               <div
                 key={index}
@@ -230,7 +232,7 @@ function BlogPage() {
                 className="gap-4 transition-all duration-300 hover:border-teal-500 hover:shadow-md hover:-translate-y-1 text-[#2d72e3] font-medium no-underline bg-white border border-[#e4e7ec] rounded-2xl flex flex-col justify-between h-full p-6 transition-shadow transition-border-color duration-300 ease-in-out inline-block max-w-full"
               >
                 <Link
-                  to={`/blog/${slugify(blog.title)}`} // yahan react-router ka Link use kiya
+                  to={`/blog/${slugify(blog.title)}`} // ← yeh sahi line hai (to use karo)
                   className="gap-4 bg-white rounded-2xl flex flex-col justify-between h-full transition-shadow transition-border-color duration-300 ease-in-out"
                 >
                   <div className="gap-4 flex flex-col justify-start items-center h-full">
@@ -238,8 +240,7 @@ function BlogPage() {
                       src={blog.imgSrc}
                       alt={blog.imgAlt}
                       loading="lazy"
-                      // className="border border-[#e4e7ec] rounded-lg max-w-full inline-block"
-                      className="w-full h-48 object-cover rounded-lg border"
+                      className="border border-[#e4e7ec] rounded-lg max-w-full inline-block"
                     />
                     <div className="gap-6 flex flex-col">
                       <div className="gap-2 flex flex-col">
@@ -255,7 +256,7 @@ function BlogPage() {
                   <div className="gap-4 flex flex-row justify-between items-center">
                     <div>
                       <span
-                        className={`font-semibold relative z-10 text-lg relative lg:block border rounded-lg self-start p-[6px_14px] font-sans font-normal overflow-hidden shadow-lg hover:shadow-xl transition-all duration-100 hover:shadow-2xl hover:-translate-y-1 font-bold block transition-colors duration-300 ${categoryColor[blog.category] || categoryColors.default}`}
+                        className={`font-semibold relative z-10 text-lg relative lg:block border rounded-lg self-start p-[6px_14px] font-sans font-normal overflow-hidden shadow-lg hover:shadow-xl transition-all duration-100 hover:shadow-2xl hover:-translate-y-1 font-bold block transition-colors duration-300 ${categoryColor[blog.category]}`}
                       >
                         {blog.category}
                       </span>
