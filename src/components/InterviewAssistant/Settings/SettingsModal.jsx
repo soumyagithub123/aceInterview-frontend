@@ -642,9 +642,16 @@ export default function SettingsModal({ onClose }) {
   const handleEditStyle = (style) => { setEditingStyle(style); setShowStyleModal(true); };
 
   const handleDeleteStyle = async (styleId) => {
-    if (!user || !confirm('Are you sure you want to delete this style?')) return;
+    console.log("Attempting to delete style:", styleId, "User:", user?.id);
+    if (!user) {
+      console.error("Delete failed: No user logged in");
+      return;
+    }
+    
     try {
+      console.log("Calling service delete...");
       await responseStyleService.deleteStyle(styleId, user.id);
+      console.log("Service delete successful");
 
       // locally update and refresh global cache
       const updatedStyles = responseStyles.filter(s => s.id !== styleId);
@@ -659,7 +666,7 @@ export default function SettingsModal({ onClose }) {
       setMessage({ type: 'success', text: 'Style deleted successfully' });
     } catch (error) {
       console.error('Error deleting style:', error);
-      setMessage({ type: 'error', text: 'Failed to delete style' });
+      setMessage({ type: 'error', text: 'Failed to delete style: ' + error.message });
     }
   };
 

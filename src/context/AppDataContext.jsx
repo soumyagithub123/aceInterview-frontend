@@ -1,4 +1,4 @@
-// // src/context/AppDataContext.jsx
+// / src/context/AppDataContext.jsx
 
 // import React, { createContext, useContext, useState, useEffect } from "react";
 
@@ -6,7 +6,7 @@
 // import { settingsService } from "../services/settingsService";
 // import { responseStyleService } from "../services/responseStyleService";
 // import { getUserPersonas } from "../database/personaService";
-// import { getUserProfile, getUserQuota } from "../database/userService";
+// import { getUserProfile } from "../database/userService";
 
 // // Auth
 // import { useAuth } from "../components/Auth/AuthContext";
@@ -15,19 +15,16 @@
 // export const useAppData = () => useContext(AppDataContext);
 
 // export function AppDataProvider({ children }) {
-//   const { user, subscriptionStatus } = useAuth();
+//   const { user, subscriptionStatus, subscriptionTier, quota } = useAuth();
 
-//   const [loading,     setLoading]     = useState(true);
-//   const [settings,    setSettings]    = useState(null);
-//   const [styles,      setStyles]      = useState([]);
-//   const [personas,    setPersonas]    = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [settings, setSettings] = useState(null);
+//   const [styles, setStyles] = useState([]);
+//   const [personas, setPersonas] = useState([]);
 //   const [userProfile, setUserProfile] = useState(null);
-//   const [quota,       setQuota]       = useState(null);
-//   const [error,       setError]       = useState(null);
+//   const [error, setError] = useState(null);
 
-//   // ✅ isPaidUser — AuthContext ke subscriptionStatus se derive karo
-//   // DB mein subscription_status "active" hi rehta hai even after expiry
-//   // isliye hamesha backend ke calculated status pe depend karo
+//   // ✅ isPaidUser - Derived from AuthContext subscription status
 //   const isPaidUser =
 //     subscriptionStatus === "active" || subscriptionStatus === "expiring";
 
@@ -35,20 +32,25 @@
 //   const lastUserIdRef = React.useRef(null);
 
 //   useEffect(() => {
-//     if (user) {
-//       const isNewUser = user.id !== lastUserIdRef.current;
-//       lastUserIdRef.current = user.id;
-//       preloadAllData(isNewUser);
+//     if (user?.id) {
+//       // Only reload if user ID actually changed
+//       if (user.id !== lastUserIdRef.current) {
+//         lastUserIdRef.current = user.id;
+//         preloadAllData(true); // showLoading=true for new user
+//       } else {
+//         // Same user (e.g. token refresh) — do nothing or silent update
+//         // Optional: preloadAllData(false) if you want silent background refresh
+//       }
 //     } else {
+//       // No user
 //       lastUserIdRef.current = null;
 //       setSettings(null);
 //       setStyles([]);
 //       setPersonas([]);
 //       setUserProfile(null);
-//       setQuota(null);
 //       setLoading(false);
 //     }
-//   }, [user]);
+//   }, [user?.id]); // ✅ Dependency only on ID, not full user object
 
 //   // =============================
 //   // 🔥 MASTER LOADER
@@ -60,9 +62,6 @@
 //     try {
 //       const profileRes = await getUserProfile();
 //       if (profileRes.success) setUserProfile(profileRes.data);
-
-//       const quotaRes = await getUserQuota();
-//       if (quotaRes.success) setQuota(quotaRes.data);
 
 //       const userSettings = await settingsService.loadSettingsWithFallback(user.id);
 //       setSettings(userSettings);
@@ -76,7 +75,6 @@
 //       } else {
 //         setError(personaRes.error || "Failed to load personas");
 //       }
-
 //     } catch (err) {
 //       console.error("GLOBAL PRELOAD ERROR:", err);
 //       setError("Failed to load app data");
@@ -86,25 +84,23 @@
 //   };
 
 //   // =============================
-//   // QUOTA CHECKS
+//   // ✅ SIMPLIFIED ACCESS CHECKS (NO QUOTA)
 //   // =============================
 //   const canUseCopilot = () => {
-//     if (!quota) return false;
-//     if (quota.copilot.total === -1) return true;
-//     return quota.copilot.remaining > 0;
+//     // ✅ Unlimited for all paid users
+//     return isPaidUser;
 //   };
 
 //   const canUseMockInterview = () => {
-//     if (!quota) return false;
-//     if (quota.mock_interview.total === -1) return true;
-//     return quota.mock_interview.remaining > 0;
+//     // ✅ Unlimited for all paid users
+//     return isPaidUser;
 //   };
 
 //   const getQuotaMessage = (type) => {
-//     if (!quota) return "Loading...";
-//     const data = type === "copilot" ? quota.copilot : quota.mock_interview;
-//     if (data.total === -1) return "Unlimited";
-//     return `${data.remaining}/${data.total} remaining`;
+//     // ✅ Show unlimited for paid users
+//     if (isPaidUser) return "Unlimited";
+//     if (subscriptionStatus === "expired") return "Plan Expired";
+//     return "Free Plan";
 //   };
 
 //   return (
@@ -116,8 +112,10 @@
 //         styles,
 //         personas,
 //         userProfile,
-//         quota,
 //         isPaidUser,
+//         currentPlan: isPaidUser ? (userProfile?.subscription_tier || "free") : "free",
+//         quota,             // ✅ Session quota info from backend
+//         subscriptionTier,
 //         canUseCopilot,
 //         canUseMockInterview,
 //         getQuotaMessage,
@@ -139,10 +137,9 @@
 
 
 
-
-
-
 // src/context/AppDataContext.jsx
+// ✅ UPDATED: Session quota ab AuthContext se aata hai (no duplicate fetch)
+// Purana code preserve kiya hai comments mein
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
@@ -159,7 +156,8 @@ const AppDataContext = createContext();
 export const useAppData = () => useContext(AppDataContext);
 
 export function AppDataProvider({ children }) {
-  const { user, subscriptionStatus, subscriptionTier } = useAuth();
+  // ✅ sessionQuota aur refreshSessionQuota ab AuthContext se aate hain
+  const { user, subscriptionStatus, subscriptionTier, sessionQuota, quotaLoading, refreshSessionQuota } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState(null);
@@ -177,16 +175,11 @@ export function AppDataProvider({ children }) {
 
   useEffect(() => {
     if (user?.id) {
-      // Only reload if user ID actually changed
       if (user.id !== lastUserIdRef.current) {
         lastUserIdRef.current = user.id;
-        preloadAllData(true); // showLoading=true for new user
-      } else {
-        // Same user (e.g. token refresh) — do nothing or silent update
-        // Optional: preloadAllData(false) if you want silent background refresh
+        preloadAllData(true);
       }
     } else {
-      // No user
       lastUserIdRef.current = null;
       setSettings(null);
       setStyles([]);
@@ -194,7 +187,7 @@ export function AppDataProvider({ children }) {
       setUserProfile(null);
       setLoading(false);
     }
-  }, [user?.id]); // ✅ Dependency only on ID, not full user object
+  }, [user?.id]);
 
   // =============================
   // 🔥 MASTER LOADER
@@ -228,20 +221,26 @@ export function AppDataProvider({ children }) {
   };
 
   // =============================
-  // ✅ SIMPLIFIED ACCESS CHECKS (NO QUOTA)
+  // ✅ ACCESS CHECKS
   // =============================
-  const canUseCopilot = () => {
-    // ✅ Unlimited for all paid users
-    return isPaidUser;
-  };
+  const canUseCopilot = () => isPaidUser;
+  const canUseMockInterview = () => isPaidUser;
 
-  const canUseMockInterview = () => {
-    // ✅ Unlimited for all paid users
-    return isPaidUser;
+  // ✅ NEW: Session quota display helper
+  // Returns readable string like "7 / 10" or "Unlimited"
+  const getSessionQuotaDisplay = () => {
+    if (!sessionQuota) return null;
+    if (sessionQuota.is_unlimited) return "Unlimited";
+    return {
+      used: sessionQuota.sessions_used,
+      remaining: sessionQuota.sessions_remaining,
+      total: sessionQuota.session_limit,
+      durationMins: sessionQuota.duration_limit_mins,
+      plan: sessionQuota.plan_type,
+    };
   };
 
   const getQuotaMessage = (type) => {
-    // ✅ Show unlimited for paid users
     if (isPaidUser) return "Unlimited";
     if (subscriptionStatus === "expired") return "Plan Expired";
     return "Free Plan";
@@ -257,7 +256,15 @@ export function AppDataProvider({ children }) {
         personas,
         userProfile,
         isPaidUser,
-        subscriptionTier,  // ✅ Added for plan-specific UI
+        currentPlan: isPaidUser ? (userProfile?.subscription_tier || "free") : "free",
+
+        // ✅ Session quota (from AuthContext, no extra fetch)
+        sessionQuota,
+        quotaLoading,
+        getSessionQuotaDisplay,
+        refreshSessionQuota,   // call this after session ends to refresh count
+
+        subscriptionTier,
         canUseCopilot,
         canUseMockInterview,
         getQuotaMessage,

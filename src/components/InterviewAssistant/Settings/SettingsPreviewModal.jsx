@@ -9,6 +9,7 @@ import {
   Code2,
   ShieldCheck,
 } from "lucide-react";
+import { useAppData } from "../../../context/AppDataContext";
 
 export default function SettingsModal({ settings, backendUrl, onClose }) {
   useEffect(() => {
@@ -17,11 +18,17 @@ export default function SettingsModal({ settings, backendUrl, onClose }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
+  const { styles } = useAppData();
+
+  const currentStyleId = settings.selectedResponseStyleId || settings.responseStyle;
+  const currentStyle = styles?.find(s => s.id === currentStyleId);
+  const styleName = currentStyle ? currentStyle.style_name : (currentStyleId || "—");
+
   const rows = useMemo(
     () => [
       {
         label: "Style",
-        value: settings.selectedResponseStyleId || settings.responseStyle,
+        value: styleName,
         icon: Wand2,
       },
       { label: "Language", value: settings.audioLanguage, icon: Globe },
@@ -29,7 +36,7 @@ export default function SettingsModal({ settings, backendUrl, onClose }) {
       { label: "Coding", value: settings.programmingLanguage, icon: Code2 },
       { label: "Model", value: settings.defaultModel, icon: Cpu },
     ],
-    [settings, backendUrl]
+    [settings, styleName]
   );
 
   const opt = useMemo(

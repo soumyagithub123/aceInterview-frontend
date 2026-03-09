@@ -447,7 +447,7 @@ export default function MockInterviewAnalytics({
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md overflow-y-auto">
       <div className="min-h-screen p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}

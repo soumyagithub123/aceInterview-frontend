@@ -1,5 +1,12 @@
-// InterviewAssist.jsx - Mock controls in QACopilot footer (desktop only)
-import React, { useEffect, useRef, useState } from "react";
+// InterviewAssist.jsx
+// ✅ UPDATED:
+// 1. Session timer starts after FIRST AI answer (mark_session_counted call)
+// 2. Timer counts down from plan duration (60min basic, 25min free, 90min pro)
+// 3. Extend button for basic/pro users (via backend call)
+// 4. refreshSessionQuota called on session end (quota counter updates)
+// 5. Sessions remaining shown in header via QACopilot timer area
+
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Auth/AuthContext";
 
@@ -62,8 +69,8 @@ export default function InterviewAssist() {
     location.state?.domain || localStorage.getItem("selectedDomain") || "",
   );
 
-  // GLOBAL SETTINGS
-  const { settings } = useAppData();
+  // GLOBAL SETTINGS + QUOTA
+  const { settings, sessionQuota, refreshSessionQuota } = useAppData();
 
   const settingsRef = useRef(settings);
   useEffect(() => {
@@ -73,6 +80,164 @@ export default function InterviewAssist() {
   // LOCAL UI STATE
   const [activeView, setActiveView] = useState("interviewer");
   const [showSettings, setShowSettings] = useState(false);
+
+  // ─────────────────────────────────────────────────────
+  // ✅ SESSION TIMER STATE
+  // Timer shuru hota hai jab pehla AI answer generate ho
+  // ─────────────────────────────────────────────────────
+  const [timerSeconds, setTimerSeconds]         = useState(null);  // null = not started
+  const [sessionCounted, setSessionCounted]     = useState(false);
+  const [isExtending, setIsExtending]           = useState(false);
+  const [extendError, setExtendError]           = useState(null);
+  const [isSessionExpired, setIsSessionExpired] = useState(false); // ✅ NEW: timer hitna pe popup
+  const [extendKey, setExtendKey]               = useState(0);     // ✅ extend pe interval restart ke liye
+  const timerRef                                = useRef(null);
+  const sessionStartTimeRef                     = useRef(null);
+  const currentSessionIdRef                     = useRef(existingSessionId);
+
+  // Duration limit from session quota (seconds)
+  // DB returns duration_limit_mins (without "utes")
+  const durationLimitSeconds = (() => {
+    const mins = sessionQuota?.duration_limit_mins;
+    if (mins && typeof mins === "number" && mins > 0) return mins * 60;
+    // Plan ke hisaab se default
+    const plan = sessionQuota?.plan_type;
+    if (plan === "pro")   return 90 * 60;
+    if (plan === "basic") return 60 * 60;
+    return 25 * 60; // free default
+  })();
+
+  // Can this user extend? (basic or pro, not free)
+  const isPaidPlan = sessionQuota?.plan_type && sessionQuota.plan_type !== "free";
+  // Extend minutes based on plan
+  const extendMinutes = sessionQuota?.plan_type === "pro" ? 90 : 60;
+
+  // ─────────────────────────────────────────────────────
+  // ✅ MARK SESSION COUNTED (first AI answer pe call hoga)
+  // ─────────────────────────────────────────────────────
+  const markSessionCounted = useCallback(async (sessionId) => {
+    if (!sessionId || sessionCounted) return;
+    try {
+      // Backend: mark_session_counted endpoint
+      // ye session_enforcement.py ka mark_session_counted() call karta hai
+      const res = await fetch(`${BACKEND_URL}/session/mark-counted/${sessionId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        console.log("[Timer] Session marked as counted:", sessionId);
+        setSessionCounted(true);
+
+        // ✅ Timer shuru karo abhi se
+        sessionStartTimeRef.current = Date.now();
+        setTimerSeconds(durationLimitSeconds);
+
+        // ✅ Quota UI turant update karo (sessions_remaining -1)
+        await refreshSessionQuota();
+        console.log("[Quota] Refreshed after session counted");
+      }
+    } catch (err) {
+      console.error("[Timer] mark-counted error:", err);
+    }
+  }, [sessionCounted, durationLimitSeconds, refreshSessionQuota]);
+
+  // ─────────────────────────────────────────────────────
+  // ✅ TIMER COUNTDOWN — single interval, starts when timerSeconds set
+  // ─────────────────────────────────────────────────────
+  const timerIntervalRef = useRef(null);
+
+  useEffect(() => {
+    // Start timer when timerSeconds is set (first time or after extend)
+    if (timerSeconds === null) return;
+
+    // ✅ FIX: local intervalId use karo — race condition avoid
+    // Old interval closure mein timerIntervalRef.current tha jo new interval clear kar deta tha
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    const intervalId = setInterval(() => {
+      setTimerSeconds(prev => {
+        if (prev === null) return null;
+        if (prev <= 0) {
+          clearInterval(intervalId); // ✅ apna hi intervalId clear karo, ref nahi
+          console.log("[Timer] Session duration limit reached");
+          setIsSessionExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    timerIntervalRef.current = intervalId;
+
+    return () => {
+      clearInterval(intervalId); // ✅ cleanup bhi apna intervalId use kare
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionCounted, extendKey]); // sessionCounted ya extend pe restart hoga
+
+  // ✅ Timer expire hone pe transcript + AI band karo
+  useEffect(() => {
+    if (!isSessionExpired) return;
+    console.log("[Timer] Stopping transcript + AI on session expire");
+    transcription.stopTranscription();
+    qa.pauseQA?.(); // agar pauseQA ho to
+  }, [isSessionExpired]);
+
+  // ─────────────────────────────────────────────────────
+  // ✅ EXTEND SESSION (basic/pro only)
+  // ─────────────────────────────────────────────────────
+  const handleExtendSession = async () => {
+    if (!isPaidPlan || isExtending) return;
+    const sessionId = currentSessionIdRef.current || existingSessionId;
+    if (!sessionId) return;
+
+    // ✅ INSTANT: Popup band karo + timer shuru karo (optimistic UI)
+    setIsSessionExpired(false);
+    setExtendError(null);
+    setIsExtending(true);
+    setTimerSeconds(extendMinutes * 60);  // naya timer value set karo
+    setExtendKey(k => k + 1);             // ✅ interval restart trigger
+
+    try {
+      // 1️⃣ Extend session duration in DB + sessions_used +1 (backend karta hai)
+      const res = await fetch(`${BACKEND_URL}/session/extend/${sessionId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ extra_minutes: extendMinutes }),
+      });
+
+      if (res.ok) {
+        console.log(`[Timer] Session extended by ${extendMinutes} minutes (+1 session counted)`);
+
+        // 2️⃣ Transcript + QA restart karo
+        try {
+          await transcription.connectDeepgram();
+          await audio.startMicrophoneCapture();
+          await qa.connectQA();
+          audio.setIsRecording(true);
+          console.log("[Extend] Transcript + QA resumed successfully");
+        } catch (resumeErr) {
+          console.error("[Extend] Failed to resume transcript/QA:", resumeErr);
+          setExtendError("Mic restart failed. Please stop and start again.");
+        }
+
+        // 3️⃣ Quota refresh (sessions_remaining -1 more)
+        await refreshSessionQuota();
+      } else {
+        // Rollback: agar API fail ho to popup wapas dikhao
+        const err = await res.json();
+        setIsSessionExpired(true);
+        setTimerSeconds(0);
+        setExtendError(err?.detail || "Extend failed");
+      }
+    } catch (err) {
+      setIsSessionExpired(true);
+      setTimerSeconds(0);
+      setExtendError("Network error");
+    } finally {
+      setIsExtending(false);
+    }
+  };
 
   // HOOKS - Pass existing session & KB IDs
   const qa = useQACopilot({
@@ -104,6 +269,18 @@ export default function InterviewAssist() {
     isGenerating: qa.isGenerating,
   });
 
+  // ─────────────────────────────────────────────────────
+  // ✅ WATCH FOR FIRST AI ANSWER → Mark session counted + start timer
+  // qaList mein pehla item aane pe trigger
+  // ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (qa.qaList.length === 1 && !sessionCounted) {
+      const sessionId = currentSessionIdRef.current || existingSessionId;
+      console.log("[Timer] First AI answer detected, marking session counted");
+      markSessionCounted(sessionId);
+    }
+  }, [qa.qaList.length, sessionCounted, existingSessionId, markSessionCounted]);
+
   // AUTH GUARD
   useEffect(() => {
     if (!loading && !user) {
@@ -125,11 +302,40 @@ export default function InterviewAssist() {
   }, [isMockMode, audio.isRecording, mockQuestionCount]);
 
   // REQUEST NEXT MOCK QUESTION
+  // 🔥 Fix 1: Submit current answer + ⚡ use prefetch if available
   const requestNextMockQuestion = () => {
     const nextCount = mockQuestionCount + 1;
     console.log(`➡️ [Mock] Requesting question #${nextCount}`);
+
+    // Collect candidate's spoken answer from transcript
+    const answeredParagraphs = transcription.candidateTranscript
+      .map((entry) => entry.text)
+      .filter(Boolean);
+    const inProgress = transcription.currentCandidateParagraph;
+    if (inProgress) answeredParagraphs.push(inProgress);
+    const answerText = answeredParagraphs.join(" ").trim();
+
+    // Submit for evaluation if there's anything spoken
+    if (answerText) {
+      console.log(`📊 [Mock] Submitting answer (${answerText.length} chars) for evaluation`);
+      qa.submitMockAnswer(answerText);
+    } else {
+      console.warn("[Mock] No answer text found to submit — skipping evaluation");
+    }
+
     setMockQuestionCount(nextCount);
-    qa.requestMockQuestion(nextCount);
+
+    // ⚡ Use prefetched question for instant display
+    if (qa.hasPrefetchedQuestion(nextCount)) {
+      console.log(`⚡ [Mock] Q#${nextCount} ready from prefetch — showing instantly`);
+      qa.usePrefetchedQuestion();
+      // Kick off prefetch for the question after this one
+      setTimeout(() => qa.prefetchNextQuestion(nextCount + 1), 600);
+    } else {
+      // Fallback: normal WS request (shows loading indicator)
+      console.log(`⏳ [Mock] Q#${nextCount} not prefetched yet — requesting normally`);
+      qa.requestMockQuestion(nextCount);
+    }
   };
 
   // RECORDING CONTROL
@@ -145,12 +351,14 @@ export default function InterviewAssist() {
     try {
       audio.setTabAudioError("");
 
-      // Ensure session exists
       const sessionId = await qa.initSession();
       if (!sessionId) {
         console.warn("❌ Session init failed");
         return;
       }
+
+      // Store current session ID for timer
+      currentSessionIdRef.current = sessionId;
 
       await transcription.connectDeepgram();
       await audio.startMicrophoneCapture();
@@ -162,9 +370,7 @@ export default function InterviewAssist() {
       await qa.connectQA();
       audio.setIsRecording(true);
 
-      console.log(
-        isMockMode ? "✅ Mock interview started" : "✅ Interview started",
-      );
+      console.log(isMockMode ? "✅ Mock interview started" : "✅ Interview started");
     } catch (err) {
       console.error("Failed to start:", err);
       transcription.stopTranscription();
@@ -175,6 +381,11 @@ export default function InterviewAssist() {
   };
 
   const stopRecording = async () => {
+    // ✅ Clear timer
+    clearInterval(timerIntervalRef.current);
+    setTimerSeconds(null);
+    setSessionCounted(false);
+
     transcription.stopTranscription();
     await qa.stopQA();
     audio.stopAudioCapture();
@@ -184,6 +395,10 @@ export default function InterviewAssist() {
     if (isMockMode) {
       setMockQuestionCount(0);
     }
+
+    // ✅ Refresh quota after session ends (counter updates instantly)
+    await refreshSessionQuota();
+    console.log("[Quota] Session quota refreshed after stop");
   };
 
   // HANDLE ANALYTICS ACTIONS
@@ -241,6 +456,7 @@ Feedback: ${q.feedback}
   // Cleanup
   useEffect(() => {
     return () => {
+      clearInterval(timerIntervalRef.current);
       transcription.stopTranscription();
       qa.stopQA();
       audio.stopAudioCapture();
@@ -303,6 +519,19 @@ Feedback: ${q.feedback}
 
             <button
               onClick={async () => {
+                // 🔥 Fix 1 (end): Submit last answer before ending session
+                const lastParagraphs = transcription.candidateTranscript
+                  .map((entry) => entry.text)
+                  .filter(Boolean);
+                const lastInProgress = transcription.currentCandidateParagraph;
+                if (lastInProgress) lastParagraphs.push(lastInProgress);
+                const lastAnswer = lastParagraphs.join(" ").trim();
+                if (lastAnswer) {
+                  console.log("[Mock] Submitting last answer before ending session");
+                  qa.submitMockAnswer(lastAnswer);
+                  // Small delay so WS can process evaluate_answer before session_end
+                  await new Promise((r) => setTimeout(r, 300));
+                }
                 await stopRecording();
               }}
               className="w-full sm:w-auto sm:ml-auto px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition text-sm shadow-lg order-3 sm:order-none"
@@ -350,21 +579,93 @@ Feedback: ${q.feedback}
           />
         )}
 
-        {/* MAIN CONTENT - Fully Responsive Layout */}
+        {/* ✅ SESSION EXPIRED POPUP */}
+        {isSessionExpired && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl text-center">
+              {/* Icon */}
+              <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+
+              <h2 className="text-white text-xl font-bold mb-2">Session Time Limit Reached</h2>
+              <p className="text-gray-400 text-sm mb-5">
+                Your allotted session time has expired.
+              </p>
+
+              {isPaidPlan ? (
+                <>
+                  <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-3 mb-6">
+                    <p className="text-orange-300 text-sm font-medium">
+                      ⚠️ Extending this session will consume <strong>1 additional session</strong> from your quota.
+                    </p>
+                    <p className="text-gray-400 text-xs mt-1">
+                      (Current session + extension = 2 sessions used)
+                    </p>
+                  </div>
+
+                  {extendError && (
+                    <p className="text-red-400 text-sm mb-4">{extendError}</p>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={async () => { await stopRecording(); navigate("/interview"); }}
+                      className="flex-1 py-3 rounded-xl border border-gray-600 text-gray-300 hover:bg-gray-800 font-semibold transition-all text-sm"
+                    >
+                      End Session
+                    </button>
+                    <button
+                      onClick={handleExtendSession}
+                      disabled={isExtending}
+                      className="flex-1 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isExtending ? "Extending..." : `🔄 +${extendMinutes} Min Extend`}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-6">
+                    <p className="text-purple-300 text-sm">
+                      Session extension is not available on the Free plan.
+                      <br />
+                      Upgrade to <strong>Basic or Pro</strong> to unlock extended sessions and more.
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={async () => { await stopRecording(); navigate("/interview"); }}
+                      className="flex-1 py-3 rounded-xl border border-gray-600 text-gray-300 hover:bg-gray-800 font-semibold transition-all text-sm"
+                    >
+                      End Session
+                    </button>
+                    <button
+                      onClick={() => navigate("/pricing")}
+                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold transition-all text-sm"
+                    >
+                      ⬆️ Upgrade Plan
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* MAIN CONTENT */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-          {/* LEFT PANEL - TRANSCRIPT - 30% on all screens */}
+          {/* LEFT PANEL - TRANSCRIPT */}
           <div className="h-[30%] lg:h-auto w-full lg:w-[30%] border-b lg:border-b-0 lg:border-r border-gray-800 flex flex-col min-h-0 shrink-0">
             <TranscriptPanel
               activeView={isMockMode ? "candidate" : activeView}
               onViewChange={isMockMode ? () => {} : setActiveView}
               interviewerTranscript={transcription.interviewerTranscript}
               candidateTranscript={transcription.candidateTranscript}
-              currentInterviewerParagraph={
-                transcription.currentInterviewerParagraph
-              }
-              currentCandidateParagraph={
-                transcription.currentCandidateParagraph
-              }
+              currentInterviewerParagraph={transcription.currentInterviewerParagraph}
+              currentCandidateParagraph={transcription.currentCandidateParagraph}
               interviewerInterim={transcription.interviewerInterim}
               candidateInterim={transcription.candidateInterim}
               isPaused={audio.isPaused}
@@ -376,7 +677,7 @@ Feedback: ${q.feedback}
             />
           </div>
 
-          {/* RIGHT PANEL - QA COPILOT - 70% on all screens */}
+          {/* RIGHT PANEL - QA COPILOT */}
           <div className="flex-1 lg:w-[70%] flex flex-col min-h-0">
             <QACopilot
               qaList={qa.qaList}
@@ -388,9 +689,15 @@ Feedback: ${q.feedback}
               isMockMode={isMockMode}
               mockQuestionCount={mockQuestionCount}
               mockControls={mockControlsContent}
+              // ✅ Timer props
+              timerSeconds={timerSeconds}
+              canExtend={isPaidPlan && !isMockMode}
+              onExtend={handleExtendSession}
+              isExtending={isExtending}
+              extendError={extendError}
             />
 
-            {/* ✅ MOCK CONTROLS - Only visible on mobile/tablet (lg:hidden) */}
+            {/* MOCK CONTROLS - mobile/tablet only */}
             {mockControlsContent && (
               <div className="lg:hidden border-t border-gray-800 bg-[#111111]">
                 {mockControlsContent}
@@ -414,7 +721,7 @@ Feedback: ${q.feedback}
           />
         )}
 
-        {/* MOCK CONFIRMATION MODAL - Fully Responsive */}
+        {/* MOCK CONFIRMATION MODAL */}
         {showMockConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4">
             <div className="w-full max-w-md bg-[#0F1115] border border-white/10 rounded-2xl shadow-2xl p-5 sm:p-6 mx-4">

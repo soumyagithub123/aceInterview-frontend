@@ -1,18 +1,24 @@
 // src/components/Interview/Copilot/CopilotLaunchpad.jsx
-// ✅ FIXED VERSION - KB Integration
+// ✅ UPDATED:
+// 1. Session quota (remaining sessions) shown in left sidebar panel
+// 2. Free user ke saath 0 sessions → launch button disabled with message
+// 3. Quota display: remaining/total with plan info
+// 4. Baaki sab code exactly same hai
 
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Auth/AuthContext"; // ✅ Import useAuth
+import { useAuth } from "../../Auth/AuthContext";
+import { useAppData } from "../../../context/AppDataContext";
 import {
   Settings,
-  HelpCircle,
   Rocket,
   CheckCircle,
-  ChevronRight,
   Sparkles,
-  ShieldCheck,
   Loader2,
+  Crown,
+  AlertCircle,
+  Clock,
+  Zap,
 } from "lucide-react";
 
 import PersonaSelection from "../Persona/PersonaSelection";
@@ -60,6 +66,8 @@ function Chip({ tone = "neutral", children }) {
       ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
       : tone === "warn"
       ? "border-yellow-400/25 bg-yellow-400/10 text-yellow-100"
+      : tone === "danger"
+      ? "border-red-400/25 bg-red-400/10 text-red-200"
       : "border-white/15 bg-white/5 text-white/75";
 
   return (
@@ -96,11 +104,134 @@ function Card({ title, subtitle, right, children }) {
   );
 }
 
+/* -------------------- SESSION QUOTA WIDGET -------------------- */
+// ✅ NEW: Left sidebar mein quota dikhata hai
+function SessionQuotaWidget({ sessionQuota, isPaidUser, onUpgrade }) {
+  if (!sessionQuota) return null;
+
+  const { is_unlimited, sessions_remaining, session_limit, duration_limit_mins, plan_type, billing_period } = sessionQuota;
+
+  // Unlimited (pro)
+  if (is_unlimited) {
+    return (
+      <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span className="text-xs font-semibold text-emerald-300 uppercase tracking-wide">
+            Pro Plan
+          </span>
+        </div>
+        <p className="text-white text-sm font-semibold">Unlimited Sessions</p>
+        <p className="text-white/40 text-xs mt-1 flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          {duration_limit_mins} min per session
+        </p>
+      </div>
+    );
+  }
+
+  // Exhausted
+  if (sessions_remaining === 0) {
+    return (
+      <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+          <span className="text-xs font-semibold text-red-300 uppercase tracking-wide">
+            Sessions Used Up
+          </span>
+        </div>
+        <p className="text-white text-sm font-semibold">0 sessions remaining</p>
+        <p className="text-white/40 text-xs mt-1">
+          {plan_type === "free"
+            ? "All 5 lifetime free sessions used"
+            : `All ${session_limit} ${billing_period} sessions used`}
+        </p>
+        <button
+          onClick={onUpgrade}
+          className="mt-3 w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-semibold px-3 py-2 rounded-xl text-xs hover:from-yellow-300 hover:to-orange-300 transition-all"
+        >
+          <Crown className="w-3.5 h-3.5" />
+          Upgrade Plan
+        </button>
+      </div>
+    );
+  }
+
+  // Low sessions (≤ 2)
+  const isLow = sessions_remaining <= 2;
+  const pct = Math.round((sessions_remaining / session_limit) * 100);
+
+  return (
+    <div className={cn(
+      "rounded-2xl border p-4",
+      isLow
+        ? "border-yellow-500/25 bg-yellow-500/5"
+        : "border-white/10 bg-white/[0.04]"
+    )}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <div className={cn(
+            "w-2 h-2 rounded-full",
+            isLow ? "bg-yellow-400" : "bg-emerald-400"
+          )} />
+          <span className={cn(
+            "text-xs font-semibold uppercase tracking-wide",
+            isLow ? "text-yellow-300" : "text-white/60"
+          )}>
+            {plan_type === "free" ? "Free Plan" : `${plan_type} · ${billing_period}`}
+          </span>
+        </div>
+        <span className={cn(
+          "text-xs font-bold",
+          isLow ? "text-yellow-300" : "text-white"
+        )}>
+          {sessions_remaining}/{session_limit}
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden mb-2">
+        <div
+          className={cn(
+            "h-full rounded-full transition-all",
+            isLow ? "bg-yellow-400" : "bg-emerald-400"
+          )}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-white/50 text-xs flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          {duration_limit_mins} min / session
+        </p>
+        <p className={cn(
+          "text-xs",
+          isLow ? "text-yellow-300" : "text-white/40"
+        )}>
+          {sessions_remaining} left
+        </p>
+      </div>
+
+      {isLow && (
+        <button
+          onClick={onUpgrade}
+          className="mt-3 w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-semibold px-3 py-1.5 rounded-xl text-xs hover:from-yellow-300 hover:to-orange-300 transition-all"
+        >
+          <Crown className="w-3.5 h-3.5" />
+          Upgrade for more
+        </button>
+      )}
+    </div>
+  );
+}
+
 /* ================== MAIN ================== */
 
 export default function CopilotLaunchpad({ mode }) {
   const navigate = useNavigate();
-  const { user } = useAuth(); // ✅ Get current user
+  const { user } = useAuth();
+  const { sessionQuota, isPaidUser } = useAppData(); // ✅ Get quota from context
 
   /* -------------------- STEPS -------------------- */
   const [step, setStep] = useState(1);
@@ -117,8 +248,12 @@ export default function CopilotLaunchpad({ mode }) {
   const [processingResume, setProcessingResume] = useState(false);
   const [launching, setLaunching] = useState(false);
 
-  /* -------------------- API -------------------- */
-  // API is imported from config.js
+  /* -------------------- QUOTA CHECKS -------------------- */
+  // ✅ Free user with 0 sessions → block launch
+  const freeSessionsExhausted = !isPaidUser &&
+    sessionQuota !== null &&
+    !sessionQuota?.is_unlimited &&
+    sessionQuota?.sessions_remaining === 0;
 
   /* -------------------- PERSONA SELECT -------------------- */
   const handlePersonaSelect = async (personaId, personaData) => {
@@ -149,18 +284,26 @@ export default function CopilotLaunchpad({ mode }) {
     setStep(3);
   };
 
-  /* -------------------- LAUNCH (✅ FIXED WITH KB) -------------------- */
+  /* -------------------- LAUNCH -------------------- */
   const handleLaunch = async () => {
     if (!selectedPersona || !selectedDomain || launching) return;
+
+    // ✅ Block if free sessions exhausted
+    if (freeSessionsExhausted) {
+      navigate("/pricing", {
+        state: { message: "You have used all your free sessions. Upgrade to continue." }
+      });
+      return;
+    }
 
     try {
       setLaunching(true);
 
-      // ✅ FIX 1: Get selected KB IDs from USER-SPECIFIC localStorage
+      // Get selected KB IDs from user-specific localStorage
       const selectedKBIds = (() => {
         try {
           if (!user?.id) return [];
-          const key = `selectedKBIds_${user.id}`; // ✅ Unique key per user
+          const key = `selectedKBIds_${user.id}`;
           const stored = localStorage.getItem(key);
           if (!stored) return [];
           const parsed = JSON.parse(stored);
@@ -172,9 +315,8 @@ export default function CopilotLaunchpad({ mode }) {
 
       console.log("📚 [LAUNCH] Selected KB IDs:", selectedKBIds);
 
-      // ✅ FIX 2: Include KB IDs in session payload
       const payload = {
-        user_id: user?.id || "anonymous", // ✅ Send actual user ID
+        user_id: user?.id || "anonymous",
         persona_id: selectedPersona,
         custom_style_prompt: null,
         knowledge_base_ids: selectedKBIds,
@@ -186,20 +328,37 @@ export default function CopilotLaunchpad({ mode }) {
         body: JSON.stringify(payload),
       });
 
+      // ✅ Handle 403 quota exceeded from backend
+      if (res.status === 403) {
+        const errData = await res.json();
+        const code = errData?.detail?.code;
+        if (code === "SESSION_QUOTA_EXCEEDED") {
+          navigate("/pricing", {
+            state: {
+              message: errData?.detail?.message || "Session quota exceeded.",
+            }
+          });
+          return;
+        }
+        throw new Error("Access denied");
+      }
+
       if (!res.ok) throw new Error("Session init failed");
 
       const data = await res.json();
 
-      // ✅ Log session response (for debugging)
       console.log("✅ Session Initialized:", {
-        ...data,
-        knowledge_base_ids: selectedKBIds,
+        session_id:           data.session_id,
+        settings:             data.settings,
+        persona_data:         data.persona_data,
+        cached_system_prompt: data.cached_system_prompt,
+        knowledge_base_ids:   selectedKBIds,
       });
 
       sessionStorage.setItem("launchAuthorized", "true");
       sessionStorage.setItem("sessionId", data.session_id);
 
-      // ✅ ROUTING LOGIC based on Domain
+      // Routing based on domain
       let targetRoute = mode === "mock" ? "/mock-interview" : "/interview-assist";
       let featureName = "Interview Assistant";
 
@@ -217,17 +376,16 @@ export default function CopilotLaunchpad({ mode }) {
         featureName = "Meeting Copilot";
       }
 
-      // ✅ FIX 3: Pass session data to InterviewAssist (including KB)
       navigate(targetRoute, {
         state: {
           personaId: selectedPersona,
           personaData: selectedPersonaData,
           domain: selectedDomain,
-          sessionId: data.session_id,              // ✅ Existing session
-          sessionData: data,                       // ✅ NEW - Full session data
-          knowledgeBaseIds: selectedKBIds,         // ✅ NEW - KB IDs
+          sessionId: data.session_id,
+          sessionData: data,
+          knowledgeBaseIds: selectedKBIds,
           isMockMode: mode === "mock",
-          featureName: featureName,                // ✅ For Coming Soon page
+          featureName: featureName,
         },
       });
     } catch (err) {
@@ -242,7 +400,6 @@ export default function CopilotLaunchpad({ mode }) {
   const handleEditStep = (stepNumber) => {
     if (stepNumber <= step) {
       setStep(stepNumber);
-
       if (stepNumber === 1) {
         setSelectedPersona(null);
         setSelectedPersonaData(null);
@@ -259,9 +416,10 @@ export default function CopilotLaunchpad({ mode }) {
       !!selectedPersona &&
       !!selectedDomain &&
       !processingResume &&
-      !launching
+      !launching &&
+      !freeSessionsExhausted  // ✅ Block if no sessions left
     );
-  }, [step, selectedPersona, selectedDomain, processingResume, launching]);
+  }, [step, selectedPersona, selectedDomain, processingResume, launching, freeSessionsExhausted]);
 
   const headerTitle =
     step === 1
@@ -325,106 +483,111 @@ export default function CopilotLaunchpad({ mode }) {
         <div className="mt-8 lg:mt-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* LEFT PANEL */}
           <div className="lg:col-span-4 space-y-6 order-2 lg:order-1">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 sm:p-6 lg:sticky lg:top-10">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold">Setup Progress</p>
-                <Chip>
-                  {step === 1 ? "Persona" : step === 2 ? "Domain" : "Confirm"}
-                </Chip>
+            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 sm:p-6 lg:sticky lg:top-10 space-y-6">
+
+              {/* Setup Progress */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold">Setup Progress</p>
+                  <Chip>
+                    {step === 1 ? "Persona" : step === 2 ? "Domain" : "Confirm"}
+                  </Chip>
+                </div>
+
+                <div className="mt-6 space-y-5">
+                  {/* STEP 1 */}
+                  <div className="flex items-start gap-4">
+                    <StepDot active={step === 1} done={step > 1} />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="font-semibold">Persona</p>
+                        {step > 1 && (
+                          <button
+                            className="text-xs text-white/60 hover:text-white"
+                            onClick={() => handleEditStep(1)}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-white/55 mt-1">
+                        {selectedPersonaData
+                          ? `${selectedPersonaData.position || "Role"} @ ${
+                              selectedPersonaData.company_name || "Company"
+                            }`
+                          : "Choose a persona to load role and resume context."}
+                      </p>
+
+                      {processingResume && (
+                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-yellow-400/25 bg-yellow-400/10 text-yellow-100 px-3 py-1 text-xs">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          Processing resume…
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="ml-[18px] h-6 w-px bg-gradient-to-b from-white/20 to-transparent" />
+
+                  {/* STEP 2 */}
+                  <div className={cn("flex items-start gap-4", step < 2 && "opacity-60")}>
+                    <StepDot active={step === 2} done={step > 2} />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="font-semibold">Interview Domain</p>
+                        {step > 2 && (
+                          <button
+                            className="text-xs text-white/60 hover:text-white"
+                            onClick={() => handleEditStep(2)}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-white/55 mt-1">
+                        {selectedDomain || "Select a domain to guide tone and examples."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="ml-[18px] h-6 w-px bg-gradient-to-b from-white/20 to-transparent" />
+
+                  {/* STEP 3 */}
+                  <div className={cn("flex items-start gap-4", step < 3 && "opacity-60")}>
+                    <StepDot active={step === 3} />
+                    <div className="flex-1">
+                      <p className="font-semibold">Confirm & Launch</p>
+                      <p className="text-xs text-white/55 mt-1">
+                        Review everything and start your interview copilot.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-6 space-y-5">
-                {/* STEP 1 */}
-                <div className="flex items-start gap-4">
-                  <StepDot active={step === 1} done={step > 1} />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="font-semibold">Persona</p>
-                      {step > 1 && (
-                        <button
-                          className="text-xs text-white/60 hover:text-white"
-                          onClick={() => handleEditStep(1)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-white/55 mt-1">
-                      {selectedPersonaData
-                        ? `${selectedPersonaData.position || "Role"} @ ${
-                            selectedPersonaData.company_name || "Company"
-                          }`
-                        : "Choose a persona to load role and resume context."}
-                    </p>
-
-                    {processingResume && (
-                      <Chip tone="warn" className="mt-3 inline-flex">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Processing resume…
-                      </Chip>
-                    )}
-                  </div>
-                </div>
-
-                <div className="ml-[18px] h-6 w-px bg-gradient-to-b from-white/20 to-transparent" />
-
-                {/* STEP 2 */}
-                <div
-                  className={cn(
-                    "flex items-start gap-4",
-                    step < 2 && "opacity-60"
-                  )}
-                >
-                  <StepDot active={step === 2} done={step > 2} />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="font-semibold">Interview Domain</p>
-                      {step > 2 && (
-                        <button
-                          className="text-xs text-white/60 hover:text-white"
-                          onClick={() => handleEditStep(2)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-white/55 mt-1">
-                      {selectedDomain ||
-                        "Select a domain to guide tone and examples."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="ml-[18px] h-6 w-px bg-gradient-to-b from-white/20 to-transparent" />
-
-                {/* STEP 3 */}
-                <div
-                  className={cn(
-                    "flex items-start gap-4",
-                    step < 3 && "opacity-60"
-                  )}
-                >
-                  <StepDot active={step === 3} />
-                  <div className="flex-1">
-                    <p className="font-semibold">Confirm & Launch</p>
-                    <p className="text-xs text-white/55 mt-1">
-                      Review everything and start your interview copilot.
-                    </p>
-                  </div>
-                </div>
+              {/* ✅ SESSION QUOTA WIDGET — divider ke baad */}
+              <div className="border-t border-white/10 pt-5">
+                <p className="text-xs text-white/40 uppercase tracking-wide font-semibold mb-3">
+                  Session Quota
+                </p>
+                <SessionQuotaWidget
+                  sessionQuota={sessionQuota}
+                  isPaidUser={isPaidUser}
+                  onUpgrade={() => navigate("/pricing")}
+                />
               </div>
 
               {/* LAUNCH BUTTON */}
-              <div className="mt-8 pt-6 border-t border-white/10">
+              <div className="border-t border-white/10 pt-5">
                 <button
                   onClick={handleLaunch}
                   disabled={!canLaunch}
                   className={cn(
                     "w-full rounded-2xl py-4 px-5 font-semibold flex items-center justify-center gap-2 transition-all",
                     canLaunch
-                      ? "bg-gradient-to-r from-white to-white/90 text-black shadow-lg"
+                      ? "bg-white text-black shadow-md hover:bg-white/90 active:bg-white/80"
                       : "bg-white/10 text-white/35 cursor-not-allowed"
                   )}
                 >
@@ -441,9 +604,12 @@ export default function CopilotLaunchpad({ mode }) {
                   )}
                 </button>
 
+                {/* ✅ Status message under button */}
                 <p className="mt-3 text-center text-[11px] text-white/50 italic">
                   {launching
                     ? "Initializing interview session…"
+                    : freeSessionsExhausted
+                    ? "⚠️ No sessions remaining. Upgrade to continue."
                     : canLaunch
                     ? "✓ All set. You're ready to launch."
                     : "Complete setup steps to enable launch."}
@@ -465,11 +631,7 @@ export default function CopilotLaunchpad({ mode }) {
               subtitle={headerSubtitle}
               right={
                 <Chip>
-                  {step === 1
-                    ? "Select"
-                    : step === 2
-                    ? "Choose"
-                    : "Review"}
+                  {step === 1 ? "Select" : step === 2 ? "Choose" : "Review"}
                 </Chip>
               }
             >
@@ -478,9 +640,7 @@ export default function CopilotLaunchpad({ mode }) {
                   <PersonaSelection onSelect={handlePersonaSelect} />
                 )}
                 {step === 2 && (
-                  <InterviewDomainSelection
-                    onSelect={handleDomainSelect}
-                  />
+                  <InterviewDomainSelection onSelect={handleDomainSelect} />
                 )}
                 {step === 3 && (
                   <LaunchChecklist
@@ -502,6 +662,8 @@ export default function CopilotLaunchpad({ mode }) {
     </div>
   );
 }
+
+
 
 
 

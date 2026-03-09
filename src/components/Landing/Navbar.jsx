@@ -165,7 +165,7 @@ const ResourcesDropdown = ({ isOpen, onClose, onBlogClick }) => {
 };
 
 // -------------------- USER MENU --------------------
-const UserMenu = ({ user, onSignOut, userProfile }) => {
+const UserMenu = ({ user, onSignOut, userProfile, currentPlan }) => {
 
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
@@ -184,7 +184,7 @@ const UserMenu = ({ user, onSignOut, userProfile }) => {
   const firstLetter = user?.email?.[0]?.toUpperCase() || "U";
 
   // Determine styles based on plan
-  const plan = userProfile?.subscription_tier || "free";
+  const plan = currentPlan || "free"; // Fallback just in case
   
   const ringClasses = 
     plan === "pro" ? "ring-2 ring-offset-2 ring-yellow-400" :
@@ -267,7 +267,7 @@ const UserMenu = ({ user, onSignOut, userProfile }) => {
 // -------------------- NAVBAR --------------------
 export default function Navbar() {
   const { user, signOut } = useAuth();
-  const { userProfile } = useAppData();
+  const { userProfile, currentPlan } = useAppData();
   const navigate = useNavigate();
 
 
@@ -444,7 +444,7 @@ export default function Navbar() {
               Start for free
             </button>
           ) : (
-            <UserMenu user={user} onSignOut={handleSignOut} userProfile={userProfile} />
+            <UserMenu user={user} onSignOut={handleSignOut} userProfile={userProfile} currentPlan={currentPlan} />
           )}
 
         </div>

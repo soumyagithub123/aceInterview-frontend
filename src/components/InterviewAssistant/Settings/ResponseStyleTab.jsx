@@ -1,8 +1,42 @@
 import React from 'react';
-import { ChevronDown, Edit2, Trash2, Settings as SettingsIcon } from 'lucide-react';
+import { ChevronDown, Edit2, Trash2, Settings as SettingsIcon, Lock } from 'lucide-react';
+import { useAppData } from '../../../context/AppDataContext';
+import { useNavigate } from 'react-router-dom';
+
+const FREE_STYLES = ['Concise', 'Conversational', 'Detailed'];
 
 export default function ResponseStyleTab({ responseStyles, selectedStyleId, setSelectedStyleId, onCreateStyle, onEditStyle, onDeleteStyle }) {
+  const { isPaidUser } = useAppData();
+  const navigate = useNavigate();
   const selectedStyle = responseStyles.find(s => s.id === selectedStyleId) || null;
+
+  const handleStyleChange = (e) => {
+    const newStyleId = e.target.value;
+    const style = responseStyles.find(s => s.id === newStyleId);
+    
+    if (!style) return;
+
+    // Check if style is allowed
+    const isAllowed = isPaidUser || FREE_STYLES.includes(style.style_name);
+    
+    if (!isAllowed) {
+      // Redirect to pricing or show alert
+      if (confirm("This style is available for Pro users. Upgrade to unlock?")) {
+        navigate('/pricing');
+      }
+      return;
+    }
+
+    setSelectedStyleId(newStyleId);
+  };
+
+  const handleCustomizationClick = () => {
+    if (!isPaidUser) {
+      navigate('/pricing', { state: { message: "Upgrade to customize AI styles" } });
+      return;
+    }
+    onCreateStyle();
+  };
 
   return (
     <div className="space-y-6">
@@ -13,15 +47,20 @@ export default function ResponseStyleTab({ responseStyles, selectedStyleId, setS
         <div className="relative mb-6">
           <select
             value={selectedStyleId || ''}
-            onChange={(e) => setSelectedStyleId(e.target.value)}
+            onChange={handleStyleChange}
             className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white appearance-none focus:outline-none focus:border-purple-500/50"
           >
             {responseStyles.length === 0 && <option value="">No styles available</option>}
-            {responseStyles.map(style => (
-              <option key={style.id} value={style.id}>
-                {style.style_name} {style.is_system_default ? '(System)' : '(Custom)'}
-              </option>
-            ))}
+            {responseStyles.map(style => {
+              const isAllowed = isPaidUser || FREE_STYLES.includes(style.style_name);
+              return (
+                <option key={style.id} value={style.id} disabled={!isAllowed} className={!isAllowed ? "text-gray-500 bg-gray-900" : ""}>
+                  {style.style_name} 
+                  {style.is_system_default ? '' : ' (Custom)'}
+                  {!isAllowed ? ' 🔒 (Pro)' : ''}
+                </option>
+              );
+            })}
           </select>
           <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
         </div>
@@ -45,7 +84,7 @@ export default function ResponseStyleTab({ responseStyles, selectedStyleId, setS
                 </div>
               </div>
 
-              {!selectedStyle.is_system_default && (
+              {!selectedStyle.is_system_default && isPaidUser && (
                 <div className="flex gap-2 ml-4">
                   <button onClick={() => onEditStyle(selectedStyle)} className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit style">
                     <Edit2 className="w-4 h-4" />
@@ -66,9 +105,16 @@ export default function ResponseStyleTab({ responseStyles, selectedStyleId, setS
           </div>
         )}
 
-        <button onClick={onCreateStyle} className="mt-6 w-full bg-purple-600/20 hover:bg-purple-600/30 border-2 border-purple-500/50 hover:border-purple-500 text-purple-300 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
-          <SettingsIcon className="w-5 h-5" />
-          Style Customization
+        <button 
+          onClick={handleCustomizationClick} 
+          className={`mt-6 w-full font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 border-2 ${
+            isPaidUser 
+              ? "bg-purple-600/20 hover:bg-purple-600/30 border-purple-500/50 hover:border-purple-500 text-purple-300"
+              : "bg-gray-800/50 border-gray-700 text-gray-500 cursor-not-allowed hover:bg-gray-800"
+          }`}
+        >
+          {isPaidUser ? <SettingsIcon className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+          Style Customization {isPaidUser ? "" : ""}
         </button>
       </div>
     </div>

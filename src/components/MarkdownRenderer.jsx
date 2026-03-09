@@ -24,6 +24,13 @@ export default function MarkdownRenderer({ content }) {
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw]}
       components={{
+        p({ children }) {
+          return (
+            <p className="mb-2 last:mb-0 text-justify leading-snug">
+              {children}
+            </p>
+          );
+        },
         code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
 

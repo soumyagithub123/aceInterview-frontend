@@ -18,7 +18,7 @@ export default function StatusBar({
 
   const isQAActive =
     qaStatus &&
-    ["ready", "active"].some((s) =>
+    ["ready", "active", "initializing"].some((s) =>
       qaStatus.toLowerCase().includes(s)
     );
 
@@ -56,7 +56,7 @@ export default function StatusBar({
           <div
             className={`w-2 h-2 rounded-full shrink-0 ${
               isQAActive
-                ? "bg-purple-400"
+                ? "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.1)]"
                 : isQAReconnecting
                 ? "bg-yellow-400 animate-pulse"
                 : "bg-gray-600"
@@ -86,12 +86,20 @@ export default function StatusBar({
         {isPaused && (
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-yellow-400 rounded-full" />
-            <span className="text-yellow-400">
+            <span className="text-yellow-400 font-medium">
               Paused
             </span>
           </div>
         )}
 
+        {!isGenerating && !isPaused && (
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+            <span className="text-white/30 font-bold uppercase text-[9px] tracking-widest">
+              Live
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

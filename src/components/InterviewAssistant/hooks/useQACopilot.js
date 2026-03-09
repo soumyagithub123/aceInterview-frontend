@@ -63,8 +63,17 @@ export default function useQACopilot({
   const qaWsRef = useRef(null);
   const reconnectingQaWsRef = useRef(null);
   const sessionIdRef = useRef(null);
+  const currentQuestionNumberRef = useRef(1); // 🔥 Fix 4: track for evaluate_answer
+
+  // ⚡ Prefetch refs
+  const prefetchedDataRef = useRef(null);   // stores prefetched { question, audio, ... }
+  const isPrefetchingRef  = useRef(false);  // prevent duplicate prefetch requests
 
   const audioRef = useRef(null);
+
+  // ⚡ RAF delta buffer — accumulate tokens, flush at 60fps to avoid per-token re-renders
+  const answerBufferRef = useRef("");
+  const rafScheduledRef = useRef(false);
 
   // Initialize Session ID on mount
   // Initialize Session ID on mount
@@ -134,16 +143,36 @@ export default function useQACopilot({
       return;
     }
 
-    console.log(`🎤 [Mock] Requesting question #${questionNumber || "next"}`);
+    const qNum = questionNumber || 1;
+    console.log(`🎤 [Mock] Requesting question #${qNum}`);
     setIsGenerating(true);
     setIsWaitingForAnswer(false);
     setQuestionStartTime(Date.now()); // 🔥 Track question start time
+    currentQuestionNumberRef.current = qNum; // 🔥 Fix 4: update current question number
 
     reconnectingQaWsRef.current.send({
       type: "request_mock_question",
-      question_number: questionNumber || 1,
+      question_number: qNum,
       voice: settingsRef.current?.candidate_voice_settings?.voice || "alloy",
       include_audio: true,
+    });
+  };
+
+  // ⚡ Silently pre-generate the next question in background
+  const prefetchNextQuestion = (nextNum) => {
+    if (!reconnectingQaWsRef.current || !sessionIdRef.current) return;
+    if (isPrefetchingRef.current) return;                              // already fetching
+    if (prefetchedDataRef.current?.question_number === nextNum) return; // already have it
+
+    isPrefetchingRef.current = true;
+    console.log(`🔄 [Mock] Prefetching question #${nextNum} in background`);
+
+    reconnectingQaWsRef.current.send({
+      type: "request_mock_question",
+      question_number: nextNum,
+      voice: settingsRef.current?.candidate_voice_settings?.voice || "alloy",
+      include_audio: true,
+      is_prefetch: true,  // ⚡ flag: backend echoes this back
     });
   };
 
@@ -200,7 +229,8 @@ export default function useQACopilot({
       question: currentMockQuestion,
       answer: answerText,
       get_feedback: true,
-      response_time_seconds: responseTime, // 🔥 NEW
+      response_time_seconds: responseTime,
+      question_number: currentQuestionNumberRef.current, // 🔥 Fix 4: send question number
     });
 
     setIsGenerating(true);
@@ -403,16 +433,36 @@ export default function useQACopilot({
               break;
 
             case "mock_question":
-              console.log("🎤 [Mock] Question received");
-              setCurrentMockQuestion(data.question || "");
-              setCurrentQuestion(data.question || "");
-              setIsGenerating(false);
-              
-              if (data.audio) {
-                setMockQuestionAudio(data.audio);
-                playQuestionAudio(data.audio);
+              if (data.is_prefetch) {
+                // ⚡ Store silently — don't display yet
+                prefetchedDataRef.current = data;
+                isPrefetchingRef.current  = false;
+                console.log(`✅ [Mock] Q#${data.question_number} prefetched & ready`);
               } else {
-                setIsWaitingForAnswer(true);
+                // Normal display
+                console.log("🎤 [Mock] Question received");
+                setCurrentMockQuestion(data.question || "");
+                setCurrentQuestion(data.question || "");
+                setIsGenerating(false);
+
+                if (data.audio) {
+                  setMockQuestionAudio(data.audio);
+                  playQuestionAudio(data.audio);
+                } else {
+                  setIsWaitingForAnswer(true);
+                }
+
+                // ⚡ Kick off prefetch for next question after a short delay
+                const thisQNum = data.question_number || 1;
+                setTimeout(() => prefetchNextQuestion(thisQNum + 1), 800);
+              }
+              break;
+
+            // 🔥 Fix 3: Handle backend-computed final analytics
+            case "session_analytics":
+              console.log("📊 [Mock] Backend analytics received");
+              if (data.analytics) {
+                setAnalyticsData(data.analytics);
               }
               break;
 
@@ -466,6 +516,9 @@ export default function useQACopilot({
 
               if (!data.question) return;
               console.log("❓ [QACopilot] Question:", data.question);
+              // ⚡ Reset delta buffer for new question
+              answerBufferRef.current = "";
+              rafScheduledRef.current = false;
               setCurrentQuestion(data.question);
               setCurrentAnswer("");
               setIsGenerating(true);
@@ -477,32 +530,52 @@ export default function useQACopilot({
 
               if (data.delta) {
                 setIsGenerating(false);
-                setCurrentAnswer((prev) => prev + data.delta);
+                // ⚡ Buffer delta and flush via RAF (~60fps) — avoids per-token re-render
+                answerBufferRef.current += data.delta;
+                if (!rafScheduledRef.current) {
+                  rafScheduledRef.current = true;
+                  requestAnimationFrame(() => {
+                    setCurrentAnswer(answerBufferRef.current);
+                    rafScheduledRef.current = false;
+                  });
+                }
               }
               break;
 
             case "answer_complete":
-            case "answer_ready":
+            case "answer_ready": {
               if (isMockMode) break;
 
               console.log("✅ [QACopilot] Answer complete");
 
-              if (data.answer && typeof data.answer === "string") {
-                setCurrentAnswer(data.answer);
-              }
+              // ⚡ Flush any remaining buffered delta before finalizing
+              // Block scope {} required here to use const inside switch-case
+              const finalAnswer = data.answer && typeof data.answer === "string"
+                ? data.answer
+                : answerBufferRef.current || currentAnswer;
 
+              // Clear RAF buffer
+              answerBufferRef.current = "";
+              rafScheduledRef.current = false;
+
+              setCurrentAnswer(finalAnswer);
               setIsGenerating(false);
               setIsStreamingComplete(true);
 
               addQA({
                 question: data.question || currentQuestion,
-                answer: data.answer || currentAnswer,
+                answer: finalAnswer,
               });
 
-              setCurrentQuestion("");
-              setCurrentAnswer("");
-              setIsStreamingComplete(false);
+              // Brief delay so user sees the completed answer before clearing
+              setTimeout(() => {
+                setCurrentQuestion("");
+                setCurrentAnswer("");
+                setIsStreamingComplete(false);
+                answerBufferRef.current = "";
+              }, 300);
               break;
+            }
 
             case "error":
               console.error("❌ [QACopilot] WS error:", data.message);
@@ -521,6 +594,12 @@ export default function useQACopilot({
           console.log(
             `🚀 [QACopilot] WS connected. Using session: ${sessionIdRef.current}`
           );
+
+          // 🔥 Fix 2: Set interviewStartTime when mock session connects (covers all paths)
+          if (isMockMode) {
+            setInterviewStartTime(Date.now());
+            console.log("⏱ [Mock] Interview start time set on WS connect");
+          }
 
           const initMessage = {
             type: "init",
@@ -669,6 +748,28 @@ export default function useQACopilot({
     currentMockQuestion,
     isWaitingForAnswer,
 
+    // ⚡ PREFETCH EXPORTS
+    prefetchNextQuestion,
+    hasPrefetchedQuestion: (num) => prefetchedDataRef.current?.question_number === num,
+    usePrefetchedQuestion: () => {
+      const d = prefetchedDataRef.current;
+      if (!d) return false;
+      prefetchedDataRef.current = null;
+      setCurrentMockQuestion(d.question || "");
+      setCurrentQuestion(d.question || "");
+      setIsGenerating(false);
+      setQuestionStartTime(Date.now());
+      currentQuestionNumberRef.current = d.question_number || 1;
+      if (d.audio) {
+        setMockQuestionAudio(d.audio);
+        playQuestionAudio(d.audio);
+      } else {
+        setIsWaitingForAnswer(true);
+      }
+      console.log(`⚡ [Mock] Q#${d.question_number} shown instantly from prefetch`);
+      return true;
+    },
+
     // ANALYTICS EXPORTS
     analyticsData,
     showAnalytics,
@@ -680,3 +781,9 @@ export default function useQACopilot({
     knowledgeBasesData,
   };
 }
+
+
+
+
+
+
