@@ -39,7 +39,7 @@ export const checkSupabaseConnection = async () => {
       return false;
     }
     
-//     console.log('Supabase connected successfully');
+    console.log('Supabase connected successfully');
     return true;
   } catch (error) {
     console.error('Failed to connect to Supabase:', error);

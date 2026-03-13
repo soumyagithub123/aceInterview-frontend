@@ -64,12 +64,12 @@ export const openRazorpayCheckout = async ({
     },
     modal: {
       ondismiss: function() {
-//         console.log("Checkout form closed by user");
+        console.log("Checkout form closed by user");
         if (onFailure) onFailure();
       },
     },
     handler: function(response) {
-//       console.log("Payment successful:", response);
+      console.log("Payment successful:", response);
       if (onSuccess) onSuccess(response);
     },
   };

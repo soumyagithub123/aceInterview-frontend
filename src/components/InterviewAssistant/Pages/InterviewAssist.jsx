@@ -125,7 +125,7 @@ export default function InterviewAssist() {
         headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
-//         console.log("[Timer] Session marked as counted:", sessionId);
+        console.log("[Timer] Session marked as counted:", sessionId);
         setSessionCounted(true);
 
         // ✅ Timer shuru karo abhi se
@@ -134,7 +134,7 @@ export default function InterviewAssist() {
 
         // ✅ Quota UI turant update karo (sessions_remaining -1)
         await refreshSessionQuota();
-//         console.log("[Quota] Refreshed after session counted");
+        console.log("[Quota] Refreshed after session counted");
       }
     } catch (err) {
       console.error("[Timer] mark-counted error:", err);
@@ -159,7 +159,7 @@ export default function InterviewAssist() {
         if (prev === null) return null;
         if (prev <= 0) {
           clearInterval(intervalId); // ✅ apna hi intervalId clear karo, ref nahi
-//           console.log("[Timer] Session duration limit reached");
+          console.log("[Timer] Session duration limit reached");
           setIsSessionExpired(true);
           return 0;
         }
@@ -178,7 +178,7 @@ export default function InterviewAssist() {
   // ✅ Timer expire hone pe transcript + AI band karo
   useEffect(() => {
     if (!isSessionExpired) return;
-//     console.log("[Timer] Stopping transcript + AI on session expire");
+    console.log("[Timer] Stopping transcript + AI on session expire");
     transcription.stopTranscription();
     qa.pauseQA?.(); // agar pauseQA ho to
   }, [isSessionExpired]);
@@ -207,7 +207,7 @@ export default function InterviewAssist() {
       });
 
       if (res.ok) {
-//         console.log(`[Timer] Session extended by ${extendMinutes} minutes (+1 session counted)`);
+        console.log(`[Timer] Session extended by ${extendMinutes} minutes (+1 session counted)`);
 
         // 2️⃣ Transcript + QA restart karo
         try {
@@ -215,7 +215,7 @@ export default function InterviewAssist() {
           await audio.startMicrophoneCapture();
           await qa.connectQA();
           audio.setIsRecording(true);
-//           console.log("[Extend] Transcript + QA resumed successfully");
+          console.log("[Extend] Transcript + QA resumed successfully");
         } catch (resumeErr) {
           console.error("[Extend] Failed to resume transcript/QA:", resumeErr);
           setExtendError("Mic restart failed. Please stop and start again.");
@@ -276,7 +276,7 @@ export default function InterviewAssist() {
   useEffect(() => {
     if (qa.qaList.length === 1 && !sessionCounted) {
       const sessionId = currentSessionIdRef.current || existingSessionId;
-//       console.log("[Timer] First AI answer detected, marking session counted");
+      console.log("[Timer] First AI answer detected, marking session counted");
       markSessionCounted(sessionId);
     }
   }, [qa.qaList.length, sessionCounted, existingSessionId, markSessionCounted]);
@@ -292,7 +292,7 @@ export default function InterviewAssist() {
   useEffect(() => {
     if (isMockMode && audio.isRecording && mockQuestionCount === 0) {
       const timer = setTimeout(() => {
-//         console.log("🎤 [Mock] Auto-requesting first question");
+        console.log("🎤 [Mock] Auto-requesting first question");
         setMockQuestionCount(1);
         qa.requestMockQuestion(1);
       }, 2000);
@@ -305,7 +305,7 @@ export default function InterviewAssist() {
   // 🔥 Fix 1: Submit current answer + ⚡ use prefetch if available
   const requestNextMockQuestion = () => {
     const nextCount = mockQuestionCount + 1;
-//     console.log(`➡️ [Mock] Requesting question #${nextCount}`);
+    console.log(`➡️ [Mock] Requesting question #${nextCount}`);
 
     // Collect candidate's spoken answer from transcript
     const answeredParagraphs = transcription.candidateTranscript
@@ -317,7 +317,7 @@ export default function InterviewAssist() {
 
     // Submit for evaluation if there's anything spoken
     if (answerText) {
-//       console.log(`📊 [Mock] Submitting answer (${answerText.length} chars) for evaluation`);
+      console.log(`📊 [Mock] Submitting answer (${answerText.length} chars) for evaluation`);
       qa.submitMockAnswer(answerText);
     } else {
       console.warn("[Mock] No answer text found to submit — skipping evaluation");
@@ -327,13 +327,13 @@ export default function InterviewAssist() {
 
     // ⚡ Use prefetched question for instant display
     if (qa.hasPrefetchedQuestion(nextCount)) {
-//       console.log(`⚡ [Mock] Q#${nextCount} ready from prefetch — showing instantly`);
+      console.log(`⚡ [Mock] Q#${nextCount} ready from prefetch — showing instantly`);
       qa.usePrefetchedQuestion();
       // Kick off prefetch for the question after this one
       setTimeout(() => qa.prefetchNextQuestion(nextCount + 1), 600);
     } else {
       // Fallback: normal WS request (shows loading indicator)
-//       console.log(`⏳ [Mock] Q#${nextCount} not prefetched yet — requesting normally`);
+      console.log(`⏳ [Mock] Q#${nextCount} not prefetched yet — requesting normally`);
       qa.requestMockQuestion(nextCount);
     }
   };
@@ -370,7 +370,7 @@ export default function InterviewAssist() {
       await qa.connectQA();
       audio.setIsRecording(true);
 
-//       console.log(isMockMode ? "✅ Mock interview started" : "✅ Interview started");
+      console.log(isMockMode ? "✅ Mock interview started" : "✅ Interview started");
     } catch (err) {
       console.error("Failed to start:", err);
       transcription.stopTranscription();
@@ -398,7 +398,7 @@ export default function InterviewAssist() {
 
     // ✅ Refresh quota after session ends (counter updates instantly)
     await refreshSessionQuota();
-//     console.log("[Quota] Session quota refreshed after stop");
+    console.log("[Quota] Session quota refreshed after stop");
   };
 
   // HANDLE ANALYTICS ACTIONS
@@ -527,7 +527,7 @@ Feedback: ${q.feedback}
                 if (lastInProgress) lastParagraphs.push(lastInProgress);
                 const lastAnswer = lastParagraphs.join(" ").trim();
                 if (lastAnswer) {
-//                   console.log("[Mock] Submitting last answer before ending session");
+                  console.log("[Mock] Submitting last answer before ending session");
                   qa.submitMockAnswer(lastAnswer);
                   // Small delay so WS can process evaluate_answer before session_end
                   await new Promise((r) => setTimeout(r, 300));

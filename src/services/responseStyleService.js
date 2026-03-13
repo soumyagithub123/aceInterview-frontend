@@ -48,7 +48,7 @@ export const responseStyleService = {
    */
   async createOrUpdateStyle(userId, formData, existingId = null) {
     try {
-//       console.log('createOrUpdateStyle called with:', { userId, formData, existingId });
+      console.log('createOrUpdateStyle called with:', { userId, formData, existingId });
       
       // Ensure userId exists
       if (!userId) {
@@ -57,7 +57,7 @@ export const responseStyleService = {
       
       // If editing existing style → update directly
       if (existingId) {
-//         console.log('Updating existing style:', existingId);
+        console.log('Updating existing style:', existingId);
         const { data, error } = await supabase
           .from('response_styles')
           .update({
@@ -78,15 +78,15 @@ export const responseStyleService = {
       }
 
       // Create new custom style
-//       console.log('Creating new style with insert data:', {
-//         user_id: userId,
-//         style_name: formData.styleName,
-//         description: formData.description,
-//         approximate_length: formData.approximateLength,
-//         tone: formData.tone,
-//         example_response: formData.exampleResponse,
-//         is_system_default: false
-//       });
+      console.log('Creating new style with insert data:', {
+        user_id: userId,
+        style_name: formData.styleName,
+        description: formData.description,
+        approximate_length: formData.approximateLength,
+        tone: formData.tone,
+        example_response: formData.exampleResponse,
+        is_system_default: false
+      });
       
       const { data, error } = await supabase
         .from('response_styles')

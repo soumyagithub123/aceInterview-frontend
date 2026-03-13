@@ -579,26 +579,26 @@ export default function SettingsModal({ onClose }) {
 
     // 🔥 DETAILED CONFIGURATION LOG
     // Ye log tab dikhega jab saari fields validate ho chuki hongi
-//     console.group("🚀 Saving Main Settings...");
-//     console.log("User ID:", user.id);
-//     
-//     console.table({
-//       "Default Model": defaultModel,
-//       "Coding Model": codingModel,
-//       "Audio Language": audioLanguage,
-//       "Pause Interval": pauseInterval + " seconds",
-//       "Adv. Question Detection": advancedQuestionDetection ? "ON" : "OFF",
-//       "Message Direction": messageDirection,
-//       "Auto Scroll": autoScroll ? "Enabled" : "Disabled",
-//       "Programming Language": programmingLanguage,
-//       "Response Style ID": selectedStyleId || "None Selected"
-//     });
-// 
-//     console.log("Instructions Check:", {
-//       interview: interviewInstructions.length > 0 ? `${interviewInstructions.length} chars` : "Empty",
-//       coding: codingInstructions.length > 0 ? `${codingInstructions.length} chars` : "Empty"
-//     });
-//     console.groupEnd();
+    console.group("🚀 Saving Main Settings...");
+    console.log("User ID:", user.id);
+    
+    console.table({
+      "Default Model": defaultModel,
+      "Coding Model": codingModel,
+      "Audio Language": audioLanguage,
+      "Pause Interval": pauseInterval + " seconds",
+      "Adv. Question Detection": advancedQuestionDetection ? "ON" : "OFF",
+      "Message Direction": messageDirection,
+      "Auto Scroll": autoScroll ? "Enabled" : "Disabled",
+      "Programming Language": programmingLanguage,
+      "Response Style ID": selectedStyleId || "None Selected"
+    });
+
+    console.log("Instructions Check:", {
+      interview: interviewInstructions.length > 0 ? `${interviewInstructions.length} chars` : "Empty",
+      coding: codingInstructions.length > 0 ? `${codingInstructions.length} chars` : "Empty"
+    });
+    console.groupEnd();
 
     try {
       // 1. SAVE TO DATABASE
@@ -620,7 +620,7 @@ export default function SettingsModal({ onClose }) {
       // 2. FORCE GLOBAL REFRESH
       await reloadAll(); 
 
-//       console.log("✅ Settings saved and global state refreshed.");
+      console.log("✅ Settings saved and global state refreshed.");
 
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
 
@@ -642,16 +642,16 @@ export default function SettingsModal({ onClose }) {
   const handleEditStyle = (style) => { setEditingStyle(style); setShowStyleModal(true); };
 
   const handleDeleteStyle = async (styleId) => {
-//     console.log("Attempting to delete style:", styleId, "User:", user?.id);
+    console.log("Attempting to delete style:", styleId, "User:", user?.id);
     if (!user) {
       console.error("Delete failed: No user logged in");
       return;
     }
     
     try {
-//       console.log("Calling service delete...");
+      console.log("Calling service delete...");
       await responseStyleService.deleteStyle(styleId, user.id);
-//       console.log("Service delete successful");
+      console.log("Service delete successful");
 
       // locally update and refresh global cache
       const updatedStyles = responseStyles.filter(s => s.id !== styleId);

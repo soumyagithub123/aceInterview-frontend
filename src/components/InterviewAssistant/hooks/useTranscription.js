@@ -87,10 +87,10 @@ export default function useTranscription({
 
       const finalText = ref.current;
 
-//       console.log(
-//         `📝 [Transcription] Final ${stream}:`,
-//         finalText.slice(0, 60)
-//       );
+      console.log(
+        `📝 [Transcription] Final ${stream}:`,
+        finalText.slice(0, 60)
+      );
 
       setHistory((prev) => [
         ...prev,
@@ -117,10 +117,10 @@ export default function useTranscription({
           reset: true,
         });
 
-//         console.log(
-//           "📤 [Transcription → QA]",
-//           finalText.slice(0, 50) + "..."
-//         );
+        console.log(
+          "📤 [Transcription → QA]",
+          finalText.slice(0, 50) + "..."
+        );
       }
 
       ref.current = "";
@@ -222,7 +222,7 @@ export default function useTranscription({
         `/ws/dual-transcribe?language=${language}`
       );
 
-//       console.log(`🔗 [Deepgram] Connecting → ${wsUrl}`);
+      console.log(`🔗 [Deepgram] Connecting → ${wsUrl}`);
       setDeepgramStatus("Connecting…");
 
       const handleMessage = (event) => {
@@ -237,7 +237,7 @@ export default function useTranscription({
             data.type === "ready" ||
             data.type === "connected"
           ) {
-//             console.log("✓ [Deepgram] Ready");
+            console.log("✓ [Deepgram] Ready");
           }
         } catch (e) {
           console.error("❌ [Deepgram] Parse error:", e);
@@ -247,7 +247,7 @@ export default function useTranscription({
       const handleStatusChange = (status) => {
         if (status === "connected") {
           setDeepgramStatus("Ready");
-//           console.log("✅ [Deepgram] Connected");
+          console.log("✅ [Deepgram] Connected");
           resolve(reconnectingDeepgramWsRef.current);
         } else if (status === "reconnecting") {
           setDeepgramStatus("🔄 Reconnecting…");
@@ -282,7 +282,7 @@ export default function useTranscription({
   // STOP TRANSCRIPTION
   // ======================
   const stopTranscription = () => {
-//     console.log("🛑 [Deepgram] Stopping transcription");
+    console.log("🛑 [Deepgram] Stopping transcription");
 
     if (candidatePauseTimerRef.current) {
       clearTimeout(candidatePauseTimerRef.current);
@@ -310,7 +310,7 @@ export default function useTranscription({
     deepgramWsRef.current = null;
     setDeepgramStatus("Stopped");
 
-//     console.log("✓ [Deepgram] Transcription stopped cleanly");
+    console.log("✓ [Deepgram] Transcription stopped cleanly");
   };
 
   // ======================
@@ -318,7 +318,7 @@ export default function useTranscription({
   // ======================
   useEffect(() => {
     return () => {
-//       console.log("♻️ [Deepgram] Cleanup on unmount");
+      console.log("♻️ [Deepgram] Cleanup on unmount");
       stopTranscription();
     };
   }, []);

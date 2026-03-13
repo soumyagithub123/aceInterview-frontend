@@ -111,6 +111,13 @@ export default function PersonaSelection({ onSelect }) {
   const { user } = useAuth();
   const { personas, loading, error } = useAppData();
 
+  React.useEffect(() => {
+    if (!loading && personas && personas.length > 0) {
+      console.log("🚀 [PERSONA_LOADED] Personas fetched and loaded on screen:", personas);
+    }
+  }, [loading, personas]);
+
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPersona, setSelectedPersona] = useState(null);
   const [showModal, setShowModal] = useState(false);

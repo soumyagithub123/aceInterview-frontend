@@ -38,13 +38,13 @@ export function useSubscriptionPopup() {
     const isExactInterviewRoute = location.pathname === "/interview";
     
     if (!isExactInterviewRoute) {
-// console.log(`📍 Not on /interview (current: ${location.pathname}) - skipping popup`);
+    console.log(`📍 Not on /interview (current: ${location.pathname}) - skipping popup`);
       return;
     }
 
     // Already shown for this visit → skip
     if (shownForCurrentVisit.current) {
-// console.log("📦 Already shown for this /interview visit - skipping");
+    console.log("📦 Already shown for this /interview visit - skipping");
       return;
     }
 
@@ -53,7 +53,7 @@ export function useSubscriptionPopup() {
       subscriptionStatus === "expiring" ||
       subscriptionStatus === "expired"
     ) {
-// console.log(`⚠️ Showing ${subscriptionStatus} popup on /interview (${daysRemaining} days)`);
+    console.log(`⚠️ Showing ${subscriptionStatus} popup on /interview (${daysRemaining} days)`);
       
       const timer = setTimeout(() => {
         setPopupStatus(subscriptionStatus);
@@ -66,7 +66,7 @@ export function useSubscriptionPopup() {
 
       return () => clearTimeout(timer);
     } else {
-// console.log(`✅ Subscription ${subscriptionStatus} - no popup needed`);
+    console.log(`✅ Subscription ${subscriptionStatus} - no popup needed`);
     }
   }, [subscriptionStatus, daysRemaining, location.pathname]);
 
