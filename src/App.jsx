@@ -17,6 +17,10 @@ import Pricing         from "./components/Payment/Pricing";
 import SignIn          from "./components/Auth/SignIn";
 import SignUp          from "./components/Auth/SignUp";
 
+// LEGAL
+import PrivacyPolicy   from "./pages/PrivacyPolicy";
+import TermsAndService  from "./pages/Termsandservice";
+
 // RESOURCES
 import Blog          from "./components/Resources/Blog/Blog";
 import ResumeBuilder from "./components/Resources/Blog/ResumeBuilder";
@@ -45,6 +49,8 @@ function App() {
             <Route path="/sign-up"        element={<SignUp />} />
             <Route path="/blog"           element={<Blog />} />
             <Route path="/resume-builder" element={<ResumeBuilder />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/Termsandservice" element={<TermsAndService />} />
 
             {/* ── PAYMENT ── */}
             <Route path="/payment/success" element={<PaymentSuccess />} />
