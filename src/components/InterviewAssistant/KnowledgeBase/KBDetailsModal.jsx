@@ -1,6 +1,6 @@
 // src/components/Interview/KnowledgeBase/KBDetailsModal.jsx
 
-import React from "react";
+import React, { useState } from "react";
 import {
   X,
   FileText,
@@ -13,10 +13,16 @@ import {
   ExternalLink,
   AlertTriangle,
   Clock,
+  Loader2,
 } from "lucide-react";
+import { supabase } from "../../../database/supabaseClient";
+
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function KBDetailsModal({ kb, onClose }) {
   if (!kb) return null;
+
+  const [loadingFile, setLoadingFile] = useState(false);
 
   // ── file icon by type ──
   const FileIconComp = () => {
@@ -79,6 +85,37 @@ export default function KBDetailsModal({ kb, onClose }) {
   };
 
   const status = statusConfig[kb.processing_status] || statusConfig.pending;
+
+  // ✅ FIX: Private bucket ke liye signed URL fetch karo
+  const handleViewFile = async () => {
+    if (!kb.file_path) return;
+
+    setLoadingFile(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const res = await fetch(
+        `${API_BASE}/api/kb/signed-url?file_path=${encodeURIComponent(kb.file_path)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.signed_url) {
+        window.open(data.signed_url, "_blank");
+      } else {
+        alert("Could not load file. Please try again.");
+      }
+    } catch (err) {
+      console.error("KB view error:", err);
+      alert("Could not load file. Please try again.");
+    } finally {
+      setLoadingFile(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
@@ -168,17 +205,19 @@ export default function KBDetailsModal({ kb, onClose }) {
             </div>
           )}
 
-          {/* View original */}
-          {kb.file_url && (
-            <a
-              href={kb.file_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-white font-medium text-sm transition"
+          {/* ✅ FIX: View button — signed URL via backend */}
+          {kb.file_path && (
+            <button
+              onClick={handleViewFile}
+              disabled={loadingFile}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-white font-medium text-sm transition disabled:opacity-50"
             >
-              <ExternalLink className="w-4 h-4" />
+              {loadingFile
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <ExternalLink className="w-4 h-4" />
+              }
               View Original File
-            </a>
+            </button>
           )}
 
           {/* Close */}

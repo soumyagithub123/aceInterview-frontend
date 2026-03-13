@@ -37,11 +37,11 @@ export default function StyleCustomizationModal({ style, onClose, onSave, userId
     setError('');
 
     // 🔥 LOG 1: Log the attempt and the data being sent
-    console.log(style ? "Updating existing style..." : "Creating new style...", {
-      styleId: style?.id || 'New',
-      userId: userId,
-      payload: formData
-    });
+//     console.log(style ? "Updating existing style..." : "Creating new style...", {
+//       styleId: style?.id || 'New',
+//       userId: userId,
+//       payload: formData
+//     });
 
     try {
       // ✅ SINGLE SOURCE OF TRUTH (CREATE + UPDATE)
@@ -52,7 +52,7 @@ export default function StyleCustomizationModal({ style, onClose, onSave, userId
       );
 
       // 🔥 LOG 2: Log successful database response
-      console.log("Style saved successfully to database:", result);
+//       console.log("Style saved successfully to database:", result);
 
       await onSave();   // refresh styles / reloadAll
       onClose();

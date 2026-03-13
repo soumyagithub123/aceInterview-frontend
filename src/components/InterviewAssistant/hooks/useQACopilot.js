@@ -81,7 +81,7 @@ export default function useQACopilot({
     if (!sessionIdRef.current) {
       if (existingSessionId) {
         sessionIdRef.current = existingSessionId;
-        console.log(`🆔 [Session] Using Existing Session ID: ${existingSessionId}`);
+//         console.log(`🆔 [Session] Using Existing Session ID: ${existingSessionId}`);
       } else {
         sessionIdRef.current =
           typeof crypto !== "undefined" && crypto.randomUUID
@@ -90,9 +90,9 @@ export default function useQACopilot({
                 .toString(36)
                 .substr(2, 9)}`;
 
-        console.log(
-          `🆔 [Session] New Session ID Generated (Fallback): ${sessionIdRef.current}`
-        );
+//         console.log(
+//           `🆔 [Session] New Session ID Generated (Fallback): ${sessionIdRef.current}`
+//         );
       }
     }
 
@@ -119,7 +119,7 @@ export default function useQACopilot({
          setKnowledgeBasesData(sessionData.knowledge_bases);
       }
 
-      console.log(`🚀 [useQACopilot] Session already initialized: ${existingSessionId}`);
+//       console.log(`🚀 [useQACopilot] Session already initialized: ${existingSessionId}`);
 
        // 🔥 Start interview timer
       if (isMockMode && !interviewStartTime) {
@@ -144,7 +144,7 @@ export default function useQACopilot({
     }
 
     const qNum = questionNumber || 1;
-    console.log(`🎤 [Mock] Requesting question #${qNum}`);
+//     console.log(`🎤 [Mock] Requesting question #${qNum}`);
     setIsGenerating(true);
     setIsWaitingForAnswer(false);
     setQuestionStartTime(Date.now()); // 🔥 Track question start time
@@ -165,7 +165,7 @@ export default function useQACopilot({
     if (prefetchedDataRef.current?.question_number === nextNum) return; // already have it
 
     isPrefetchingRef.current = true;
-    console.log(`🔄 [Mock] Prefetching question #${nextNum} in background`);
+//     console.log(`🔄 [Mock] Prefetching question #${nextNum} in background`);
 
     reconnectingQaWsRef.current.send({
       type: "request_mock_question",
@@ -191,10 +191,10 @@ export default function useQACopilot({
       audioRef.current = audio;
 
       audio.play();
-      console.log("🔊 Playing mock question audio");
+//       console.log("🔊 Playing mock question audio");
 
       audio.onended = () => {
-        console.log("✅ Audio playback complete");
+//         console.log("✅ Audio playback complete");
         setIsWaitingForAnswer(true);
       };
 
@@ -217,7 +217,7 @@ export default function useQACopilot({
       return;
     }
 
-    console.log("📤 [Mock] Submitting answer for evaluation");
+//     console.log("📤 [Mock] Submitting answer for evaluation");
 
     // 🔥 Calculate response time
     const responseTime = questionStartTime 
@@ -377,7 +377,7 @@ export default function useQACopilot({
       ]
     };
 
-    console.log("📊 Analytics Payload:", analyticsPayload);
+//     console.log("📊 Analytics Payload:", analyticsPayload);
     setAnalyticsData(analyticsPayload);
 
     try {
@@ -388,7 +388,7 @@ export default function useQACopilot({
       });
 
       if (res.ok) {
-        console.log("✅ Analytics submitted successfully");
+//         console.log("✅ Analytics submitted successfully");
       }
     } catch (err) {
       console.error("❌ Failed to submit analytics:", err);
@@ -427,7 +427,7 @@ export default function useQACopilot({
 
           switch (data.type) {
             case "init_complete":
-              console.log("✅ [QACopilot] Init complete");
+//               console.log("✅ [QACopilot] Init complete");
               setQaStatus("Ready");
               resolve();
               break;
@@ -437,10 +437,10 @@ export default function useQACopilot({
                 // ⚡ Store silently — don't display yet
                 prefetchedDataRef.current = data;
                 isPrefetchingRef.current  = false;
-                console.log(`✅ [Mock] Q#${data.question_number} prefetched & ready`);
+//                 console.log(`✅ [Mock] Q#${data.question_number} prefetched & ready`);
               } else {
                 // Normal display
-                console.log("🎤 [Mock] Question received");
+//                 console.log("🎤 [Mock] Question received");
                 setCurrentMockQuestion(data.question || "");
                 setCurrentQuestion(data.question || "");
                 setIsGenerating(false);
@@ -460,19 +460,19 @@ export default function useQACopilot({
 
             // 🔥 Fix 3: Handle backend-computed final analytics
             case "session_analytics":
-              console.log("📊 [Mock] Backend analytics received");
+//               console.log("📊 [Mock] Backend analytics received");
               if (data.analytics) {
                 setAnalyticsData(data.analytics);
               }
               break;
 
             case "feedback_generating":
-              console.log("⏳ [Mock] Generating feedback...");
+//               console.log("⏳ [Mock] Generating feedback...");
               setIsGenerating(true);
               break;
 
             case "answer_feedback":
-              console.log("✅ [Mock] Feedback received");
+//               console.log("✅ [Mock] Feedback received");
               setIsGenerating(false);
 
               const responseTime = questionStartTime 
@@ -504,7 +504,7 @@ export default function useQACopilot({
               break;
 
             case "answer_acknowledged":
-              console.log("✅ [Mock] Answer acknowledged");
+//               console.log("✅ [Mock] Answer acknowledged");
               setIsGenerating(false);
               setCurrentMockQuestion("");
               setCurrentQuestion("");
@@ -515,7 +515,7 @@ export default function useQACopilot({
               if (isMockMode) break;
 
               if (!data.question) return;
-              console.log("❓ [QACopilot] Question:", data.question);
+//               console.log("❓ [QACopilot] Question:", data.question);
               // ⚡ Reset delta buffer for new question
               answerBufferRef.current = "";
               rafScheduledRef.current = false;
@@ -546,7 +546,7 @@ export default function useQACopilot({
             case "answer_ready": {
               if (isMockMode) break;
 
-              console.log("✅ [QACopilot] Answer complete");
+//               console.log("✅ [QACopilot] Answer complete");
 
               // ⚡ Flush any remaining buffered delta before finalizing
               // Block scope {} required here to use const inside switch-case
@@ -591,14 +591,14 @@ export default function useQACopilot({
       const handleStatusChange = (status) => {
         if (status === "connected") {
           setQaStatus("Initializing...");
-          console.log(
-            `🚀 [QACopilot] WS connected. Using session: ${sessionIdRef.current}`
-          );
+//           console.log(
+//             `🚀 [QACopilot] WS connected. Using session: ${sessionIdRef.current}`
+//           );
 
           // 🔥 Fix 2: Set interviewStartTime when mock session connects (covers all paths)
           if (isMockMode) {
             setInterviewStartTime(Date.now());
-            console.log("⏱ [Mock] Interview start time set on WS connect");
+//             console.log("⏱ [Mock] Interview start time set on WS connect");
           }
 
           const initMessage = {
@@ -620,7 +620,7 @@ export default function useQACopilot({
           };
 
           reconnectingQaWsRef.current.send(initMessage);
-          console.log("✅ [QACopilot] Init message sent");
+//           console.log("✅ [QACopilot] Init message sent");
         }
 
         if (status === "closed" || status === "error") {
@@ -648,9 +648,9 @@ export default function useQACopilot({
   // ======================
   const stopQA = async () => {
     if (reconnectingQaWsRef.current && sessionIdRef.current) {
-      console.log(
-        `🛑 [QACopilot] Ending session: ${sessionIdRef.current}`
-      );
+//       console.log(
+//         `🛑 [QACopilot] Ending session: ${sessionIdRef.current}`
+//       );
 
       reconnectingQaWsRef.current.send({
         type: "session_end",
@@ -684,7 +684,7 @@ export default function useQACopilot({
       audioRef.current = null;
     }
 
-    console.log("✅ [QACopilot] Q&A stopped cleanly");
+//     console.log("✅ [QACopilot] Q&A stopped cleanly");
   };
 
   // ======================
@@ -692,7 +692,7 @@ export default function useQACopilot({
   // ======================
   const handleManualGenerate = async (text) => {
     try {
-      console.log("✏️ [QACopilot] Manual generate");
+//       console.log("✏️ [QACopilot] Manual generate");
 
       const payload = {
         user_id: user?.id || "anonymous",
@@ -766,7 +766,7 @@ export default function useQACopilot({
       } else {
         setIsWaitingForAnswer(true);
       }
-      console.log(`⚡ [Mock] Q#${d.question_number} shown instantly from prefetch`);
+//       console.log(`⚡ [Mock] Q#${d.question_number} shown instantly from prefetch`);
       return true;
     },
 

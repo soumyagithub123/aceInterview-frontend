@@ -1,30 +1,375 @@
-// frontend/src/database/personaService.js
+// // frontend/src/database/personaService.js
 
-import { supabase, RESUME_BUCKET } from './supabaseClient';
+// import { supabase, RESUME_BUCKET } from './supabaseClient';
+
+// /**
+//  * Get all personas for current user (including sample personas)
+//  */
+// export const getUserPersonas = async () => {
+//   try {
+//     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+//     if (authError || !user) {
+//       return { success: false, error: 'Not authenticated', data: [] };
+//     }
+
+//     const { data, error } = await supabase
+//       .from('personas')
+//       .select('*')
+//       .or(`user_id.eq.${user.id},is_sample.eq.true`)
+//       .order('is_sample', { ascending: false })
+//       .order('created_at', { ascending: false });
+
+//     if (error) throw error;
+
+//     return { success: true, data: data || [] };
+//   } catch (error) {
+//     console.error('Error fetching personas:', error);
+//     return { success: false, error: error.message, data: [] };
+//   }
+// };
+
+// /**
+//  * Get only sample personas
+//  */
+// export const getSamplePersonas = async () => {
+//   try {
+//     const { data, error } = await supabase
+//       .from('personas')
+//       .select('*')
+//       .eq('is_sample', true)
+//       .order('created_at', { ascending: false });
+
+//     if (error) throw error;
+//     return { success: true, data: data || [] };
+//   } catch (error) {
+//     console.error('Error fetching sample personas:', error);
+//     return { success: false, error: error.message, data: [] };
+//   }
+// };
+
+// /**
+//  * Get only user's custom personas (excluding samples)
+//  */
+// export const getUserCustomPersonas = async () => {
+//   try {
+//     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+//     if (authError || !user) {
+//       return { success: false, error: 'Not authenticated', data: [] };
+//     }
+
+//     const { data, error } = await supabase
+//       .from('personas')
+//       .select('*')
+//       .eq('user_id', user.id)
+//       .eq('is_sample', false)
+//       .order('created_at', { ascending: false });
+
+//     if (error) throw error;
+//     return { success: true, data: data || [] };
+//   } catch (error) {
+//     console.error('Error fetching custom personas:', error);
+//     return { success: false, error: error.message, data: [] };
+//   }
+// };
+
+// /**
+//  * Search personas by company name or position
+//  */
+// export const searchPersonas = async (searchTerm) => {
+//   try {
+//     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+//     if (authError || !user) {
+//       return { success: false, error: 'Not authenticated', data: [] };
+//     }
+
+//     const { data, error } = await supabase
+//       .from('personas')
+//       .select('*')
+//       .or(`user_id.eq.${user.id},is_sample.eq.true`)
+//       .or(`company_name.ilike.%${searchTerm}%,position.ilike.%${searchTerm}%`)
+//       .order('created_at', { ascending: false });
+
+//     if (error) throw error;
+//     return { success: true, data: data || [] };
+//   } catch (error) {
+//     console.error('Error searching personas:', error);
+//     return { success: false, error: error.message, data: [] };
+//   }
+// };
+
+// /**
+//  * Get a single persona by ID
+//  */
+// export const getPersonaById = async (personaId) => {
+//   try {
+//     const { data, error } = await supabase
+//       .from('personas')
+//       .select('*')
+//       .eq('id', personaId)
+//       .single();
+
+//     if (error) throw error;
+//     return { success: true, data };
+//   } catch (error) {
+//     console.error('Error fetching persona:', error);
+//     return { success: false, error: error.message };
+//   }
+// };
+
+// /**
+//  * Upload resume to Supabase Storage
+//  */
+// export const uploadResume = async (file) => {
+//   try {
+//     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+//     if (authError || !user) {
+//       return { success: false, error: 'Not authenticated' };
+//     }
+
+//     if (!file || !(file instanceof File)) {
+//       throw new Error('Invalid file');
+//     }
+
+//     if (file.type !== 'application/pdf') {
+//       throw new Error('Only PDF files are allowed');
+//     }
+
+//     const maxSize = 5 * 1024 * 1024; // 5MB
+//     if (file.size > maxSize) {
+//       throw new Error('File size must be less than 5MB');
+//     }
+
+//     const timestamp = Date.now();
+//     const filename = `${user.id}/${timestamp}_${file.name}`;
+
+//     const { data, error } = await supabase.storage
+//       .from(RESUME_BUCKET)
+//       .upload(filename, file, { 
+//         cacheControl: '3600', 
+//         upsert: false 
+//       });
+
+//     if (error) throw error;
+
+//     const { data: publicUrlData } = supabase.storage
+//       .from(RESUME_BUCKET)
+//       .getPublicUrl(filename);
+
+//     return {
+//       success: true,
+//       url: publicUrlData.publicUrl,
+//       filename: file.name,
+//       filePath: filename,
+//     };
+//   } catch (error) {
+//     console.error('Error uploading resume:', error);
+//     return { success: false, error: error.message };
+//   }
+// };
+
+// /**
+//  * Delete resume from Supabase Storage
+//  */
+// export const deleteResume = async (filePath) => {
+//   try {
+//     if (!filePath) return { success: true };
+
+//     const { error } = await supabase.storage
+//       .from(RESUME_BUCKET)
+//       .remove([filePath]);
+
+//     if (error) throw error;
+//     return { success: true };
+//   } catch (error) {
+//     console.error('Error deleting resume:', error);
+//     return { success: false, error: error.message };
+//   }
+// };
+
+// /**
+//  * Create a new persona
+//  */
+// export const createPersona = async (personaData) => {
+//   try {
+//     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+//     if (authError || !user) {
+//       return { success: false, error: 'Not authenticated' };
+//     }
+
+//     const { data, error } = await supabase
+//       .from('personas')
+//       .insert([
+//         {
+//           user_id: user.id,
+//           company_name: personaData.companyName,
+//           company_description: personaData.companyDescription,
+//           position: personaData.position,
+//           job_description: personaData.jobDescription,
+//           resume_url: personaData.resumeUrl || null,
+//           resume_filename: personaData.resumeFilename || null,
+//           resume_file_path: personaData.resumeFilePath || null,
+//           is_sample: false,
+//         },
+//       ])
+//       .select();
+
+//     if (error) throw error;
+//     return { success: true, data: data[0] };
+//   } catch (error) {
+//     console.error('Error creating persona:', error);
+//     return { success: false, error: error.message };
+//   }
+// };
+
+// /**
+//  * Update an existing persona
+//  */
+// export const updatePersona = async (personaId, personaData) => {
+//   try {
+//     const { data, error } = await supabase
+//       .from('personas')
+//       .update({
+//         company_name: personaData.companyName,
+//         company_description: personaData.companyDescription,
+//         position: personaData.position,
+//         job_description: personaData.jobDescription,
+//         resume_url: personaData.resumeUrl || null,
+//         resume_filename: personaData.resumeFilename || null,
+//         resume_file_path: personaData.resumeFilePath || null,
+//       })
+//       .eq('id', personaId)
+//       .select();
+
+//     if (error) throw error;
+//     return { success: true, data: data[0] };
+//   } catch (error) {
+//     console.error('Error updating persona:', error);
+//     return { success: false, error: error.message };
+//   }
+// };
+
+// /**
+//  * Delete a persona (and its resume if exists)
+//  */
+// export const deletePersona = async (personaId) => {
+//   try {
+//     const { data: persona, error: fetchError } = await supabase
+//       .from('personas')
+//       .select('resume_file_path, is_sample')
+//       .eq('id', personaId)
+//       .single();
+
+//     if (fetchError) throw fetchError;
+
+//     if (persona?.is_sample) {
+//       throw new Error('Cannot delete sample personas');
+//     }
+
+//     if (persona?.resume_file_path) {
+//       await deleteResume(persona.resume_file_path);
+//     }
+
+//     const { error: deleteError } = await supabase
+//       .from('personas')
+//       .delete()
+//       .eq('id', personaId);
+
+//     if (deleteError) throw deleteError;
+//     return { success: true };
+//   } catch (error) {
+//     console.error('Error deleting persona:', error);
+//     return { success: false, error: error.message };
+//   }
+// };
+
+// /**
+//  * Get personas count for current user
+//  */
+// export const getUserPersonasCount = async () => {
+//   try {
+//     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+//     if (authError || !user) {
+//       return { success: false, error: 'Not authenticated', count: 0 };
+//     }
+
+//     const { count, error } = await supabase
+//       .from('personas')
+//       .select('*', { count: 'exact', head: true })
+//       .eq('user_id', user.id)
+//       .eq('is_sample', false);
+
+//     if (error) throw error;
+//     return { success: true, count: count || 0 };
+//   } catch (error) {
+//     console.error('Error counting personas:', error);
+//     return { success: false, error: error.message, count: 0 };
+//   }
+// };
+
+
+
+
+
+
+
+
+
+
+
+// frontend/src/database/personaService.js
+// FIX: uploadResume() → backend ke through (private bucket support)
+
+import { supabase, RESUME_BUCKET } from "./supabaseClient";
+
+const API_BASE = import.meta.env.VITE_API_URL;
+
+// ===============================
+// HELPER: Get auth token
+// ===============================
+async function getAuthToken() {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (error || !session?.access_token) {
+    throw new Error("Not authenticated");
+  }
+  return session.access_token;
+}
 
 /**
  * Get all personas for current user (including sample personas)
  */
 export const getUserPersonas = async () => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return { success: false, error: 'Not authenticated', data: [] };
+      return { success: false, error: "Not authenticated", data: [] };
     }
 
     const { data, error } = await supabase
-      .from('personas')
-      .select('*')
+      .from("personas")
+      .select("*")
       .or(`user_id.eq.${user.id},is_sample.eq.true`)
-      .order('is_sample', { ascending: false })
-      .order('created_at', { ascending: false });
+      .order("is_sample", { ascending: false })
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 
     return { success: true, data: data || [] };
   } catch (error) {
-    console.error('Error fetching personas:', error);
+    console.error("Error fetching personas:", error);
     return { success: false, error: error.message, data: [] };
   }
 };
@@ -35,15 +380,15 @@ export const getUserPersonas = async () => {
 export const getSamplePersonas = async () => {
   try {
     const { data, error } = await supabase
-      .from('personas')
-      .select('*')
-      .eq('is_sample', true)
-      .order('created_at', { ascending: false });
+      .from("personas")
+      .select("*")
+      .eq("is_sample", true)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return { success: true, data: data || [] };
   } catch (error) {
-    console.error('Error fetching sample personas:', error);
+    console.error("Error fetching sample personas:", error);
     return { success: false, error: error.message, data: [] };
   }
 };
@@ -53,23 +398,26 @@ export const getSamplePersonas = async () => {
  */
 export const getUserCustomPersonas = async () => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return { success: false, error: 'Not authenticated', data: [] };
+      return { success: false, error: "Not authenticated", data: [] };
     }
 
     const { data, error } = await supabase
-      .from('personas')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_sample', false)
-      .order('created_at', { ascending: false });
+      .from("personas")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("is_sample", false)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return { success: true, data: data || [] };
   } catch (error) {
-    console.error('Error fetching custom personas:', error);
+    console.error("Error fetching custom personas:", error);
     return { success: false, error: error.message, data: [] };
   }
 };
@@ -79,23 +427,28 @@ export const getUserCustomPersonas = async () => {
  */
 export const searchPersonas = async (searchTerm) => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return { success: false, error: 'Not authenticated', data: [] };
+      return { success: false, error: "Not authenticated", data: [] };
     }
 
     const { data, error } = await supabase
-      .from('personas')
-      .select('*')
+      .from("personas")
+      .select("*")
       .or(`user_id.eq.${user.id},is_sample.eq.true`)
-      .or(`company_name.ilike.%${searchTerm}%,position.ilike.%${searchTerm}%`)
-      .order('created_at', { ascending: false });
+      .or(
+        `company_name.ilike.%${searchTerm}%,position.ilike.%${searchTerm}%`
+      )
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return { success: true, data: data || [] };
   } catch (error) {
-    console.error('Error searching personas:', error);
+    console.error("Error searching personas:", error);
     return { success: false, error: error.message, data: [] };
   }
 };
@@ -106,86 +459,105 @@ export const searchPersonas = async (searchTerm) => {
 export const getPersonaById = async (personaId) => {
   try {
     const { data, error } = await supabase
-      .from('personas')
-      .select('*')
-      .eq('id', personaId)
+      .from("personas")
+      .select("*")
+      .eq("id", personaId)
       .single();
 
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error fetching persona:', error);
+    console.error("Error fetching persona:", error);
     return { success: false, error: error.message };
   }
 };
 
 /**
- * Upload resume to Supabase Storage
+ * Upload resume — Backend ke through (Private Bucket Support)
+ * 
+ * Pehle: supabase.storage.from(RESUME_BUCKET).upload() — public bucket only
+ * Ab:    Backend POST /api/resume/upload — public + private dono kaam karte hain
  */
 export const uploadResume = async (file) => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: "Not authenticated" };
     }
 
     if (!file || !(file instanceof File)) {
-      throw new Error('Invalid file');
+      throw new Error("Invalid file");
     }
 
-    if (file.type !== 'application/pdf') {
-      throw new Error('Only PDF files are allowed');
+    if (file.type !== "application/pdf") {
+      throw new Error("Only PDF files are allowed");
     }
 
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      throw new Error('File size must be less than 5MB');
+      throw new Error("File size must be less than 5MB");
     }
 
-    const timestamp = Date.now();
-    const filename = `${user.id}/${timestamp}_${file.name}`;
+    const token = await getAuthToken();
 
-    const { data, error } = await supabase.storage
-      .from(RESUME_BUCKET)
-      .upload(filename, file, { 
-        cacheControl: '3600', 
-        upsert: false 
-      });
+    // Backend ko bhejo FormData mein
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("user_id", user.id);
 
-    if (error) throw error;
+    const res = await fetch(`${API_BASE}/api/resume/upload`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
 
-    const { data: publicUrlData } = supabase.storage
-      .from(RESUME_BUCKET)
-      .getPublicUrl(filename);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+      return { success: false, error: err.detail || "Resume upload failed" };
+    }
 
-    return {
-      success: true,
-      url: publicUrlData.publicUrl,
-      filename: file.name,
-      filePath: filename,
-    };
+    const data = await res.json();
+    // Returns: { success: true, url, filename, filePath }
+    return data;
+
   } catch (error) {
-    console.error('Error uploading resume:', error);
+    console.error("Error uploading resume:", error);
     return { success: false, error: error.message };
   }
 };
 
 /**
- * Delete resume from Supabase Storage
+ * Delete resume from Supabase Storage (backend ke through)
  */
 export const deleteResume = async (filePath) => {
   try {
     if (!filePath) return { success: true };
 
-    const { error } = await supabase.storage
-      .from(RESUME_BUCKET)
-      .remove([filePath]);
+    const token = await getAuthToken();
 
-    if (error) throw error;
+    const res = await fetch(`${API_BASE}/api/resume/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ file_path: filePath }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Delete failed" }));
+      return { success: false, error: err.detail || "Resume delete failed" };
+    }
+
     return { success: true };
   } catch (error) {
-    console.error('Error deleting resume:', error);
+    console.error("Error deleting resume:", error);
     return { success: false, error: error.message };
   }
 };
@@ -195,14 +567,17 @@ export const deleteResume = async (filePath) => {
  */
 export const createPersona = async (personaData) => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return { success: false, error: 'Not authenticated' };
+      return { success: false, error: "Not authenticated" };
     }
 
     const { data, error } = await supabase
-      .from('personas')
+      .from("personas")
       .insert([
         {
           user_id: user.id,
@@ -221,7 +596,7 @@ export const createPersona = async (personaData) => {
     if (error) throw error;
     return { success: true, data: data[0] };
   } catch (error) {
-    console.error('Error creating persona:', error);
+    console.error("Error creating persona:", error);
     return { success: false, error: error.message };
   }
 };
@@ -232,7 +607,7 @@ export const createPersona = async (personaData) => {
 export const updatePersona = async (personaId, personaData) => {
   try {
     const { data, error } = await supabase
-      .from('personas')
+      .from("personas")
       .update({
         company_name: personaData.companyName,
         company_description: personaData.companyDescription,
@@ -242,13 +617,13 @@ export const updatePersona = async (personaId, personaData) => {
         resume_filename: personaData.resumeFilename || null,
         resume_file_path: personaData.resumeFilePath || null,
       })
-      .eq('id', personaId)
+      .eq("id", personaId)
       .select();
 
     if (error) throw error;
     return { success: true, data: data[0] };
   } catch (error) {
-    console.error('Error updating persona:', error);
+    console.error("Error updating persona:", error);
     return { success: false, error: error.message };
   }
 };
@@ -259,15 +634,15 @@ export const updatePersona = async (personaId, personaData) => {
 export const deletePersona = async (personaId) => {
   try {
     const { data: persona, error: fetchError } = await supabase
-      .from('personas')
-      .select('resume_file_path, is_sample')
-      .eq('id', personaId)
+      .from("personas")
+      .select("resume_file_path, is_sample")
+      .eq("id", personaId)
       .single();
 
     if (fetchError) throw fetchError;
 
     if (persona?.is_sample) {
-      throw new Error('Cannot delete sample personas');
+      throw new Error("Cannot delete sample personas");
     }
 
     if (persona?.resume_file_path) {
@@ -275,14 +650,14 @@ export const deletePersona = async (personaId) => {
     }
 
     const { error: deleteError } = await supabase
-      .from('personas')
+      .from("personas")
       .delete()
-      .eq('id', personaId);
+      .eq("id", personaId);
 
     if (deleteError) throw deleteError;
     return { success: true };
   } catch (error) {
-    console.error('Error deleting persona:', error);
+    console.error("Error deleting persona:", error);
     return { success: false, error: error.message };
   }
 };
@@ -292,22 +667,25 @@ export const deletePersona = async (personaId) => {
  */
 export const getUserPersonasCount = async () => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return { success: false, error: 'Not authenticated', count: 0 };
+      return { success: false, error: "Not authenticated", count: 0 };
     }
 
     const { count, error } = await supabase
-      .from('personas')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('is_sample', false);
+      .from("personas")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("is_sample", false);
 
     if (error) throw error;
     return { success: true, count: count || 0 };
   } catch (error) {
-    console.error('Error counting personas:', error);
+    console.error("Error counting personas:", error);
     return { success: false, error: error.message, count: 0 };
   }
 };

@@ -552,7 +552,7 @@ export default function Pricing() {
       price: "₹0",
       period: "forever",
       features: [
-        "5 Copilot Sessions/month",
+        "3 Copilot Sessions/month",
         "2 Mock Interviews/month",
         "1 Persona",
         "Basic AI models",

@@ -143,7 +143,7 @@ function SessionQuotaWidget({ sessionQuota, isPaidUser, onUpgrade }) {
         <p className="text-white text-sm font-semibold">0 sessions remaining</p>
         <p className="text-white/40 text-xs mt-1">
           {plan_type === "free"
-            ? "All 5 lifetime free sessions used"
+            ? "All 3 lifetime free sessions used"
             : `All ${session_limit} ${billing_period} sessions used`}
         </p>
         <button
